@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
-from rag_pipeline import generate_advice
+from .rag_pipeline import generate_advice
 
 app = FastAPI()
 
