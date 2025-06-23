@@ -14,4 +14,29 @@ export type ChatMessage = {
     type: 'question' | 'answer';
     content: string;
     options?: string[];
-}; 
+};
+
+export interface IntakeData {
+    cycle?: string;
+    symptoms?: string[];
+    preferences?: string[];
+    goals?: string[];
+}
+
+export type MessageType = 'user' | 'bot';
+
+export interface Message {
+    id: string;
+    type: MessageType;
+    text: string;
+}
+
+export interface Strategy {
+    // Keys as they come from the Python backend
+    'Strategie naam': string;
+    'Uitleg': string;
+    'Waarom': string;
+    'Verhelpt klachten bij': string;
+    'Bron(nen)': string;
+    'Praktische tips': string;
+} 

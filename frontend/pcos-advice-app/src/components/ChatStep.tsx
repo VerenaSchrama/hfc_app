@@ -1,53 +1,41 @@
-import React from 'react';
-import { QuestionStep } from '../lib/questionFlow';
+'use client';
+
+import { ReactNode } from 'react';
+import { Bot, User } from 'lucide-react';
 
 interface ChatStepProps {
-    step: QuestionStep;
-    value: string[] | string;
-    onChange: (value: string[] | string) => void;
+  type: 'bot' | 'user' | 'date-picker' | 'multi-select';
+  children: ReactNode;
+  isLast: boolean;
 }
 
-export default function ChatStep({ step, value, onChange }: ChatStepProps) {
-    if (step.type === 'multi-select') {
-        return (
-            <div>
-                <p className="mb-2 font-semibold">{step.question}</p>
-                <div className="flex flex-wrap gap-2">
-                    {step.options.map(option => (
-                        <button
-                            key={option}
-                            type="button"
-                            className={`px-4 py-2 rounded border ${Array.isArray(value) && value.includes(option) ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'}`}
-                            onClick={() => {
-                                if (!Array.isArray(value)) return;
-                                if (value.includes(option)) {
-                                    onChange(value.filter(v => v !== option));
-                                } else {
-                                    onChange([...value, option]);
-                                }
-                            }}
-                        >
-                            {option}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-    // single select
-    return (
-        <div>
-            <p className="mb-2 font-semibold">{step.question}</p>
-            <select
-                className="border rounded px-4 py-2"
-                value={typeof value === 'string' ? value : ''}
-                onChange={e => onChange(e.target.value)}
-            >
-                <option value="">Select...</option>
-                {step.options.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                ))}
-            </select>
+const icons = {
+  bot: <Bot className="h-6 w-6 text-pink-300" />,
+  user: <User className="h-6 w-6 text-purple-300" />,
+};
+
+export const ChatStep = ({ type, children, isLast }: ChatStepProps) => {
+  const isBot = type === 'bot';
+  const showIcon = type === 'bot' || type === 'user';
+  
+  const iconContainerClass = isBot
+    ? 'bg-pink-900/50'
+    : 'bg-purple-900/50';
+
+  const messageBubbleClass = isBot
+    ? 'bg-gray-800/80'
+    : 'bg-purple-800/60';
+
+  return (
+    <div className={`flex items-start gap-4 ${isLast ? 'animate-fade-in' : ''}`}>
+      {showIcon && (
+        <div className={`flex-shrink-0 rounded-full h-10 w-10 flex items-center justify-center ${iconContainerClass}`}>
+          {isBot ? icons.bot : icons.user}
         </div>
-    );
-} 
+      )}
+      <div className={`rounded-2xl p-4 flex-grow ${!showIcon ? 'ml-14' : ''} ${messageBubbleClass}`}>
+        {children}
+      </div>
+    </div>
+  );
+}; 

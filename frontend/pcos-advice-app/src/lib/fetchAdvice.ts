@@ -1,6 +1,6 @@
-import { IntakeInput, AdviceResponse } from '../types';
+import { IntakeData, AdviceResponse } from '../types';
 
-export async function fetchAdvice(intake: IntakeInput): Promise<AdviceResponse> {
+export async function fetchAdvice(intake: IntakeData): Promise<AdviceResponse> {
     const res = await fetch('/api/get-advice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

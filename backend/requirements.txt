@@ -118,3 +118,6 @@ yarl==1.20.0
 zipp==3.22.0
 zstandard==0.23.0
 pdfplumber==0.10.3
+pandas==2.2.2
+langchain_openai==0.2.5
+scikit-learn

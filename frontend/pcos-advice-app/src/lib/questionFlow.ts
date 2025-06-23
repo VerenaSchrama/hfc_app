@@ -1,62 +1,33 @@
-export type QuestionType = 'multi-select' | 'select';
-
-export interface QuestionStep {
-    key: keyof import('../types').IntakeInput;
+export interface Question {
+    key: 'cycle' | 'symptoms' | 'preferences' | 'goals';
     question: string;
-    type: QuestionType;
+    type: 'custom-cycle-phase' | 'multi-select';
     options: string[];
 }
 
-export const questionFlow: QuestionStep[] = [
+export const questions: Question[] = [
+    {
+        key: 'cycle',
+        question: 'In which phase of your cycle are you currently?',
+        type: 'custom-cycle-phase',
+        options: ['Menstruation', 'Follicular', 'Ovulation', 'Luteal'],
+    },
     {
         key: 'symptoms',
-        question: 'Which symptoms are you experiencing?',
+        question: 'What symptoms are you experiencing? (multiple options possible)',
         type: 'multi-select',
-        options: [
-            'Irregular periods',
-            'Acne',
-            'Weight gain',
-            'Hair loss',
-            'Excess hair growth',
-            'Mood changes',
-            'Fatigue',
-        ],
+        options: ['Fatigue', 'Acne', 'Mood swings', 'Cramping', 'Headache', 'Bloating', 'Insulin resistance', 'Irregular cycle'],
     },
     {
         key: 'preferences',
-        question: 'Do you have any dietary preferences?',
+        question: 'What are your dietary preferences? (multiple options possible)',
         type: 'multi-select',
-        options: [
-            'Vegetarian',
-            'Vegan',
-            'Gluten-free',
-            'Dairy-free',
-            'No preference',
-        ],
-    },
-    {
-        key: 'cycle',
-        question: 'Which phase of your menstrual cycle are you in?',
-        type: 'select',
-        options: [
-            'I don not have a (regular) cycle',
-            'Menstrual',
-            'Follicular',
-            'Ovulatory',
-            'Luteal',
-        ],
+        options: ['Vegetarian', 'Vegan', 'Gluten-free', 'Lactose-free', 'Keto', 'Paleo'],
     },
     {
         key: 'goals',
-        question: 'What are your health goals?',
+        question: 'What are your goals? (multiple options possible)',
         type: 'multi-select',
-        options: [
-            'Get my period back',
-            'Weight management',
-            'Clearer skin',
-            'Improved mood',
-            'Regular cycles',
-            'Increased energy',
-        ],
+        options: ['More energy', 'Improve skin', 'Lose weight', 'Regulate cycle', 'Less pain', 'Better mood'],
     },
 ]; 
