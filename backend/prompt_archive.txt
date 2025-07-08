@@ -1,0 +1,18 @@
+#Advice per cycle structure:
+If the user is asking about different cycle phases or it makes sense to structure your answer according to the 4 cycle phases, use the following structure:
+
+**Menstrual Phase**
+- Key needs:
+- Recommended foods:
+
+**Follicular Phase**
+- Key needs:
+- Recommended foods:
+
+**Ovulatory Phase**
+- Key needs:
+- Recommended foods:
+
+**Luteal Phase**
+- Key needs:
+- Recommended foods:

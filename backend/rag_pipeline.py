@@ -48,15 +48,43 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
+def ensure_list(val):
+    if isinstance(val, list):
+        return val
+    if val is None:
+        return []
+    return [val]
+
+
 def build_question(user_input: dict) -> str:
-    """Build a question from user input for the chatbot."""
-    return (
-        f"My symptoms are: {', '.join(user_input['symptoms'])}. "
-        f"My goals are: {', '.join(user_input['goals'])}. "
-        f"My dietary preferences are: {', '.join(user_input['preferences'])}. "
-        f"I'm currently in the {user_input['cycle']} phase of my cycle. "
-        "What should I eat?"
+    """Build a question from user input for the chatbot, using all intakeData fields and optional notes."""
+    symptoms = ensure_list(user_input.get('symptoms'))
+    symptoms_note = user_input.get('symptoms_note', '')
+    goals = ensure_list(user_input.get('goals'))
+    goals_note = user_input.get('goals_note', '')
+    preferences = ensure_list(user_input.get('dietaryRestrictions')) or ensure_list(user_input.get('preferences'))
+    dietary_note = user_input.get('dietaryRestrictions_note', '')
+    cycle = user_input.get('cycle', '')
+    reason = user_input.get('reason', '')
+    whatWorks = user_input.get('whatWorks', '')
+    extraThoughts = user_input.get('extraThoughts', '')
+
+    question = (
+        f"My symptoms are: {', '.join(symptoms)}. "
+        + (f"Symptom notes: {symptoms_note}. " if symptoms_note else "")
+        + f"My goals are: {', '.join(goals)}. "
+        + (f"Goals notes: {goals_note}. " if goals_note else "")
+        + f"My dietary restrictions are: {', '.join(preferences)}. "
+        + (f"Dietary notes: {dietary_note}. " if dietary_note else "")
+        + f"I'm currently in the {cycle} phase of my cycle. "
+        + (f"My reason for using this app: {reason}. " if reason else "")
+        + (f"What already works for me: {whatWorks}. " if whatWorks else "")
+        + (f"Extra thoughts: {extraThoughts}. " if extraThoughts else "")
+        + "What should I eat?"
     )
+
+    print(f"[RAG] Chatbot advice question: {question}")
+    return question
 
 
 def generate_advice(user_input: dict) -> dict:
@@ -72,24 +100,6 @@ def generate_advice(user_input: dict) -> dict:
 You are a cycle-aware nutrition assistant based on holistic and scientific insights.
 
 Always answer user questions helpfully and always provide answers in a warm, empowering tone and information dense way.
-
-If the user is asking about different cycle phases or it makes sense to structure your answer according to the 4 cycle phases, use the following structure:
-
-**Menstrual Phase**
-- Key needs:
-- Recommended foods:
-
-**Follicular Phase**
-- Key needs:
-- Recommended foods:
-
-**Ovulatory Phase**
-- Key needs:
-- Recommended foods:
-
-**Luteal Phase**
-- Key needs:
-- Recommended foods:
 
 For the foods, refer to ingredients and nutrients rather than recipes or dishes.
 
@@ -164,23 +174,42 @@ def get_advice(question: str) -> str:
 
 def get_strategies(user_input: dict) -> list:
     """
-    Get 3 personalized strategies based on user input.
+    Get 3 personalized strategies based on user input, using all intakeData fields and optional notes.
     """
-    symptoms = user_input.get('symptoms', [])
-    goals = user_input.get('goals', [])
-    
-    query = f"Symptoms: {', '.join(symptoms)}. Goals: {', '.join(goals)}. Looking for strategies that help with these symptoms and goals."
-    
+    symptoms = ensure_list(user_input.get('symptoms'))
+    symptoms_note = user_input.get('symptoms_note', '')
+    goals = ensure_list(user_input.get('goals'))
+    goals_note = user_input.get('goals_note', '')
+    preferences = ensure_list(user_input.get('dietaryRestrictions')) or ensure_list(user_input.get('preferences'))
+    dietary_note = user_input.get('dietaryRestrictions_note', '')
+    cycle = user_input.get('cycle', '')
+    reason = user_input.get('reason', '')
+    whatWorks = user_input.get('whatWorks', '')
+    extraThoughts = user_input.get('extraThoughts', '')
+
+    query = (
+        f"Symptoms: {', '.join(symptoms)}. "
+        + (f"Symptom notes: {symptoms_note}. " if symptoms_note else "")
+        + f"Goals: {', '.join(goals)}. "
+        + (f"Goals notes: {goals_note}. " if goals_note else "")
+        + f"Dietary restrictions: {', '.join(preferences)}. "
+        + (f"Dietary notes: {dietary_note}. " if dietary_note else "")
+        + f"Cycle phase: {cycle}. "
+        + (f"Reason for using the app: {reason}. " if reason else "")
+        + (f"What already works: {whatWorks}. " if whatWorks else "")
+        + (f"Extra thoughts: {extraThoughts}. " if extraThoughts else "")
+        + "Looking for strategies that match this profile."
+    )
+
+    print(f"[RAG] Strategy selection query: {query}")
+
     docs = strategy_retriever.invoke(query)
-    
-    # Return the full metadata for each recommended strategy
     strategies = [doc.metadata for doc in docs]
-        
     return strategies
 
 
 def get_recommendations(intake_data, df, top_k=3):
-    # Correctly build the query string from the intake data dictionary
+    # Build the query string from the intake data dictionary
     user_data_dict = intake_data.dict()
     symptoms = ", ".join(user_data_dict.get('symptoms', []))
     goals = ", ".join(user_data_dict.get('goals', []))

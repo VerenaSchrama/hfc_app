@@ -1,3 +1,4 @@
+// src/types/index.ts
 export type UserInput = {
     symptoms: string[];
     preferences: string[];
@@ -18,10 +19,22 @@ export type ChatMessage = {
 
 export interface IntakeData {
     cycle?: string;
-    symptoms?: string[];
-    preferences?: string[];
+  
+    reason?: string;
+  
     goals?: string[];
-}
+    goals_note?: string;
+  
+    symptoms?: string[];
+    symptoms_note?: string;
+  
+    dietaryRestrictions?: string[];
+    dietaryRestrictions_note?: string;
+  
+    whatWorks?: string;
+  
+    extraThoughts?: string;
+  }
 
 export type MessageType = 'user' | 'bot';
 
@@ -33,10 +46,10 @@ export interface Message {
 
 export interface Strategy {
     // Keys as they come from the Python backend
-    'Strategie naam': string;
-    'Uitleg': string;
-    'Waarom': string;
-    'Verhelpt klachten bij': string;
-    'Bron(nen)': string;
-    'Praktische tips': string;
+    'Strategy name': string;
+    'Explanation': string;
+    'Why': string;
+    'Solves symptoms for': string;
+    'Sources': string;
+    'Practical tips': string;
 } 

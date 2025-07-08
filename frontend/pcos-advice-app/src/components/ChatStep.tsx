@@ -1,3 +1,4 @@
+// src/components/ChatStep.tsx
 'use client';
 
 import { ReactNode } from 'react';

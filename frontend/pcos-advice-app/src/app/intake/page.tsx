@@ -1,3 +1,4 @@
+// src/app/intake/page.tsx
 "use client";
 
 import ChatInterface from "../../components/ChatInterface";

@@ -1,3 +1,4 @@
+// src/components/CycleEstimator.tsx
 'use client';
 
 import { useState } from 'react';
@@ -32,7 +33,7 @@ export const CycleEstimator: React.FC<CycleEstimatorProps> = ({ onComplete }) =>
   };
   
   const handleSkip = () => {
-    onComplete('follicular'); // Default to follicular if skipped
+    onComplete('menstruation'); // Default to menstruation if skipped
   };
 
   return (

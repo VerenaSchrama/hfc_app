@@ -19,7 +19,7 @@ CHUNKS_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'processed',
 OUTPUT_CSV_PATH = os.path.join(os.path.dirname(__file__), 'data', 'strategies_from_book.csv')
 
 def load_book_chunks(path):
-    """Loads book chunks from a JSON file."""
+    #Loads book chunks from a JSON file.
     logging.info(f"Loading book chunks from {path}...")
     try:
         with open(path, 'r') as f:
@@ -34,9 +34,7 @@ def load_book_chunks(path):
         return None
 
 def extract_strategies_with_llm(text_chunk):
-    """
-    Uses an LLM to extract a single, well-defined strategy from a text chunk.
-    """
+    #Uses an LLM to extract a single, well-defined strategy from a text chunk.
     system_prompt = """
 You are an expert in nutrition and hormonal health, specializing in distilling actionable advice from text.
 Your task is to identify ONE single, clear, actionable strategy from the provided text.
@@ -68,7 +66,7 @@ Only extract a strategy if it is a specific, actionable instruction. General inf
         return {}
 
 def main():
-    """Main function to run the strategy extraction process."""
+    #Main function to run the strategy extraction process.
     chunks = load_book_chunks(CHUNKS_PATH)
     if not chunks:
         return

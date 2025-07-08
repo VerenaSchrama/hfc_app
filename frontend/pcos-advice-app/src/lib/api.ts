@@ -1,6 +1,20 @@
-import { IntakeData, Strategy } from '../types';
+// src/lib/api.ts
+import { IntakeData, Strategy, AdviceResponse } from '../types';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+// src/lib/fetchAdvice.ts
+export async function fetchAdvice(intake: IntakeData): Promise<AdviceResponse> {
+    const res = await fetch('/api/get-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(intake),
+    });
+    if (!res.ok) {
+        throw new Error('Failed to fetch advice');
+    }
+    return res.json();
+} 
 
 export async function fetchStrategies(input: IntakeData): Promise<Strategy[]> {
   const response = await fetch(`${API_BASE_URL}/strategies`, {

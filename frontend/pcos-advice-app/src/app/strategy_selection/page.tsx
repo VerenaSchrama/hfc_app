@@ -1,3 +1,4 @@
+// src/app/strategy_selection/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -38,10 +39,10 @@ export default function ChooseStrategiesPage() {
 
   const toggleStrategy = (strategy: Strategy) => {
     setSelectedStrategies(prev => {
-      const isSelected = prev.some(s => s['Strategie naam'] === strategy['Strategie naam']);
+      const isSelected = prev.some(s => s['Strategy name'] === strategy['Strategy name']);
       if (isSelected) {
         // Deselect
-        return prev.filter(s => s['Strategie naam'] !== strategy['Strategie naam']);
+        return prev.filter(s => s['Strategy name'] !== strategy['Strategy name']);
       } else {
         // Select, but only if less than 3
         if (prev.length < 3) {
@@ -53,14 +54,25 @@ export default function ChooseStrategiesPage() {
     });
   };
   
+  const getStrategyName = (s: any) =>
+    s['strategy_name'] ||
+    s['Strategie naam'] ||
+    s['Strategy name'] ||
+    s.name ||
+    s.id;
+
   const handleContinue = () => {
-    const selectedNames = selectedStrategies.map(s => s['Strategie naam']);
+    const selectedNames = selectedStrategies.map(getStrategyName);
+    console.log('Saving intakeData to localStorage:', { ...intakeData, selectedStrategies: selectedNames });
+    localStorage.setItem('intakeData', JSON.stringify({ ...intakeData, selectedStrategies: selectedNames }));
     localStorage.setItem('selectedStrategies', JSON.stringify(selectedNames));
     if (selectedNames.length > 0) {
-      router.push(`/plan/${encodeURIComponent(selectedNames[0])}`);
+      router.push(`/strategy_overview/${encodeURIComponent(selectedNames[0])}`);
     }
   }
 
+  // Log the recommended strategies before rendering
+  console.log('Recommended strategies:', recommendedStrategies);
   if (loading) {
     return <div className="text-center p-12">Loading your recommended strategies...</div>;
   }
@@ -74,11 +86,36 @@ export default function ChooseStrategiesPage() {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <Flower className="h-8 w-8 text-pink-500" />
-                <div>
-                  <p className="font-bold capitalize">{intakeData.cycle || 'No Cycle'}</p>
-                  <p className="text-sm text-gray-500 capitalize">
-                    { [...(intakeData.symptoms || []), ...(intakeData.goals || [])].join(', ')}
-                  </p>
+                <div className="space-y-1 text-sm text-gray-700">
+                  <div className="font-bold text-base mb-1">Your personal overview</div>
+                  <div>
+                    <span className="font-bold">Cycle phase:</span> {intakeData.cycle || <span className="italic text-gray-400">None provided</span>}
+                  </div>
+                  <div>
+                    <span className="font-bold">Goals:</span> {intakeData.goals && intakeData.goals.length > 0 ? intakeData.goals.join(', ') : <span className="italic text-gray-400">None provided</span>}
+                    <span className="ml-2 text-green-600">✔︎</span>
+                    <div className="ml-4 text-xs text-gray-500">Note: {intakeData.goals_note || <span className="italic text-gray-400">None provided</span>} <span className="text-green-600">✔︎</span></div>
+                  </div>
+                  <div>
+                    <span className="font-bold">Symptoms:</span> {intakeData.symptoms && intakeData.symptoms.length > 0 ? intakeData.symptoms.join(', ') : <span className="italic text-gray-400">None provided</span>}
+                    <span className="ml-2 text-green-600">✔︎</span>
+                    <div className="ml-4 text-xs text-gray-500">Note: {intakeData.symptoms_note || <span className="italic text-gray-400">None provided</span>} <span className="text-green-600">✔︎</span></div>
+                  </div>
+                  <div>
+                    <span className="font-bold">Dietary restrictions:</span> {intakeData.dietaryRestrictions && intakeData.dietaryRestrictions.length > 0 ? intakeData.dietaryRestrictions.join(', ') : <span className="italic text-gray-400">None provided</span>}
+                    <span className="ml-2 text-green-600">✔︎</span>
+                    <div className="ml-4 text-xs text-gray-500">Note: {intakeData.dietaryRestrictions_note || <span className="italic text-gray-400">None provided</span>} <span className="text-green-600">✔︎</span></div>
+                  </div>
+                  <div>
+                    <span className="font-bold">Reason:</span> {intakeData.reason || <span className="italic text-gray-400">None provided</span>}
+                  </div>
+                  <div>
+                    <span className="font-bold">What works:</span> {intakeData.whatWorks || <span className="italic text-gray-400">None provided</span>}
+                  </div>
+                  <div>
+                    <span className="font-bold">Extra thoughts:</span> {intakeData.extraThoughts || <span className="italic text-gray-400">None provided</span>}
+                  </div>
+                  <div className="pt-2 text-xs text-gray-500"><span className="text-green-600">✔︎</span> is used for recommended strategies</div>
                 </div>
               </div>
               <button 
@@ -107,16 +144,32 @@ export default function ChooseStrategiesPage() {
 
         {/* Strategies */}
         <div className="space-y-4">
-          {recommendedStrategies.map(strategy => {
-            const isSelected = selectedStrategies.some(s => s['Strategie naam'] === strategy['Strategie naam']);
+          {recommendedStrategies.map((strategy, idx) => {
+            // Use dynamic property access with fallback
+            const s = strategy as any;
+            const strategyName = s['Strategie naam'] || s['Strategy name'] || s.name || s.id || `strategy-${idx}`;
+            const isSelected = selectedStrategies.some(sel => {
+              const selS = sel as any;
+              return (
+                selS['Strategie naam'] === strategyName ||
+                selS['Strategy name'] === strategyName ||
+                selS.name === strategyName ||
+                selS.id === strategyName
+              );
+            });
+            const tipsRaw = strategy['Practical tips'] || '';
+            const tips = tipsRaw
+              .split(/•|\*|-/)
+              .map(tip => tip.trim())
+              .filter(Boolean);
             return (
               <div
-                key={strategy['Strategie naam']}
+                key={strategyName}
                 onClick={() => toggleStrategy(strategy)}
                 className={`p-5 rounded-lg border-2 cursor-pointer transition-all ${isSelected ? 'border-pink-500 bg-pink-50' : 'border-gray-200 bg-white'}`}
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-lg">{strategy['Strategie naam']}</h3>
+                  <h3 className="font-bold text-lg">{strategyName}</h3>
                   <div className="flex items-center gap-3">
                      <span className="text-xs font-bold text-pink-600 bg-pink-100 px-3 py-1 rounded-full">Recommended</span>
                      {isSelected ? <CheckCircle className="h-6 w-6 text-pink-500" /> : <Circle className="h-6 w-6 text-gray-300" />}
@@ -124,7 +177,7 @@ export default function ChooseStrategiesPage() {
                 </div>
                 <div className="mt-2">
                     <p className="font-semibold text-sm text-gray-500">Why:</p>
-                    <p className="text-sm text-gray-700">{strategy['Waarom']}</p>
+                    <p className="text-sm text-gray-700">{s['Waarom'] || s['Why'] || s.why || ''}</p>
                 </div>
               </div>
             );

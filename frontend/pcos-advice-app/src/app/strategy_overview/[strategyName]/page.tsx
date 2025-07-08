@@ -1,3 +1,4 @@
+// src/app/strategy_overview/[strategyName]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,12 +7,6 @@ import { fetchStrategyDetails } from '../../../lib/api';
 import { Strategy } from '../../../types';
 import { ArrowLeft, Flower, Heart, Target, BookOpen } from 'lucide-react';
 import Link from 'next/link';
-
-// A helper to map backend keys to more descriptive titles
-const sectionTitles = {
-    'Uitleg': 'Wat ga je doen?',
-    'Waarom': 'Waarom werkt dit?',
-};
 
 const SYMPTOM_TAGS = ['bloating', 'constipation', 'acne', 'fatigue', 'headaches', 'anxiety', 'irregular cycles', 'pms', 'stressklachten', 'slaapproblemen', 'stemmingswisselingen', 'laag energieniveau'];
 
@@ -50,35 +45,39 @@ export default function StrategyDetailPage() {
     return <div className="text-center p-12">Strategy not found.</div>;
   }
 
-  const tips = strategy['Praktische tips']
+  // Handle different possible property names for tips, sources, etc.
+  const tipsRaw = (strategy as any)['Practical tips'] || (strategy as any)['practical_tips'] || (strategy as any)['Praktische tips'] || '';
+  const tips = tipsRaw
     .split(/•|\*|-/)
-    .map(tip => tip.trim())
+    .map((tip: any) => tip.trim())
     .filter(Boolean);
 
-  const sources = strategy['Bron(nen)']
+  const sourcesRaw = (strategy as any)['Sources'] || (strategy as any)['sources'] || (strategy as any)['Bron(nen)'] || '';
+  const sources = sourcesRaw
     .split(';')
-    .map(s => s.trim())
+    .map((s: any) => s.trim())
     .filter(Boolean);
     
-  const helpsWithTags = strategy['Verhelpt klachten bij']
+  const helpsWithRaw = (strategy as any)['Solves symptoms for'] || (strategy as any)['helps_with'] || (strategy as any)['Verhelpt klachten bij'] || '';
+  const helpsWithTags = helpsWithRaw
     .split(',')
-    .map(s => s.trim().toLowerCase())
+    .map((s: any) => s.trim().toLowerCase())
     .filter(Boolean);
 
-  const goalTags = helpsWithTags.filter(t => !SYMPTOM_TAGS.includes(t));
-  const symptomTags = helpsWithTags.filter(t => SYMPTOM_TAGS.includes(t));
+  const goalTags = helpsWithTags.filter((t: any) => !SYMPTOM_TAGS.includes(t));
+  const symptomTags = helpsWithTags.filter((t: any) => SYMPTOM_TAGS.includes(t));
 
 
   return (
     <div className="min-h-screen bg-white py-8 px-4">
       <div className="max-w-3xl mx-auto">
         
-        <Link href="/plan" className="inline-flex items-center gap-2 text-pink-600 font-semibold mb-6 hover:underline">
+        <Link href="/strategy_selection" className="inline-flex items-center gap-2 text-pink-600 font-semibold mb-6 hover:underline">
             <ArrowLeft size={16} /> Terug naar strategieën
         </Link>
 
         <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold">{strategy['Strategie naam']}</h1>
+            <h1 className="text-4xl font-bold">{(strategy as any)['Strategy name'] || (strategy as any)['strategy_name'] || (strategy as any)['Strategie naam']}</h1>
             <span className="mt-2 inline-block text-xs font-bold text-white bg-pink-500 px-3 py-1 rounded-full">Aanbevolen strategie</span>
         </div>
 
@@ -89,7 +88,7 @@ export default function StrategyDetailPage() {
             </div>
             <div>
                 <h3 className="font-bold text-lg">Wat ga je doen?</h3>
-                <p className="text-gray-700">{strategy['Uitleg']}</p>
+                <p className="text-gray-700">{(strategy as any)['Explanation'] || (strategy as any)['explanation'] || (strategy as any)['Uitleg']}</p>
             </div>
         </div>
 
@@ -100,7 +99,7 @@ export default function StrategyDetailPage() {
             </div>
             <div>
                 <h3 className="font-bold text-lg">Waarom werkt dit?</h3>
-                <p className="text-gray-700">{strategy['Waarom']}</p>
+                <p className="text-gray-700">{(strategy as any)['Why'] || (strategy as any)['why'] || (strategy as any)['Waarom']}</p>
             </div>
         </div>
 
@@ -111,7 +110,7 @@ export default function StrategyDetailPage() {
                 <div>
                     <h4 className="font-semibold text-sm mb-2 text-gray-600">Klachten</h4>
                     <div className="flex flex-wrap gap-2">
-                       {symptomTags.map(tag => (
+                       {symptomTags.map((tag: any) => (
                             <span key={tag} className="capitalize text-xs text-blue-800 bg-blue-100 px-3 py-1 rounded-full">{tag}</span>
                         ))}
                     </div>
@@ -119,7 +118,7 @@ export default function StrategyDetailPage() {
                 <div>
                     <h4 className="font-semibold text-sm mb-2 text-gray-600">Doelen</h4>
                      <div className="flex flex-wrap gap-2">
-                        {goalTags.map(tag => (
+                        {goalTags.map((tag: any) => (
                             <span key={tag} className="capitalize text-xs text-green-800 bg-green-100 px-3 py-1 rounded-full">{tag}</span>
                         ))}
                     </div>
@@ -131,7 +130,7 @@ export default function StrategyDetailPage() {
          <div className="bg-teal-50/70 p-6 rounded-lg mb-4">
             <h3 className="font-bold text-lg mb-4">Praktische tips</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-700">
-                {tips.map((tip, i) => (
+                {tips.map((tip: any, i: any) => (
                     <li key={i}>{tip}</li>
                 ))}
             </ul>
@@ -141,7 +140,7 @@ export default function StrategyDetailPage() {
         <div className="bg-white border border-gray-200 p-6 rounded-lg">
             <h3 className="font-bold text-lg mb-4">Wetenschappelijke bronnen</h3>
             <div className="space-y-2">
-                {sources.map((source, i) => (
+                {sources.map((source: any, i: any) => (
                      <a key={i} href="#" className="flex items-center gap-2 text-sm text-gray-600 hover:text-pink-600 transition-colors">
                         <BookOpen size={14} /> {source}
                     </a>
