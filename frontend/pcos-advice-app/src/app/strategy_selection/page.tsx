@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { fetchStrategies } from '../../lib/api';
 import { IntakeData, Strategy } from '../../types';
 import { CheckCircle, Circle, RefreshCw, Flower, ChevronDown } from 'lucide-react';
+import { auth } from '@/lib/auth';
+import { setCurrentStrategy } from '@/lib/strategy';
 
 export default function ChooseStrategiesPage() {
   const [recommendedStrategies, setRecommendedStrategies] = useState<Strategy[]>([]);
@@ -39,17 +41,13 @@ export default function ChooseStrategiesPage() {
 
   const toggleStrategy = (strategy: Strategy) => {
     setSelectedStrategies(prev => {
-      const isSelected = prev.some(s => s['Strategy name'] === strategy['Strategy name']);
+      const isSelected = prev.some(s => getStrategyName(s) === getStrategyName(strategy));
       if (isSelected) {
         // Deselect
-        return prev.filter(s => s['Strategy name'] !== strategy['Strategy name']);
+        return [];
       } else {
-        // Select, but only if less than 3
-        if (prev.length < 3) {
-          return [...prev, strategy];
-        } else {
-          return prev; // Do nothing if already 3 selected
-        }
+        // Only one allowed
+        return [strategy];
       }
     });
   };
@@ -61,15 +59,35 @@ export default function ChooseStrategiesPage() {
     s.name ||
     s.id;
 
-  const handleContinue = () => {
-    const selectedNames = selectedStrategies.map(getStrategyName);
-    console.log('Saving intakeData to localStorage:', { ...intakeData, selectedStrategies: selectedNames });
-    localStorage.setItem('intakeData', JSON.stringify({ ...intakeData, selectedStrategies: selectedNames }));
-    localStorage.setItem('selectedStrategies', JSON.stringify(selectedNames));
-    if (selectedNames.length > 0) {
-      router.push(`/strategy_overview/${encodeURIComponent(selectedNames[0])}`);
+  const handleContinue = async () => {
+    if (selectedStrategies.length === 0) return;
+    const selectedName = getStrategyName(selectedStrategies[0]);
+    setCurrentStrategy(selectedName);
+    localStorage.setItem('selectedStrategies', JSON.stringify([selectedName]));
+    // Save to backend
+    const token = auth.getToken();
+    if (token) {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/set_strategy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ strategy_name: selectedName }),
+        });
+        if (!res.ok) {
+          alert('Failed to update your strategy.');
+          return;
+        }
+      } catch (e) {
+        alert('Failed to update your strategy.');
+        return;
+      }
     }
-  }
+    // Redirect to today page
+    router.push('/today');
+  };
 
   // Log the recommended strategies before rendering
   console.log('Recommended strategies:', recommendedStrategies);
@@ -191,7 +209,7 @@ export default function ChooseStrategiesPage() {
                 disabled={selectedStrategies.length === 0}
                 className="w-full bg-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-pink-600 disabled:bg-gray-300"
             >
-                Continue
+                Confirm Strategy
             </button>
         </div>
 
