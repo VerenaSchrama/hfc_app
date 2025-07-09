@@ -1,19 +1,20 @@
 # python main.py
-from fastapi import FastAPI, Depends, HTTPException, status, Request, Body
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Body, Path, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import pandas as pd
-from rag_pipeline import get_strategies, get_advice
+from rag_pipeline import get_strategies, get_advice, generate_advice
 import os
 import urllib.parse
-from models import create_db_and_tables, User
+from models import create_db_and_tables, User, ChatMessage, TrackedSymptom, DailyLog, TrialPeriod
 from sqlalchemy.orm import Session
 from db import SessionLocal
 import bcrypt
 from jose import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from datetime import datetime as dt
 
 app = FastAPI()
 
@@ -64,10 +65,19 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class ChatRequest(BaseModel):
+    question: str
+
+class TrialPeriodCreate(BaseModel):
+    strategy_name: str
+    start_date: str  # YYYY-MM-DD format
+    end_date: str    # YYYY-MM-DD format
+
 security = HTTPBearer()
 
-def get_current_user(request: Request, db: Session = Depends(get_db)):
-    auth: HTTPAuthorizationCredentials = security(request)
+# Make get_current_user async and use await security(request)
+async def get_current_user(request: Request, db: Session = Depends(get_db)):
+    auth: HTTPAuthorizationCredentials = await security(request)
     token = auth.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -80,6 +90,13 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         return user
     except Exception:
         raise HTTPException(status_code=401, detail='Invalid token')
+
+# Update all endpoints that use get_current_user to be async
+def sync_to_async(f):
+    import functools
+    async def wrapper(*args, **kwargs):
+        return f(*args, **kwargs)
+    return functools.wraps(f)(wrapper)
 
 @app.post("/api/v1/strategies")
 async def strategies(intake_data: IntakeData):
@@ -144,21 +161,232 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.delete('/api/v1/delete_account')
-def delete_account(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
+async def delete_account(request: Request, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
     db.delete(user)
     db.commit()
     return {"detail": "Account deleted"}
 
 @app.post('/api/v1/set_strategy')
-def set_strategy(request: Request, db: Session = Depends(get_db), data: dict = Body(...)):
-    user = get_current_user(request, db)
+async def set_strategy(request: Request, db: Session = Depends(get_db), data: dict = Body(...)):
+    user = await get_current_user(request, db)
     strategy_name = data.get('strategy_name')
+    trial_period = data.get('trial_period')  # Optional trial period data
+    
     if not strategy_name:
         raise HTTPException(status_code=400, detail='No strategy_name provided')
+    
+    # Update current strategy
     user.current_strategy = strategy_name
+    
+    # If trial period data is provided, create a new trial period
+    if trial_period:
+        try:
+            start_date = dt.strptime(trial_period['start_date'], "%Y-%m-%d").date()
+            end_date = dt.strptime(trial_period['end_date'], "%Y-%m-%d").date()
+            
+            # Deactivate any existing active trial periods
+            existing_trials = db.query(TrialPeriod).filter_by(user_id=user.id, is_active=True).all()
+            for trial in existing_trials:
+                trial.is_active = False
+            
+            # Create new trial period
+            new_trial = TrialPeriod(
+                user_id=user.id,
+                strategy_name=strategy_name,
+                start_date=start_date,
+                end_date=end_date,
+                is_active=True
+            )
+            db.add(new_trial)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f'Invalid trial period data: {str(e)}')
+    
     db.commit()
     return {"detail": "Strategy updated"}
+
+@app.post('/api/v1/chat')
+async def chat(request: Request, data: ChatRequest, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    # 1. Retrieve intake data from user row
+    intake_data = {
+        'cycle': user.current_strategy,  # or other fields if available
+        # Add more fields as needed from user/intake
+    }
+    # 2. Retrieve chat history
+    chat_history = db.query(ChatMessage).filter(ChatMessage.user_id == user.id).order_by(ChatMessage.timestamp).all()
+    history = [(msg.sender, msg.text) for msg in chat_history]
+    # 3. Append new user message
+    user_msg = ChatMessage(user_id=user.id, sender='user', text=data.question, timestamp=datetime.utcnow())
+    db.add(user_msg)
+    db.commit()
+    # 4. Call RAG LLM with intake_data, chat history, and question
+    rag_input = {
+        **intake_data,
+        'chat_history': history,
+        'question': data.question
+    }
+    result = generate_advice(rag_input)
+    answer = result['answer'] if isinstance(result, dict) else result
+    # 5. Store bot response
+    bot_msg = ChatMessage(user_id=user.id, sender='bot', text=answer, timestamp=datetime.utcnow())
+    db.add(bot_msg)
+    db.commit()
+    # 6. Return updated chat history
+    updated_history = db.query(ChatMessage).filter(ChatMessage.user_id == user.id).order_by(ChatMessage.timestamp).all()
+    return {'history': [{'sender': m.sender, 'text': m.text, 'timestamp': m.timestamp.isoformat()} for m in updated_history]}
+
+# --- Trial Period Endpoints ---
+@app.get('/api/v1/trial_periods')
+async def get_trial_periods(request: Request, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    trials = db.query(TrialPeriod).filter_by(user_id=user.id).order_by(TrialPeriod.start_date.desc()).all()
+    return [
+        {
+            "id": trial.id,
+            "strategy_name": trial.strategy_name,
+            "start_date": trial.start_date.isoformat(),
+            "end_date": trial.end_date.isoformat(),
+            "is_active": trial.is_active,
+            "created_at": trial.created_at.isoformat()
+        }
+        for trial in trials
+    ]
+
+@app.post('/api/v1/trial_periods')
+async def create_trial_period(request: Request, trial_data: TrialPeriodCreate, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    
+    try:
+        start_date = dt.strptime(trial_data.start_date, "%Y-%m-%d").date()
+        end_date = dt.strptime(trial_data.end_date, "%Y-%m-%d").date()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+    
+    if start_date >= end_date:
+        raise HTTPException(status_code=400, detail="End date must be after start date.")
+    
+    # Deactivate any existing active trial periods
+    existing_trials = db.query(TrialPeriod).filter_by(user_id=user.id, is_active=True).all()
+    for trial in existing_trials:
+        trial.is_active = False
+    
+    # Create new trial period
+    new_trial = TrialPeriod(
+        user_id=user.id,
+        strategy_name=trial_data.strategy_name,
+        start_date=start_date,
+        end_date=end_date,
+        is_active=True
+    )
+    db.add(new_trial)
+    db.commit()
+    
+    return {
+        "id": new_trial.id,
+        "strategy_name": new_trial.strategy_name,
+        "start_date": new_trial.start_date.isoformat(),
+        "end_date": new_trial.end_date.isoformat(),
+        "is_active": new_trial.is_active
+    }
+
+# --- Tracked Symptoms Endpoints ---
+@app.get('/api/v1/symptoms')
+async def get_symptoms(request: Request, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    symptoms = db.query(TrackedSymptom).filter_by(user_id=user.id).order_by(TrackedSymptom.order).all()
+    return [s.symptom for s in symptoms]
+
+@app.post('/api/v1/symptoms')
+async def set_symptoms(request: Request, symptoms: list[str] = Body(...), db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    db.query(TrackedSymptom).filter_by(user_id=user.id).delete()
+    for i, s in enumerate(symptoms):
+        db.add(TrackedSymptom(user_id=user.id, symptom=s, order=i))
+    db.commit()
+    return {"success": True}
+
+# --- Daily Log Endpoints ---
+@app.get('/api/v1/logs/today')
+async def get_today_log(request: Request, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    today = date.today()
+    log = db.query(DailyLog).filter_by(user_id=user.id, date=today).first()
+    return log
+
+@app.post('/api/v1/logs/today')
+async def upsert_today_log(request: Request, log_data: dict = Body(...), db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    today = date.today()
+    
+    # Remove 'date' and 'strategy_name' from log_data to avoid duplicate/invalid argument errors
+    log_data.pop('date', None)
+    log_data.pop('strategy_name', None)
+    
+    # Require applied_strategy
+    if 'applied_strategy' not in log_data or log_data['applied_strategy'] is None:
+        raise HTTPException(status_code=400, detail="applied_strategy is required and cannot be null.")
+    
+    log = db.query(DailyLog).filter_by(user_id=user.id, date=today).first()
+    if log:
+        for k, v in log_data.items():
+            setattr(log, k, v)
+    else:
+        log = DailyLog(user_id=user.id, date=today, **log_data)
+        db.add(log)
+    db.commit()
+    return {"success": True}
+
+# --- Edit a Past Log ---
+@app.patch('/api/v1/logs/{log_date}')
+async def edit_log(request: Request, log_date: str = Path(...), log_data: dict = Body(...), db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    try:
+        log_date_obj = dt.strptime(log_date, "%Y-%m-%d").date()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+    log = db.query(DailyLog).filter_by(user_id=user.id, date=log_date_obj).first()
+    if not log:
+        raise HTTPException(status_code=404, detail="Log not found for this date.")
+    for k, v in log_data.items():
+        setattr(log, k, v)
+    db.commit()
+    return {"success": True}
+
+# --- Date Range Log Fetch ---
+@app.get('/api/v1/logs')
+async def get_logs_range(request: Request, start: Optional[str] = Query(None), end: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    query = db.query(DailyLog).filter_by(user_id=user.id)
+    if start:
+        try:
+            start_date = dt.strptime(start, "%Y-%m-%d").date()
+            query = query.filter(DailyLog.date >= start_date)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid start date format. Use YYYY-MM-DD.")
+    if end:
+        try:
+            end_date = dt.strptime(end, "%Y-%m-%d").date()
+            query = query.filter(DailyLog.date <= end_date)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid end date format. Use YYYY-MM-DD.")
+    logs = query.all()
+    return logs
+
+@app.get('/api/v1/profile')
+async def get_profile(request: Request, db: Session = Depends(get_db)):
+    user = await get_current_user(request, db)
+    strategy_details = None
+    if user.current_strategy:
+        details = strategies_df[strategies_df['Strategie naam'] == user.current_strategy]
+        if not details.empty:
+            strategy_details = details.to_dict(orient='records')[0]
+    return {
+        "email": user.email,
+        "current_strategy": user.current_strategy,
+        "strategy_details": strategy_details,
+        # Add more fields as needed
+    }
 
 if __name__ == "__main__":
     import uvicorn
