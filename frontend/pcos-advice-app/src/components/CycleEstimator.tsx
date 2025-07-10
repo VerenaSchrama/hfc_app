@@ -38,7 +38,7 @@ export const CycleEstimator: React.FC<CycleEstimatorProps> = ({ onComplete }) =>
 
   return (
     <div className="space-y-4 text-center p-4 border rounded-lg bg-gray-50">
-      <p className="font-semibold">Let's estimate your cycle phase.</p>
+      <p className="font-semibold">Let&apos;s estimate your cycle phase.</p>
       <p>Please enter your two most recent menstruation start dates:</p>
       <div className="flex justify-center gap-4">
         <DatePicker selected={menstruation2} onChange={(date: Date | null) => setMenstruation2(date)} placeholderText="First date" className="p-2 border rounded-md w-full" />
