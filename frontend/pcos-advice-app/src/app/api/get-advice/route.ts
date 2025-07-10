@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
     const intake = await req.json();
-    const backendRes = await fetch('http://localhost:8000/advice', {
+    const API_BASE_URL = process.env.API_URL || 'http://localhost:8000';
+    const backendRes = await fetch(`${API_BASE_URL}/advice`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(intake),
