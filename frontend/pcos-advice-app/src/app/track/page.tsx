@@ -36,6 +36,15 @@ export default function TrackPage() {
   const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
   const [currentDay, setCurrentDay] = useState(0);
   const [totalDays, setTotalDays] = useState(0);
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  const handleMonthChange = (newMonth: Date) => {
+    setCurrentMonth(newMonth);
+    loadLogsForMonth(newMonth);
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -224,25 +233,6 @@ export default function TrackPage() {
     return days;
   }
 
-  function getTrialForDate(dateStr: string) {
-    return trialPeriods.find(tp => 
-      tp.start_date <= dateStr && 
-      dateStr <= tp.end_date && 
-      tp.is_active
-    );
-  }
-
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-
-  const handleMonthChange = (newMonth: Date) => {
-    setCurrentMonth(newMonth);
-    loadLogsForMonth(newMonth);
-  };
-
-  // Helper: build a date-to-strategy map for the current month
   function buildStrategyMap(trialPeriods: TrialPeriod[], month: Date) {
     const days = getMonthDays(month);
     const map: Record<string, TrialPeriod> = {};

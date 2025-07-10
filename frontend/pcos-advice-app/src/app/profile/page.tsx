@@ -96,7 +96,7 @@ export default function ProfilePage() {
       setCyclePhase("Unclear");
       setCycleExplanation("No cycle information provided. If you don't have a period, that's okay—nutrition can still support your health!");
     }
-  }, []);
+  }, [router]);
 
   const handleLogout = () => {
     auth.logout();

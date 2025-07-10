@@ -52,7 +52,6 @@ export default function TodayPage() {
     // Fetch logs for progress bar
     const fetchLogs = async () => {
       if (trialPeriod) {
-        const logsInPeriod = await getLogs({ start: trialPeriod.start_date, end: trialPeriod.end_date });
         const today = new Date();
         const start = new Date(trialPeriod.start_date);
         setCurrentDay(Math.max(1, Math.min(
