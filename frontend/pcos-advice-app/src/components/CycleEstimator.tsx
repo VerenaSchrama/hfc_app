@@ -50,7 +50,7 @@ export const CycleEstimator: React.FC<CycleEstimatorProps> = ({ onComplete }) =>
           Estimate My Phase
         </button>
         <button onClick={handleSkip} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
-          I don't know
+                      I don&apos;t know
         </button>
       </div>
     </div>

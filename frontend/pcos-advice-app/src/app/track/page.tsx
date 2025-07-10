@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getCurrentStrategy } from "@/lib/strategy";
 import { getTrialPeriods, getLogs, getTrackedSymptoms, upsertTodayLog, getTodayLog } from "@/lib/api";
 import { TrialPeriod, UserProfile, Log } from "@/types";
 import { getUserProfile } from '@/lib/api';
@@ -50,7 +49,7 @@ export default function TrackPage() {
     const loadData = async () => {
       try {
         // Load strategy
-        setStrategy(getCurrentStrategy() || "Blood Sugar Balance");
+        setStrategy("Blood Sugar Balance");
         
         // Load symptoms
         try {
@@ -351,7 +350,7 @@ export default function TrackPage() {
         {/* Score Your Symptoms Block or Confirmation */}
         {logStored && !editMode ? (
           <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex flex-col items-center mb-4">
-            <div className="text-green-700 font-semibold mb-2">You successfully entered today's log.</div>
+            <div className="text-green-700 font-semibold mb-2">You successfully entered today&apos;s log.</div>
             <button
               className="bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded-xl transition-colors"
               onClick={() => setEditMode(true)}
@@ -481,7 +480,7 @@ export default function TrackPage() {
         )}
         {/* Progress Overview Block */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 mt-2">
-          <div className="font-semibold text-lg text-gray-900 mb-2">This Week's Progress</div>
+          <div className="font-semibold text-lg text-gray-900 mb-2">This Week&apos;s Progress</div>
           <div className="flex justify-between text-sm">
             <span>Strategy followed</span>
             <span className="font-bold text-purple-600">{daysAppliedTrial}/{trialTotalDays} days</span>
@@ -560,7 +559,7 @@ export default function TrackPage() {
             <div className="flex flex-col items-center"><span className="text-green-600 font-bold text-lg">↗ 1</span><span className="text-xs text-gray-500">Current streak</span></div>
             <div className="flex flex-col items-center"><span className="text-blue-600 font-bold text-lg">📅 1</span><span className="text-xs text-gray-500">Total logged</span></div>
           </div>
-          <div className="bg-blue-50 text-blue-700 rounded-lg px-4 py-2 mt-2 text-center font-medium w-full">🎉 Great! You're doing great following your strategy!</div>
+          <div className="bg-blue-50 text-blue-700 rounded-lg px-4 py-2 mt-2 text-center font-medium w-full">🎉 Great! You&apos;re doing great following your strategy!</div>
         </div>
       </div>
       {/* Modal for viewing previous logs */}

@@ -15,7 +15,7 @@ const OPTION_IDS = {
 };
 
 const CYCLE_OPTIONS = [
-  { id: OPTION_IDS.DONT_KNOW, title: "I don't know", description: "Let us help you figure it out" },
+  { id: OPTION_IDS.DONT_KNOW, title: "I don&apos;t know", description: "Let us help you figure it out" },
   { id: OPTION_IDS.NO_CYCLE, title: "I have no cycle", description: "For example due to pregnancy, menopause, PCOS or medical reasons" }
 ];
 

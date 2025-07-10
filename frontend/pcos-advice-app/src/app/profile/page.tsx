@@ -86,15 +86,15 @@ export default function ProfilePage() {
           setCycleExplanation(explanation);
         } else {
           setCyclePhase("Unclear");
-          setCycleExplanation("No cycle information provided. If you don't have a period, that's okay—nutrition can still support your health!");
+          setCycleExplanation("No cycle information provided. If you don&apos;t have a period, that&apos;s okay—nutrition can still support your health!");
         }
       } catch {
         setCyclePhase("Unclear");
-        setCycleExplanation("No cycle information provided. If you don't have a period, that's okay—nutrition can still support your health!");
+        setCycleExplanation("No cycle information provided. If you don&apos;t have a period, that&apos;s okay—nutrition can still support your health!");
       }
     } else {
       setCyclePhase("Unclear");
-      setCycleExplanation("No cycle information provided. If you don't have a period, that's okay—nutrition can still support your health!");
+      setCycleExplanation("No cycle information provided. If you don&apos;t have a period, that&apos;s okay—nutrition can still support your health!");
     }
   }, [router]);
 
