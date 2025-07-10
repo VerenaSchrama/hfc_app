@@ -104,7 +104,7 @@ export async function setTrackedSymptoms(symptoms: string[]): Promise<void> {
   if (!res.ok) throw new Error('Failed to set symptoms');
 }
 
-export async function getTodayLog(): Promise<any> {
+export async function getTodayLog(): Promise<unknown> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/logs/today`, {
     headers: { 'Authorization': `Bearer ${token}` },
@@ -113,7 +113,7 @@ export async function getTodayLog(): Promise<any> {
   return res.json();
 }
 
-export async function upsertTodayLog(logData: any): Promise<void> {
+export async function upsertTodayLog(logData: unknown): Promise<void> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/logs/today`, {
     method: 'POST',
@@ -126,7 +126,7 @@ export async function upsertTodayLog(logData: any): Promise<void> {
   if (!res.ok) throw new Error('Failed to save today log');
 }
 
-export async function getLogs(params?: { start?: string, end?: string }): Promise<any[]> {
+export async function getLogs(params?: { start?: string, end?: string }): Promise<unknown[]> {
   const token = auth.getToken();
   let url = `${API_BASE_URL}/logs`;
   if (params && (params.start || params.end)) {
@@ -142,7 +142,7 @@ export async function getLogs(params?: { start?: string, end?: string }): Promis
   return res.json();
 }
 
-export async function patchLog(date: string, logData: any): Promise<void> {
+export async function patchLog(date: string, logData: unknown): Promise<void> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/logs/${date}`, {
     method: 'PATCH',
@@ -156,7 +156,7 @@ export async function patchLog(date: string, logData: any): Promise<void> {
 }
 
 // --- Trial Period API Functions ---
-export async function getTrialPeriods(): Promise<any[]> {
+export async function getTrialPeriods(): Promise<unknown[]> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/trial_periods`, {
     headers: { 'Authorization': `Bearer ${token}` },
@@ -165,7 +165,7 @@ export async function getTrialPeriods(): Promise<any[]> {
   return res.json();
 }
 
-export async function createTrialPeriod(trialData: { strategy_name: string, start_date: string, end_date: string }): Promise<any> {
+export async function createTrialPeriod(trialData: { strategy_name: string, start_date: string, end_date: string }): Promise<unknown> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/trial_periods`, {
     method: 'POST',
@@ -197,7 +197,7 @@ export async function setStrategyWithTrial(strategyName: string, trialPeriod?: {
   if (!res.ok) throw new Error('Failed to set strategy');
 } 
 
-export async function getUserProfile(): Promise<any> {
+export async function getUserProfile(): Promise<unknown> {
   const token = auth.getToken();
   const res = await fetch('http://127.0.0.1:8000/api/v1/profile', {
     headers: { 'Authorization': `Bearer ${token}` },

@@ -295,7 +295,6 @@ export default function TrackPage() {
 
   const [weekStart, weekEnd] = getWeekRange();
   const weekLogs = logs.filter(l => l.date >= weekStart && l.date <= weekEnd);
-  const daysAppliedWeek = weekLogs.filter(l => l.applied_strategy).length;
   const avgEnergy = weekLogs.length ? (weekLogs.reduce((sum, l) => sum + (l.energy || 0), 0) / weekLogs.length).toFixed(1) : '-';
   const avgMood = weekLogs.length ? (weekLogs.reduce((sum, l) => sum + (l.mood || 0), 0) / weekLogs.length).toFixed(1) : '-';
 

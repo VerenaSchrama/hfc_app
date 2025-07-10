@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ChatStep } from "@/components/ChatStep";
-import { fetchChatAnswer, fetchChatHistoryAndSend } from "@/lib/api";
+import { fetchChatHistoryAndSend } from "@/lib/api";
 import { auth } from "@/lib/auth";
 
 const QUICK_QUESTIONS = [
@@ -64,7 +64,7 @@ export default function ChatPage() {
         text: m.text,
         timestamp: m.timestamp,
       })));
-    } catch (err) {
+    } catch (err: unknown) {
       setMessages((prev) => [
         ...prev,
         { id: uuidv4(), type: "bot", text: "Sorry, something went wrong. Please try again." },

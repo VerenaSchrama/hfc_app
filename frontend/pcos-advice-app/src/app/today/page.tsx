@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { getCurrentStrategy } from '@/lib/strategy';
 import { getTrialPeriods, getLogs, getUserProfile } from '@/lib/api';
 import { TrialPeriod } from '@/types';
 import Link from 'next/link';
@@ -15,33 +14,6 @@ interface StrategyDetails {
   error?: string;
 }
 
-const tips = [
-  {
-    title: 'Morning Protein Power',
-    level: 'Easy',
-    description: 'Start your day with 20–30g of protein to stabilize blood sugar and reduce afternoon cravings.',
-    tags: ['Breakfast'],
-  },
-  {
-    title: 'Hydration with Electrolytes',
-    level: 'Easy',
-    description: 'Add a pinch of sea salt to your water to support adrenal function and energy levels.',
-    tags: ['Hydration'],
-  },
-  {
-    title: 'Anti-Inflammatory Spices',
-    level: 'Moderate',
-    description: 'Include turmeric, ginger, and cinnamon in your meals to reduce inflammation naturally.',
-    tags: ['Cooking'],
-  },
-];
-
-const recipes = [
-  { title: 'Hormone Balance Smoothie', time: '5 min', desc: 'Spinach, avocado, berries, protein powder' },
-  { title: 'Golden Milk Latte', time: '3 min', desc: 'Turmeric, coconut milk, honey, cinnamon' },
-  { title: 'Seed Cycling Energy Balls', time: '15 min', desc: 'Pumpkin seeds, flax seeds, dates, almond butter' },
-];
-
 const BACKEND_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
   ? 'http://127.0.0.1:8000'
   : '';
@@ -51,10 +23,7 @@ export default function TodayPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
-  const [logs, setLogs] = useState<any[]>([]);
-  const [daysApplied, setDaysApplied] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
-  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     const fetchProfileAndData = async () => {
@@ -62,7 +31,6 @@ export default function TodayPage() {
       setError(null);
       try {
         const userProfile = await getUserProfile();
-        setProfile(userProfile);
         // Fetch strategy details
         const strategyName = userProfile.current_strategy;
         // Fetch strategy details from profile.strategy_details
@@ -89,8 +57,6 @@ export default function TodayPage() {
     const fetchLogs = async () => {
       if (trialPeriod) {
         const logsInPeriod = await getLogs({ start: trialPeriod.start_date, end: trialPeriod.end_date });
-        setLogs(logsInPeriod);
-        setDaysApplied(logsInPeriod.filter((l: any) => l.applied_strategy).length);
         const today = new Date();
         const start = new Date(trialPeriod.start_date);
         setCurrentDay(Math.max(1, Math.min(
@@ -155,7 +121,7 @@ export default function TodayPage() {
               </div>
               <div className="text-xs text-gray-400 mb-2">Progress through your strategy period</div>
               <div className="text-sm text-gray-500 mb-2 sm:mb-0">
-                Successfully applied: {daysApplied} days
+                Successfully applied: 0 days
               </div>
             </div>
           </div>

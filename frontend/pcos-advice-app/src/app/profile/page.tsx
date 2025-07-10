@@ -11,7 +11,6 @@ import { getUserProfile, getTodayLog } from '@/lib/api';
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [trialPeriod, setTrialPeriod] = useState<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
   const [daysApplied, setDaysApplied] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
   const [showTrialModal, setShowTrialModal] = useState(false);
@@ -42,7 +41,6 @@ export default function ProfilePage() {
       setTrialPeriod(active);
       if (active) {
         const logsInPeriod = await getLogs({ start: active.start_date, end: active.end_date });
-        setLogs(logsInPeriod);
         setDaysApplied(logsInPeriod.filter((l: any) => l.applied_strategy).length);
         const today = new Date();
         const start = new Date(active.start_date);
@@ -128,7 +126,7 @@ export default function ProfilePage() {
       } else {
         alert('Failed to delete account.');
       }
-    } catch (e) {
+    } catch {
       alert('Failed to delete account.');
     }
   };
@@ -342,7 +340,6 @@ export default function ProfilePage() {
                   setTrialPeriod(active);
                   if (active) {
                     const logsInPeriod = await getLogs({ start: active.start_date, end: active.end_date });
-                    setLogs(logsInPeriod);
                     setDaysApplied(logsInPeriod.filter((l: any) => l.applied_strategy).length);
                     const today = new Date();
                     const start = new Date(active.start_date);

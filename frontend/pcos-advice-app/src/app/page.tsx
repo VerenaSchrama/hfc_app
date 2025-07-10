@@ -1,6 +1,4 @@
 // src/app/page.tsx
-import { redirect } from 'next/navigation';
-import ChatInterface from '../components/ChatInterface';
 import Image from 'next/image';
 import Link from 'next/link';
 

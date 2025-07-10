@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import React from 'react';
 import BottomNav from '../components/BottomNav';
 import Header from '../components/Header';
-import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
