@@ -67,4 +67,34 @@ export interface TrialPeriodCreate {
     strategy_name: string;
     start_date: string;
     end_date: string;
+}
+
+export interface UserProfile {
+    current_strategy: string;
+    strategy_details: {
+        'Strategie naam': string;
+        Uitleg: string;
+        Waarom: string;
+        'Verhelpt klachten bij': string;
+        'Praktische tips': string;
+        'Bron(nen)': string;
+    };
+    goals?: string[];
+    symptoms?: string[];
+    currentStrategy?: {
+        name: string;
+    };
+}
+
+export interface Log {
+    date: string;
+    symptoms?: string[];
+    notes?: string;
+    strategy_applied?: boolean;
+    energy?: number;
+    mood?: number;
+    symptom_scores?: Record<string, number>;
+    extra_symptoms?: string;
+    extra_notes?: string;
+    applied_strategy?: boolean; // Keep for backward compatibility
 } 

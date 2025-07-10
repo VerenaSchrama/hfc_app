@@ -33,7 +33,7 @@ export default function ChatPage() {
           text: m.text,
           timestamp: m.timestamp,
         })));
-      } catch (err) {
+      } catch {
         // Optionally show error
       } finally {
         setIsLoading(false);
@@ -64,7 +64,7 @@ export default function ChatPage() {
         text: m.text,
         timestamp: m.timestamp,
       })));
-    } catch (err: unknown) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { id: uuidv4(), type: "bot", text: "Sorry, something went wrong. Please try again." },

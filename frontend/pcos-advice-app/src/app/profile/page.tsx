@@ -4,23 +4,23 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { setCurrentStrategy } from '@/lib/strategy';
 import { getTrialPeriods, getLogs, createTrialPeriod } from '@/lib/api';
 import { getUserProfile, getTodayLog } from '@/lib/api';
+import { UserProfile, TrialPeriod, Log } from '@/types';
 
 export default function ProfilePage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [trialPeriod, setTrialPeriod] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [todayLog, setTodayLog] = useState<Log | null>(null);
+  const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
   const [daysApplied, setDaysApplied] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
+  const [cyclePhase, setCyclePhase] = useState<string>('');
+  const [cycleExplanation, setCycleExplanation] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [newStart, setNewStart] = useState<string | null>(null);
   const [newEnd, setNewEnd] = useState<string | null>(null);
   const [trialError, setTrialError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [todayLog, setTodayLog] = useState<any>(null);
-  const [cyclePhase, setCyclePhase] = useState<string>("");
-  const [cycleExplanation, setCycleExplanation] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
@@ -35,13 +35,13 @@ export default function ProfilePage() {
         getTrialPeriods(),
         getTodayLog()
       ]);
-      setProfile(profileData);
-      setTodayLog(todayLogData);
-      const active = trials.find((t: any) => t.is_active);
-      setTrialPeriod(active);
+      setProfile(profileData as UserProfile);
+      setTodayLog(todayLogData as Log | null);
+      const active = trials.find((t: TrialPeriod) => t.is_active);
+      setTrialPeriod(active || null);
       if (active) {
         const logsInPeriod = await getLogs({ start: active.start_date, end: active.end_date });
-        setDaysApplied(logsInPeriod.filter((l: any) => l.applied_strategy).length);
+        setDaysApplied(logsInPeriod.filter((l: Log) => l.strategy_applied).length);
         const today = new Date();
         const start = new Date(active.start_date);
         setCurrentDay(Math.max(1, Math.min(
@@ -104,7 +104,6 @@ export default function ProfilePage() {
   };
 
   const handleViewDetails = () => {
-    setCurrentStrategy(profile?.currentStrategy?.name);
     router.push('/today');
   };
 
@@ -331,16 +330,20 @@ export default function ProfilePage() {
                   return;
                 }
                 try {
+                  if (!trialPeriod) {
+                    setTrialError('No trial period found.');
+                    return;
+                  }
                   await createTrialPeriod({ strategy_name: trialPeriod.strategy_name, start_date: newStart, end_date: newEnd });
                   setShowTrialModal(false);
                   setIsLoading(true);
                   // Refetch data
                   const trials = await getTrialPeriods();
-                  const active = trials.find((t: any) => t.is_active);
-                  setTrialPeriod(active);
+                  const active = trials.find((t: TrialPeriod) => t.is_active);
+                  setTrialPeriod(active || null);
                   if (active) {
                     const logsInPeriod = await getLogs({ start: active.start_date, end: active.end_date });
-                    setDaysApplied(logsInPeriod.filter((l: any) => l.applied_strategy).length);
+                    setDaysApplied(logsInPeriod.filter((l: Log) => l.strategy_applied).length);
                     const today = new Date();
                     const start = new Date(active.start_date);
                     setCurrentDay(Math.max(1, Math.min(
@@ -349,7 +352,7 @@ export default function ProfilePage() {
                     )));
                   }
                   setIsLoading(false);
-                } catch (e: any) {
+                } catch {
                   setTrialError('Failed to update trial period.');
                 }
               }}>Confirm</button>

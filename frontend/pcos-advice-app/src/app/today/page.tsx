@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { getTrialPeriods, getLogs, getUserProfile } from '@/lib/api';
-import { TrialPeriod } from '@/types';
+import { TrialPeriod, UserProfile } from '@/types';
 import Link from 'next/link';
 
 interface StrategyDetails {
@@ -13,10 +13,6 @@ interface StrategyDetails {
   'Bron(nen)': string;
   error?: string;
 }
-
-const BACKEND_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  ? 'http://127.0.0.1:8000'
-  : '';
 
 export default function TodayPage() {
   const [strategy, setStrategy] = useState<StrategyDetails | null>(null);
@@ -30,7 +26,7 @@ export default function TodayPage() {
       setLoading(true);
       setError(null);
       try {
-        const userProfile = await getUserProfile();
+        const userProfile: UserProfile = await getUserProfile();
         // Fetch strategy details
         const strategyName = userProfile.current_strategy;
         // Fetch strategy details from profile.strategy_details
@@ -43,7 +39,7 @@ export default function TodayPage() {
           active = periods.find((p: TrialPeriod) => p.is_active);
         }
         setTrialPeriod(active || null);
-      } catch (e) {
+      } catch {
         setError('Failed to load your profile or strategy.');
         setStrategy(null);
       }
@@ -153,7 +149,7 @@ export default function TodayPage() {
       <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 text-center text-yellow-700 font-medium mb-6">More recipes coming soon!</div>
 
       <div className="bg-orange-50 border border-orange-100 rounded-xl p-5 mt-8 shadow-sm">
-        <div className="font-bold text-gray-900 mb-1">Today's Focus</div>
+        <div className="font-bold text-gray-900 mb-1">Today&apos;s Focus</div>
         <div className="text-gray-700 mb-2">Personalized focus coming soon!</div>
       </div>
     </div>

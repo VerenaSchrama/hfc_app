@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchStrategies, setStrategyWithTrial } from '../../lib/api';
 import { IntakeData, Strategy, TrialPeriodCreate } from '../../types';
-import { CheckCircle, Circle, RefreshCw, Flower, ChevronDown, Calendar } from 'lucide-react';
+import { CheckCircle, Circle, RefreshCw, Flower, Calendar } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { setCurrentStrategy } from '@/lib/strategy';
 
@@ -69,12 +69,16 @@ export default function ChooseStrategiesPage() {
     });
   };
   
-  const getStrategyName = (s: any) =>
-    s['strategy_name'] ||
-    s['Strategie naam'] ||
-    s['Strategy name'] ||
-    s.name ||
-    s.id;
+  const getStrategyName = (s: Strategy | Record<string, unknown>) => {
+    return (
+      (s as unknown as Record<string, unknown>)['Strategie naam'] ||
+      (s as unknown as Record<string, unknown>)['Strategy name'] ||
+      (s as unknown as Record<string, unknown>)['strategy_name'] ||
+      (s as unknown as Record<string, unknown>)['name'] ||
+      (s as unknown as Record<string, unknown>)['id'] ||
+      ''
+    ) as string;
+  };
 
   const handleContinue = async () => {
     if (selectedStrategies.length === 0) return;
@@ -95,7 +99,7 @@ export default function ChooseStrategiesPage() {
         } else {
           await setStrategyWithTrial(selectedName);
         }
-      } catch (e) {
+      } catch {
         alert('Failed to update your strategy.');
         return;
       }
@@ -126,8 +130,6 @@ export default function ChooseStrategiesPage() {
     });
   };
 
-  // Log the recommended strategies before rendering
-  console.log('Recommended strategies:', recommendedStrategies);
   if (loading) {
     return <div className="text-center p-12">Loading your recommended strategies...</div>;
   }
@@ -199,24 +201,16 @@ export default function ChooseStrategiesPage() {
 
         {/* Strategies */}
         <div className="space-y-4">
-          {recommendedStrategies.map((strategy, idx) => {
-            // Use dynamic property access with fallback
-            const s = strategy as any;
-            const strategyName = s['Strategie naam'] || s['Strategy name'] || s.name || s.id || `strategy-${idx}`;
+          {recommendedStrategies.map((strategy) => {
+            const s = strategy as Strategy;
+            const strategyName = getStrategyName(s);
             const isSelected = selectedStrategies.some(sel => {
-              const selS = sel as any;
+              const selS = sel as Strategy;
               return (
-                selS['Strategie naam'] === strategyName ||
-                selS['Strategy name'] === strategyName ||
-                selS.name === strategyName ||
-                selS.id === strategyName
+                getStrategyName(selS) === strategyName
               );
             });
-            const tipsRaw = strategy['Practical tips'] || '';
-            const tips = tipsRaw
-              .split(/•|\*|-/)
-              .map(tip => tip.trim())
-              .filter(Boolean);
+
             return (
               <div
                 key={strategyName}
@@ -232,7 +226,14 @@ export default function ChooseStrategiesPage() {
                 </div>
                 <div className="mt-2">
                     <p className="font-semibold text-sm text-gray-500">Why:</p>
-                    <p className="text-sm text-gray-700">{s['Waarom'] || s['Why'] || s.why || ''}</p>
+                    <p className="text-sm text-gray-700">{
+                      String(
+                        (s as unknown as Record<string, unknown>)['Waarom'] ||
+                        (s as unknown as Record<string, unknown>)['Why'] ||
+                        (s as unknown as Record<string, unknown>)['why'] ||
+                        ''
+                      )
+                    }</p>
                 </div>
               </div>
             );

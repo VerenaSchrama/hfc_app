@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { fetchStrategyDetails } from '../../../lib/api';
 import { Strategy } from '../../../types';
 import { ArrowLeft, Heart, Target, BookOpen } from 'lucide-react';
@@ -46,20 +46,20 @@ export default function StrategyDetailPage() {
 
   // Handle different possible property names for tips, sources, etc.
   // For multilingual/dynamic property access, use:
-  // @ts-ignore
-  const tipsRaw = (strategy as any)['Practical tips'] || (strategy as any)['practical_tips'] || (strategy as any)['Praktische tips'] || '';
+  // @ts-expect-error: backend property name is dynamic
+  const tipsRaw = (strategy as Strategy | Record<string, unknown>)['Practical tips'] || (strategy as Strategy | Record<string, unknown>)['practical_tips'] || (strategy as Strategy | Record<string, unknown>)['Praktische tips'] || '';
   const tips = tipsRaw
     .split(/•|\*|-/)
     .map((tip: string) => tip.trim())
     .filter(Boolean);
-  // @ts-ignore
-  const sourcesRaw = (strategy as any)['Sources'] || (strategy as any)['sources'] || (strategy as any)['Bron(nen)'] || '';
+  // @ts-expect-error: backend property name is dynamic
+  const sourcesRaw = (strategy as Strategy | Record<string, unknown>)['Sources'] || (strategy as Strategy | Record<string, unknown>)['sources'] || (strategy as Strategy | Record<string, unknown>)['Bron(nen)'] || '';
   const sources = sourcesRaw
     .split(';')
     .map((s: string) => s.trim())
     .filter(Boolean);
-  // @ts-ignore
-  const helpsWithRaw = (strategy as any)['Solves symptoms for'] || (strategy as any)['helps_with'] || (strategy as any)['Verhelpt klachten bij'] || '';
+  // @ts-expect-error: backend property name is dynamic
+  const helpsWithRaw = (strategy as Strategy | Record<string, unknown>)['Solves symptoms for'] || (strategy as Strategy | Record<string, unknown>)['helps_with'] || (strategy as Strategy | Record<string, unknown>)['Verhelpt klachten bij'] || '';
   const helpsWithTags = helpsWithRaw
     .split(',')
     .map((s: string) => s.trim().toLowerCase())
@@ -78,8 +78,8 @@ export default function StrategyDetailPage() {
         </Link>
 
         <div className="text-center mb-6">
-            {/* @ts-ignore */}
-            <h1 className="text-4xl font-bold">{(strategy as any)['Strategy name'] || (strategy as any)['strategy_name'] || (strategy as any)['Strategie naam']}</h1>
+            {/* @ts-expect-error: backend property name is dynamic */}
+            <h1 className="text-4xl font-bold">{(strategy as Strategy | Record<string, unknown>)['Strategy name'] || (strategy as Strategy | Record<string, unknown>)['strategy_name'] || (strategy as Strategy | Record<string, unknown>)['Strategie naam']}</h1>
             <span className="mt-2 inline-block text-xs font-bold text-white bg-pink-500 px-3 py-1 rounded-full">Aanbevolen strategie</span>
         </div>
 
@@ -90,8 +90,8 @@ export default function StrategyDetailPage() {
             </div>
             <div>
                 <h3 className="font-bold text-lg">Wat ga je doen?</h3>
-                {/* @ts-ignore */}
-                <p className="text-gray-700">{(strategy as any)['Explanation'] || (strategy as any)['explanation'] || (strategy as any)['Uitleg']}</p>
+                {/* @ts-expect-error: backend property name is dynamic */}
+                <p className="text-gray-700">{(strategy as Strategy | Record<string, unknown>)['Explanation'] || (strategy as Strategy | Record<string, unknown>)['explanation'] || (strategy as Strategy | Record<string, unknown>)['Uitleg']}</p>
             </div>
         </div>
 
@@ -102,8 +102,8 @@ export default function StrategyDetailPage() {
             </div>
             <div>
                 <h3 className="font-bold text-lg">Waarom werkt dit?</h3>
-                {/* @ts-ignore */}
-                <p className="text-gray-700">{(strategy as any)['Why'] || (strategy as any)['why'] || (strategy as any)['Waarom']}</p>
+                {/* @ts-expect-error: backend property name is dynamic */}
+                <p className="text-gray-700">{(strategy as Strategy | Record<string, unknown>)['Why'] || (strategy as Strategy | Record<string, unknown>)['why'] || (strategy as Strategy | Record<string, unknown>)['Waarom']}</p>
             </div>
         </div>
 

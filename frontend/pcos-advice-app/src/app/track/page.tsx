@@ -2,23 +2,10 @@
 import { useEffect, useState } from "react";
 import { getCurrentStrategy } from "@/lib/strategy";
 import { getTrialPeriods, getLogs, getTrackedSymptoms, upsertTodayLog, getTodayLog } from "@/lib/api";
-import { TrialPeriod } from "@/types";
-import { useRef } from "react";
+import { TrialPeriod, UserProfile, Log } from "@/types";
 import { getUserProfile } from '@/lib/api';
 
 const MOCK_SYMPTOMS = ["Bloating", "Cravings", "Fatigue", "Mood swings", "Headache"];
-
-function Modal({ open, onClose, children }: { open: boolean, onClose: () => void, children: React.ReactNode }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-xl shadow-xl p-6 min-w-[320px] max-w-[90vw] relative">
-        <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold" onClick={onClose}>&times;</button>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 export default function TrackPage() {
   const [strategy, setStrategy] = useState<string | null>(null);
@@ -37,16 +24,16 @@ export default function TrackPage() {
   const [editSymptomsList, setEditSymptomsList] = useState<string[]>([]);
   const [newSymptom, setNewSymptom] = useState("");
   const [selectedLogDate, setSelectedLogDate] = useState<string | null>(null);
-  const [selectedLog, setSelectedLog] = useState<any | null>(null);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+  const [logs, setLogs] = useState<Log[]>([]);
   const [trialPeriods, setTrialPeriods] = useState<TrialPeriod[]>([]);
   const [loading, setLoading] = useState(true);
   const [logError, setLogError] = useState<string | null>(null);
   const [showLogModal, setShowLogModal] = useState(false);
   const [showApplyStrategyPopup, setShowApplyStrategyPopup] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
-  const [trialPeriod, setTrialPeriod] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
   const [currentDay, setCurrentDay] = useState(0);
   const [totalDays, setTotalDays] = useState(0);
 
@@ -98,7 +85,7 @@ export default function TrackPage() {
   useEffect(() => {
     const fetchProfileAndPeriods = async () => {
       try {
-        const userProfile = await getUserProfile();
+        const userProfile: UserProfile = await getUserProfile();
         setProfile(userProfile);
         setStrategy(userProfile.strategy_details?.['Strategie naam'] || userProfile.current_strategy);
         const periods = await getTrialPeriods();
@@ -117,7 +104,7 @@ export default function TrackPage() {
           )));
           setTotalDays(Math.floor((end.getTime() - start.getTime()) / (1000*60*60*24)) + 1);
         }
-      } catch (e) {
+      } catch {
         // fallback: do nothing
       }
     };
@@ -127,13 +114,18 @@ export default function TrackPage() {
   useEffect(() => {
     async function checkTodayLog() {
       try {
-        const todayLog = await getTodayLog();
+        const todayLog: Log | null = await getTodayLog();
         if (todayLog && todayLog.date === toLocalDateString(new Date())) {
           setLogStored(true);
           setEditMode(false);
           // Pre-fill form data if needed
-          setAppliedStrategy(todayLog.applied_strategy ?? null);
-          setScores((prev: any) => ({ ...prev, Energy: todayLog.energy, Mood: todayLog.mood, ...todayLog.symptom_scores }));
+          setAppliedStrategy(todayLog.strategy_applied ?? null);
+          setScores((prev: Record<string, number>) => ({
+            ...prev,
+            Energy: todayLog.energy ?? 3,
+            Mood: todayLog.mood ?? 3,
+            ...todayLog.symptom_scores,
+          }));
           setExtraSymptoms(todayLog.extra_symptoms || '');
           setExtraNotes(todayLog.extra_notes || '');
         } else {
@@ -186,8 +178,8 @@ export default function TrackPage() {
       await upsertTodayLog(logData);
       setLogStored(true);
       await loadLogsForMonth(currentMonth); // Refetch logs to update UI
-    } catch (err: any) {
-      setLogError(err.message || 'Failed to store log');
+    } catch (err: unknown) {
+      setLogError((err as Error).message || 'Failed to store log');
     }
   };
 
@@ -198,7 +190,7 @@ export default function TrackPage() {
     try {
       const logsForDay = await getLogs({ start: dateStr, end: dateStr });
       setSelectedLog(logsForDay && logsForDay.length > 0 ? logsForDay[0] : null);
-    } catch (err) {
+    } catch {
       setSelectedLog(null);
     }
   };
@@ -224,7 +216,6 @@ export default function TrackPage() {
   function getMonthDays(month: Date) {
     const year = month.getFullYear();
     const monthIdx = month.getMonth();
-    const firstDay = new Date(year, monthIdx, 1);
     const lastDay = new Date(year, monthIdx + 1, 0);
     const days = [];
     for (let d = 1; d <= lastDay.getDate(); d++) {
@@ -252,9 +243,9 @@ export default function TrackPage() {
   };
 
   // Helper: build a date-to-strategy map for the current month
-  function buildStrategyMap(trialPeriods: any[], month: Date) {
+  function buildStrategyMap(trialPeriods: TrialPeriod[], month: Date) {
     const days = getMonthDays(month);
-    const map: Record<string, any> = {};
+    const map: Record<string, TrialPeriod> = {};
     // Sort trial periods by start_date ascending
     const sorted = [...trialPeriods].sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
     days.forEach(dateObj => {
@@ -299,7 +290,7 @@ export default function TrackPage() {
   const avgMood = weekLogs.length ? (weekLogs.reduce((sum, l) => sum + (l.mood || 0), 0) / weekLogs.length).toFixed(1) : '-';
 
   // Calculate logs for current trial period
-  let trialLogs: any[] = [];
+  let trialLogs: Log[] = [];
   let daysAppliedTrial = 0;
   let trialTotalDays = totalDays;
   if (trialPeriod) {
@@ -528,7 +519,7 @@ export default function TrackPage() {
           <div className="grid grid-cols-7 gap-3 mb-4">
             {getMonthDays(currentMonth).map(dateObj => {
               const dateStr = toLocalDateString(dateObj);
-              const log = logs.find((l: any) => l.date === dateStr);
+              const log = logs.find((l: Log) => l.date === dateStr);
               const trial = strategyMap[dateStr];
               const isToday = dateStr === new Date().toISOString().slice(0, 10);
               let status: "today" | "success" | "none" = "none";
