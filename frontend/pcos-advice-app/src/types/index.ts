@@ -53,3 +53,18 @@ export interface Strategy {
     'Sources': string;
     'Practical tips': string;
 } 
+
+export interface TrialPeriod {
+    id: number;
+    strategy_name: string;
+    start_date: string;
+    end_date: string;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface TrialPeriodCreate {
+    strategy_name: string;
+    start_date: string;
+    end_date: string;
+} 

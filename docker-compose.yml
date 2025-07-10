@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  # Backend API with RAG Model
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hfc-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount the strategies data
+      - ./backend/data:/app/data
+      # Mount the vectorstore data for RAG model
+      - ./data/vectorstore:/app/data/vectorstore
+      # Mount the processed data
+      - ./data/processed:/app/data/processed
+      # Mount the SQLite database
+      - ./backend/users.db:/app/users.db
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./users.db}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - hfc-network
+
+  # Frontend Next.js App
+  frontend:
+    build:
+      context: ./frontend/pcos-advice-app
+      dockerfile: Dockerfile
+    container_name: hfc-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NODE_ENV=${NODE_ENV:-production}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - hfc-network
+
+networks:
+  hfc-network:
+    driver: bridge 

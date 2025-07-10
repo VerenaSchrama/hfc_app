@@ -1,10 +1,37 @@
 version: "3.9"
+
 services:
   backend:
-    build: ./backend
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: hfc-backend
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/data:/app/data
+      # Mount the strategies data
+      - ./data:/app/data
+      # Mount the vectorstore data for RAG model
+      - ../data/vectorstore:/app/data/vectorstore
+      # Mount the processed data
+      - ../data/processed:/app/data/processed
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./users.db}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
     env_file:
-      - ./backend/.env
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - hfc-network
+
+networks:
+  hfc-network:
+    driver: bridge

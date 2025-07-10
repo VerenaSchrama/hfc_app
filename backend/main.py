@@ -16,20 +16,34 @@ from datetime import datetime, timedelta, date
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime as dt
 
-app = FastAPI()
+app = FastAPI(
+    title="HerFoodCode API",
+    description="FastAPI backend for HerFoodCode app with RAG model integration",
+    version="1.0.0"
+)
 
 create_db_and_tables()
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for container orchestration"""
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+
 # CORS Middleware
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-SECRET_KEY = "supersecretkey"  # Change this in production!
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey")  # Change this in production!
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 

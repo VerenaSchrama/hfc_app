@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { getCurrentStrategy } from '@/lib/strategy';
+import { getTrialPeriods, getLogs, getUserProfile } from '@/lib/api';
+import { TrialPeriod } from '@/types';
 import Link from 'next/link';
 
 interface StrategyDetails {
@@ -48,29 +50,57 @@ export default function TodayPage() {
   const [strategy, setStrategy] = useState<StrategyDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [daysApplied, setDaysApplied] = useState(0);
+  const [currentDay, setCurrentDay] = useState(0);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const fetchStrategy = async () => {
-      const name = getCurrentStrategy() || 'Bloedsuiker in balans';
+    const fetchProfileAndData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${BACKEND_URL}/api/v1/strategies/${encodeURIComponent(name)}`);
-        const data = await res.json();
-        if (data.error) {
-          setError('Strategy not found. Please select a valid strategy.');
-          setStrategy(null);
-        } else {
-          setStrategy(data);
+        const userProfile = await getUserProfile();
+        setProfile(userProfile);
+        // Fetch strategy details
+        const strategyName = userProfile.current_strategy;
+        // Fetch strategy details from profile.strategy_details
+        setStrategy(userProfile.strategy_details);
+        // Fetch trial period for current strategy
+        const periods = await getTrialPeriods();
+        const normalize = (s: string) => s?.trim().toLowerCase();
+        let active = periods.find((p: TrialPeriod) => normalize(p.strategy_name) === normalize(strategyName) && p.is_active);
+        if (!active) {
+          active = periods.find((p: TrialPeriod) => p.is_active);
         }
+        setTrialPeriod(active || null);
       } catch (e) {
-        setError('Failed to load strategy. Please check your connection or try again later.');
+        setError('Failed to load your profile or strategy.');
         setStrategy(null);
       }
       setLoading(false);
     };
-    fetchStrategy();
+    fetchProfileAndData();
   }, []);
+
+  useEffect(() => {
+    // Fetch logs for progress bar
+    const fetchLogs = async () => {
+      if (trialPeriod) {
+        const logsInPeriod = await getLogs({ start: trialPeriod.start_date, end: trialPeriod.end_date });
+        setLogs(logsInPeriod);
+        setDaysApplied(logsInPeriod.filter((l: any) => l.applied_strategy).length);
+        const today = new Date();
+        const start = new Date(trialPeriod.start_date);
+        setCurrentDay(Math.max(1, Math.min(
+          Math.floor((today.getTime() - start.getTime()) / (1000*60*60*24)) + 1,
+          Math.floor((new Date(trialPeriod.end_date).getTime() - start.getTime()) / (1000*60*60*24)) + 1
+        )));
+      }
+    };
+    fetchLogs();
+  }, [trialPeriod]);
 
   if (loading) {
     return <div className="max-w-2xl mx-auto py-10 text-center text-gray-500">Loading your strategy...</div>;
@@ -101,6 +131,36 @@ export default function TodayPage() {
         <div className="text-sm text-gray-500">Why: {strategy.Waarom}</div>
         <div className="text-sm text-gray-500">Sources: {strategy['Bron(nen)']}</div>
       </div>
+
+      {trialPeriod && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Trial Period</h2>
+              <p className="text-gray-600 mt-1">{trialPeriod.start_date} to {trialPeriod.end_date}</p>
+            </div>
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Active</span>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-between items-center w-full">
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">
+                Day {currentDay} of {Math.floor((new Date(trialPeriod.end_date).getTime() - new Date(trialPeriod.start_date).getTime()) / (1000*60*60*24)) + 1}
+              </div>
+              {/* Progress Bar */}
+              <div className="w-full h-3 bg-pink-100 rounded-full overflow-hidden mb-2">
+                <div
+                  className="h-full bg-pink-400 transition-all duration-300"
+                  style={{ width: `${Math.round((currentDay / (Math.floor((new Date(trialPeriod.end_date).getTime() - new Date(trialPeriod.start_date).getTime()) / (1000*60*60*24)) + 1)) * 100)}%` }}
+                ></div>
+              </div>
+              <div className="text-xs text-gray-400 mb-2">Progress through your strategy period</div>
+              <div className="text-sm text-gray-500 mb-2 sm:mb-0">
+                Successfully applied: {daysApplied} days
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Key Tips for Today with Chat Button */}
       <div className="flex items-center justify-between mb-2">

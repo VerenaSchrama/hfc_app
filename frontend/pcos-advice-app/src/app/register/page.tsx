@@ -35,7 +35,7 @@ export default function RegisterPage() {
     try {
       const response = await auth.register({ email, password });
       auth.setToken(response.access_token);
-      router.push('/profile');
+      router.push('/intake');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {

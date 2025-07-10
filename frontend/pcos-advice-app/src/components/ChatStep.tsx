@@ -23,9 +23,8 @@ export const ChatStep = ({ type, children, isLast }: ChatStepProps) => {
     ? 'bg-pink-900/50'
     : 'bg-purple-900/50';
 
-  const messageBubbleClass = isBot
-    ? 'bg-gray-800/80'
-    : 'bg-purple-800/60';
+  const messageBubbleClass =
+    'bg-pink-100 text-gray-900';
 
   return (
     <div className={`flex items-start gap-4 ${isLast ? 'animate-fade-in' : ''}`}>

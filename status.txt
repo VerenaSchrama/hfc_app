@@ -1,0 +1,18 @@
+HerFoodCode App – Recent Changes Summary
+========================================
+
+Date: [Auto-generated]
+
+**Frontend: Profile Page Improvements**
+--------------------------------------
+- The profile page now displays real backend data for user goals, symptoms, cycle phase, and dietary preferences.
+- The cycle phase is calculated from intake data (localStorage) and includes a supportive explanation for each phase or for users without a regular cycle.
+- Dietary preferences from intake are now shown in the profile block. If none are specified, "None specified" is displayed.
+- The "Update Profile" button has been moved inside the profile content block for better UX.
+- The "Recent Progress" block uses real log data for strategy followed, energy level (now X/5), and mood.
+- The label for missing cycle phase info is now "Unclear" instead of "Not set".
+- Layout and UI polish for consistency and clarity.
+
+**Other**
+---------
+- All changes have been committed and pushed to the main branch. 
