@@ -2,7 +2,7 @@
 import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log } from '../types';
 import { auth } from "./auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` : 'http://127.0.0.1:8000/api/v1';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` : 'http://127.0.0.1:8000/api/v1';
 
 // src/lib/fetchAdvice.ts
 export async function fetchAdvice(intake: IntakeData): Promise<AdviceResponse> {
@@ -199,7 +199,7 @@ export async function setStrategyWithTrial(strategyName: string, trialPeriod?: {
 
 export async function getUserProfile(): Promise<UserProfile> {
   const token = auth.getToken();
-  const res = await fetch('http://127.0.0.1:8000/api/v1/profile', {
+  const res = await fetch(`${API_BASE_URL}/profile`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!res.ok) throw new Error('Failed to fetch user profile');

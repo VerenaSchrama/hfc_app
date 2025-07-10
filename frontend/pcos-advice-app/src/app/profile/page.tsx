@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { getTrialPeriods, getLogs, createTrialPeriod } from '@/lib/api';
+import { getTrialPeriods, getLogs, createTrialPeriod, API_BASE_URL } from '@/lib/api';
 import { getUserProfile, getTodayLog } from '@/lib/api';
 import { UserProfile, TrialPeriod, Log } from '@/types';
 
@@ -112,7 +112,7 @@ export default function ProfilePage() {
     const token = auth.getToken();
     if (!token) return;
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/delete_account', {
+      const res = await fetch(`${API_BASE_URL}/delete_account`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
