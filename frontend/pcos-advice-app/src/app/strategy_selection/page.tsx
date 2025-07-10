@@ -188,7 +188,7 @@ export default function ChooseStrategiesPage() {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold">Choose your strategies</h1>
-          <p className="text-gray-600 mt-2">Based on your intake, we've selected these strategies for you.</p>
+          <p className="text-gray-600 mt-2">Based on your intake, we&apos;ve selected these strategies for you.</p>
           <p className="font-bold text-pink-500 mt-1">Choose up to 3 to start with.</p>
         </div>
 

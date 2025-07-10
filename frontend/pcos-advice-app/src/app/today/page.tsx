@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { getTrialPeriods, getLogs, getUserProfile } from '@/lib/api';
+import { getTrialPeriods, getUserProfile } from '@/lib/api';
 import { TrialPeriod, UserProfile } from '@/types';
 import Link from 'next/link';
 
