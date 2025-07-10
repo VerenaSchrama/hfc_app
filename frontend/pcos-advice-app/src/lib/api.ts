@@ -3,6 +3,7 @@ import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log } f
 import { auth } from "./auth";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` : 'http://127.0.0.1:8000/api/v1';
+console.log("API_BASE_URL (api.ts):", API_BASE_URL);
 
 // src/lib/fetchAdvice.ts
 export async function fetchAdvice(intake: IntakeData): Promise<AdviceResponse> {
