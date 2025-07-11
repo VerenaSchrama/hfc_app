@@ -5,6 +5,7 @@ import { TrialPeriod, UserProfile } from '@/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 interface StrategyDetails {
   'Strategie naam': string;
@@ -18,21 +19,21 @@ interface StrategyDetails {
 
 export default function TodayPage() {
   const router = useRouter();
+  const { isLoggedIn, loading } = useAuth();
   const [strategy, setStrategy] = useState<StrategyDetails | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
   const [currentDay, setCurrentDay] = useState(0);
 
   useEffect(() => {
-    if (!auth.isLoggedIn()) {
+    if (!loading && !isLoggedIn) {
       router.push('/login');
     }
-  }, [router]);
+  }, [isLoggedIn, loading, router]);
 
   useEffect(() => {
     const fetchProfileAndData = async () => {
-      setLoading(true);
+      if (loading || !isLoggedIn) return; // Only fetch if not loading or not logged in
       setError(null);
       try {
         const userProfile: UserProfile = await getUserProfile();
@@ -52,10 +53,9 @@ export default function TodayPage() {
         setError('Failed to load your profile or strategy.');
         setStrategy(null);
       }
-      setLoading(false);
     };
     fetchProfileAndData();
-  }, []);
+  }, [loading, isLoggedIn]); // Add loading and isLoggedIn to dependencies
 
   useEffect(() => {
     // Fetch logs for progress bar
@@ -72,9 +72,7 @@ export default function TodayPage() {
     fetchLogs();
   }, [trialPeriod]);
 
-  if (loading) {
-    return <div className="max-w-2xl mx-auto py-10 text-center text-gray-500">Loading your strategy...</div>;
-  }
+  if (loading || !isLoggedIn) return null;
   if (error) {
     return <div className="max-w-2xl mx-auto py-10 text-center text-red-500">{error}</div>;
   }

@@ -5,16 +5,19 @@ import { TrialPeriod, UserProfile, Log } from "@/types";
 import { getUserProfile } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 const MOCK_SYMPTOMS = ["Bloating", "Cravings", "Fatigue", "Mood swings", "Headache"];
 
 export default function TrackPage() {
   const router = useRouter();
+  const { isLoggedIn, loading } = useAuth();
   useEffect(() => {
-    if (!auth.isLoggedIn()) {
+    if (!loading && !isLoggedIn) {
       router.push('/login');
     }
-  }, [router]);
+  }, [isLoggedIn, loading, router]);
+  if (loading || !isLoggedIn) return null;
   const [strategy, setStrategy] = useState<string | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>(MOCK_SYMPTOMS);
   const [scores, setScores] = useState<{ [key: string]: number }>({

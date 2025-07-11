@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
   ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
   : 'http://127.0.0.1:8000/api/v1';
@@ -77,4 +79,19 @@ export const auth = {
   isLoggedIn(): boolean {
     return !!this.getToken();
   },
-}; 
+};
+
+export function useAuth() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setIsLoggedIn(!!auth.getToken());
+    setLoading(false);
+    const onStorage = () => {
+      setIsLoggedIn(!!auth.getToken());
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+  return { isLoggedIn, loading };
+} 

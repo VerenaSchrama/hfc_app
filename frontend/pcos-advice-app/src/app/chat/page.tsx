@@ -5,6 +5,7 @@ import { ChatStep } from "@/components/ChatStep";
 import { fetchChatHistoryAndSend } from "@/lib/api";
 import { auth } from "@/lib/auth";
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth';
 
 const QUICK_QUESTIONS = [
   "Why am I so tired?",
@@ -16,6 +17,7 @@ const QUICK_QUESTIONS = [
 
 export default function ChatPage() {
   const router = useRouter();
+  const { isLoggedIn, loading } = useAuth();
   const [messages, setMessages] = useState<{id: string, type: 'user' | 'bot', text: string, timestamp?: string}[]>([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,10 +47,10 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    if (!auth.isLoggedIn()) {
+    if (!loading && !isLoggedIn) {
       router.push('/login');
     }
-  }, [router]);
+  }, [isLoggedIn, loading, router]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -86,6 +88,8 @@ export default function ChatPage() {
     setInput(q);
     setTimeout(() => handleSend(), 100);
   };
+
+  if (loading || !isLoggedIn) return null;
 
   return (
     <div className="flex flex-col items-center min-h-[70vh] py-8 px-2">
