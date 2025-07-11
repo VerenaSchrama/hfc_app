@@ -5,8 +5,8 @@ import { useAuth } from '@/lib/auth';
 
 export default function BottomNav() {
   const { isLoggedIn, loading } = useAuth();
-  if (loading || !isLoggedIn) return null;
   const pathname = usePathname();
+  if (loading || !isLoggedIn) return null;
   const navItems = [
     { href: '/profile', label: 'Profile', icon: '👤' },
     { href: '/today', label: 'Today', icon: '📅' },

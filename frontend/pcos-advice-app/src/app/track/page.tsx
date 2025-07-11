@@ -4,7 +4,6 @@ import { getTrialPeriods, getLogs, getTrackedSymptoms, upsertTodayLog, getTodayL
 import { TrialPeriod, UserProfile, Log } from "@/types";
 import { getUserProfile } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/auth';
 import { useAuth } from '@/lib/auth';
 import BottomNav from '@/components/BottomNav';
 
@@ -13,12 +12,7 @@ const MOCK_SYMPTOMS = ["Bloating", "Cravings", "Fatigue", "Mood swings", "Headac
 export default function TrackPage() {
   const router = useRouter();
   const { isLoggedIn, loading } = useAuth();
-  useEffect(() => {
-    if (!loading && !isLoggedIn) {
-      router.push('/login');
-    }
-  }, [isLoggedIn, loading, router]);
-  if (loading || !isLoggedIn) return null;
+  // All hooks must be called unconditionally at the top
   const [strategy, setStrategy] = useState<string | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>(MOCK_SYMPTOMS);
   const [scores, setScores] = useState<{ [key: string]: number }>({
@@ -52,10 +46,11 @@ export default function TrackPage() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
 
-  const handleMonthChange = (newMonth: Date) => {
-    setCurrentMonth(newMonth);
-    loadLogsForMonth(newMonth);
-  };
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      router.push('/login');
+    }
+  }, [isLoggedIn, loading, router]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -213,6 +208,11 @@ export default function TrackPage() {
     } catch {
       setSelectedLog(null);
     }
+  };
+
+  const handleMonthChange = (newMonth: Date) => {
+    setCurrentMonth(newMonth);
+    loadLogsForMonth(newMonth);
   };
 
   const STRATEGY_COLORS: Record<string, string> = {

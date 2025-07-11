@@ -4,7 +4,6 @@ import { getTrialPeriods, getUserProfile } from '@/lib/api';
 import { TrialPeriod, UserProfile } from '@/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/auth';
 import { useAuth } from '@/lib/auth';
 import BottomNav from '@/components/BottomNav';
 
