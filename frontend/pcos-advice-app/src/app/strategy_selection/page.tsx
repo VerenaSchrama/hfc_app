@@ -87,17 +87,19 @@ export default function ChooseStrategiesPage() {
     setCurrentStrategy(selectedName);
     localStorage.setItem('selectedStrategies', JSON.stringify([selectedName]));
     
-    // Save to backend with trial period if provided
+    // Save to backend with trial period
     const token = auth.getToken();
     if (token) {
       try {
-        if (trialPeriodType === 'custom' && trialPeriod.start_date && trialPeriod.end_date) {
+        // Trial period is required
+        if (trialPeriodType && trialPeriod.start_date && trialPeriod.end_date) {
           await setStrategyWithTrial(selectedName, {
             start_date: trialPeriod.start_date,
             end_date: trialPeriod.end_date
           });
         } else {
-          await setStrategyWithTrial(selectedName);
+          alert('Please select a trial period before continuing.');
+          return;
         }
       } catch {
         alert('Failed to update your strategy.');
@@ -247,6 +249,9 @@ export default function ChooseStrategiesPage() {
               <Calendar className="h-5 w-5 text-pink-500" />
               <h3 className="font-bold text-lg">Set Trial Period</h3>
             </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Choose how long you want to try this strategy.
+            </p>
             <div className="flex flex-wrap gap-3 mb-4">
               {periodOptions.map((opt) => (
                 <button
