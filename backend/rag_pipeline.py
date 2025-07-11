@@ -16,7 +16,7 @@ load_dotenv()
 
 # Define paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-VECTORSTORE_PATH = os.path.join(BASE_DIR, "..", "data", "vectorstore")
+VECTORSTORE_PATH = os.path.join(BASE_DIR, "data", "vectorstore")
 STRATEGY_VECTORSTORE_PATH = os.path.join(VECTORSTORE_PATH, "strategies_chroma")
 MAIN_VECTORSTORE_PATH = os.path.join(VECTORSTORE_PATH, "chroma")
 

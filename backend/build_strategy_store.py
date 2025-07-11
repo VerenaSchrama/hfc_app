@@ -9,7 +9,7 @@ load_dotenv()
 
 # Define paths
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data", "strategies.csv")
-PERSIST_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "vectorstore", "strategies_chroma")
+PERSIST_DIR = os.path.join(os.path.dirname(__file__), "data", "vectorstore", "strategies_chroma")
 COLLECTION_NAME = "strategies"
 
 # Load data from CSV
