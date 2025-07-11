@@ -6,6 +6,7 @@ import { getUserProfile } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { useAuth } from '@/lib/auth';
+import BottomNav from '@/components/BottomNav';
 
 const MOCK_SYMPTOMS = ["Bloating", "Cravings", "Fatigue", "Mood swings", "Headache"];
 
@@ -37,7 +38,7 @@ export default function TrackPage() {
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
   const [logs, setLogs] = useState<Log[]>([]);
   const [trialPeriods, setTrialPeriods] = useState<TrialPeriod[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [logError, setLogError] = useState<string | null>(null);
   const [showLogModal, setShowLogModal] = useState(false);
   const [showApplyStrategyPopup, setShowApplyStrategyPopup] = useState(false);
@@ -94,7 +95,7 @@ export default function TrackPage() {
       } catch (error) {
         console.error("Failed to load data:", error);
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     };
 
@@ -306,7 +307,7 @@ export default function TrackPage() {
     }
   }
 
-  if (loading) {
+  if (dataLoading) {
     return (
       <div className="flex flex-col items-center min-h-[70vh] py-8 px-2">
         <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col gap-6">
@@ -627,6 +628,7 @@ export default function TrackPage() {
           </div>
         </div>
       )}
+      <BottomNav />
     </div>
   );
 } 

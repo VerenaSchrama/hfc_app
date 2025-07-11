@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth';
 import { getTrialPeriods, getLogs, createTrialPeriod, API_BASE_URL } from '@/lib/api';
 import { getUserProfile, getTodayLog } from '@/lib/api';
 import { UserProfile, TrialPeriod, Log } from '@/types';
+import BottomNav from '@/components/BottomNav';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -367,6 +368,7 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+      <BottomNav />
     </div>
   );
 } 

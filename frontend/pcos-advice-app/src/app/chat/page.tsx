@@ -6,6 +6,7 @@ import { fetchChatHistoryAndSend } from "@/lib/api";
 import { auth } from "@/lib/auth";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import BottomNav from '@/components/BottomNav';
 
 const QUICK_QUESTIONS = [
   "Why am I so tired?",
@@ -151,6 +152,7 @@ export default function ChatPage() {
           </button>
         </form>
       </div>
+      <BottomNav />
     </div>
   );
 } 
