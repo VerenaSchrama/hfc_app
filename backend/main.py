@@ -34,7 +34,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://hfc-app.vercel.app",
-        "https://hfc-eps9ieyj6-verenaschramas-projects.vercel.app"
+        "https://hfc-eps9ieyj6-verenaschramas-projects.vercel.app",
+        "https://hfc-in87hwgo7-verenaschramas-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
