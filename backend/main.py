@@ -53,6 +53,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 # Load strategies from the correct CSV
 STRATEGIES_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'strategies.csv')
 strategies_df = pd.read_csv(STRATEGIES_FILE_PATH, sep=';')
+print("[DEBUG] Loaded strategies.csv shape:", strategies_df.shape)
+print("[DEBUG] Loaded strategies.csv columns:", strategies_df.columns)
+print("[DEBUG] First row of strategies.csv:", strategies_df.head(1))
 strategies_df.fillna('', inplace=True)
 
 # Dependency to get DB session
@@ -117,13 +120,13 @@ def sync_to_async(f):
 
 @app.post("/api/v1/strategies")
 async def strategies(intake_data: IntakeData):
-    #Receives user intake data and returns the top 3 recommended strategies with full details.
-  
+    print("[DEBUG] Received intake data:", intake_data.dict())
     # 1. Get the list of recommended strategy metadata from the RAG pipeline
     recommended_metadata = get_strategies(intake_data.dict())
-    
+    print("[DEBUG] Recommended metadata:", recommended_metadata)
     # 2. Extract just the names of the strategies
     recommended_names = [meta['strategy_name'] for meta in recommended_metadata]
+    print("[DEBUG] Recommended names:", recommended_names)
     
     # 3. Filter the main DataFrame to get the full details for those strategies
     full_recommendations = strategies_df[strategies_df['Strategie naam'].isin(recommended_names)]
