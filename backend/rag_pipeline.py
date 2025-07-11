@@ -92,12 +92,17 @@ def generate_advice(user_input: dict) -> dict:
     Generate advice using the conversational chatbot with memory.
     This is the original function for the chat interface.
     """
-    query = build_question(user_input)
+    # Always include user_profile in the system prompt
+    user_profile = user_input.get('user_profile', '')
+    query = user_input.get('question', '')
 
     prompt_template = PromptTemplate(
-        input_variables=["context", "question"],
+        input_variables=["context", "question", "user_profile"],
         template="""
 You are a cycle-aware nutrition assistant based on holistic and scientific insights.
+
+You have access to the following up-to-date user profile:
+{user_profile}
 
 Always answer user questions helpfully and always provide answers in a warm, empowering tone and information dense way.
 
@@ -134,7 +139,7 @@ Question:
         output_key="answer"
     )
 
-    result = qa_chain({"question": query})
+    result = qa_chain({"question": query, "user_profile": user_profile})
 
     return {
         "answer": result["answer"],

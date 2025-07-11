@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { getTrialPeriods, getUserProfile } from '@/lib/api';
 import { TrialPeriod, UserProfile } from '@/types';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/auth';
 
 interface StrategyDetails {
   'Strategie naam': string;
@@ -15,11 +17,18 @@ interface StrategyDetails {
 }
 
 export default function TodayPage() {
+  const router = useRouter();
   const [strategy, setStrategy] = useState<StrategyDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
   const [currentDay, setCurrentDay] = useState(0);
+
+  useEffect(() => {
+    if (!auth.isLoggedIn()) {
+      router.push('/login');
+    }
+  }, [router]);
 
   useEffect(() => {
     const fetchProfileAndData = async () => {

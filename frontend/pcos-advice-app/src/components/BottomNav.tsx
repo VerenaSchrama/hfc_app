@@ -1,8 +1,10 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { auth } from '@/lib/auth';
 
 export default function BottomNav() {
+  if (typeof window !== 'undefined' && !auth.isLoggedIn()) return null;
   const pathname = usePathname();
   const navItems = [
     { href: '/profile', label: 'Profile', icon: '👤' },

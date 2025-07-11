@@ -232,31 +232,57 @@ async def set_strategy(request: Request, db: Session = Depends(get_db), data: di
 @app.post('/api/v1/chat')
 async def chat(request: Request, data: ChatRequest, db: Session = Depends(get_db)):
     user = await get_current_user(request, db)
-    # 1. Retrieve intake data from user row
-    intake_data = {
-        'cycle': user.current_strategy,  # or other fields if available
-        # Add more fields as needed from user/intake
-    }
-    # 2. Retrieve chat history
+    # 1. Retrieve symptoms
+    symptoms = [s.symptom for s in db.query(TrackedSymptom).filter_by(user_id=user.id).order_by(TrackedSymptom.order).all()]
+    # 2. Retrieve all logs
+    logs = db.query(DailyLog).filter_by(user_id=user.id).order_by(DailyLog.date).all()
+    logs_summary = []
+    for log in logs:
+        logs_summary.append({
+            'date': log.date.isoformat(),
+            'applied_strategy': log.applied_strategy,
+            'energy': log.energy,
+            'mood': log.mood,
+            'symptom_scores': log.symptom_scores,
+            'extra_symptoms': log.extra_symptoms,
+            'extra_notes': log.extra_notes
+        })
+    # 3. Retrieve current strategy details
+    strategy_details = None
+    if user.current_strategy:
+        details = strategies_df[strategies_df['Strategie naam'] == user.current_strategy]
+        if not details.empty:
+            strategy_details = details.to_dict(orient='records')[0]
+    # 4. Build user profile context
+    user_profile_context = f"""
+User Profile:
+- Email: {user.email}
+- Symptoms: {', '.join(symptoms) if symptoms else 'None'}
+- Goals: {getattr(user, 'goals', 'None')}
+- Current Strategy: {user.current_strategy or 'None'}
+- Strategy Details: {strategy_details if strategy_details else 'None'}
+- Progress/Logs: {logs_summary if logs_summary else 'None'}
+"""
+    # 5. Retrieve chat history
     chat_history = db.query(ChatMessage).filter(ChatMessage.user_id == user.id).order_by(ChatMessage.timestamp).all()
     history = [(msg.sender, msg.text) for msg in chat_history]
-    # 3. Append new user message
+    # 6. Append new user message
     user_msg = ChatMessage(user_id=user.id, sender='user', text=data.question, timestamp=datetime.utcnow())
     db.add(user_msg)
     db.commit()
-    # 4. Call RAG LLM with intake_data, chat history, and question
+    # 7. Call RAG LLM with user profile context, chat history, and question
     rag_input = {
-        **intake_data,
+        'user_profile': user_profile_context,
         'chat_history': history,
         'question': data.question
     }
     result = generate_advice(rag_input)
     answer = result['answer'] if isinstance(result, dict) else result
-    # 5. Store bot response
+    # 8. Store bot response
     bot_msg = ChatMessage(user_id=user.id, sender='bot', text=answer, timestamp=datetime.utcnow())
     db.add(bot_msg)
     db.commit()
-    # 6. Return updated chat history
+    # 9. Return updated chat history
     updated_history = db.query(ChatMessage).filter(ChatMessage.user_id == user.id).order_by(ChatMessage.timestamp).all()
     return {'history': [{'sender': m.sender, 'text': m.text, 'timestamp': m.timestamp.isoformat()} for m in updated_history]}
 

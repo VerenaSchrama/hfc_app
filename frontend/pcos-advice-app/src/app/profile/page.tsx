@@ -285,6 +285,13 @@ export default function ProfilePage() {
               <div className="text-sm text-gray-600">Mood</div>
             </div>
           </div>
+          <div className="flex justify-center mt-6">
+            <Link href="/track">
+              <button className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-sm">
+                Add Today's Log
+              </button>
+            </Link>
+          </div>
         </div>
 
         {/* Action Buttons */}
