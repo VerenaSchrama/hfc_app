@@ -52,6 +52,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 
 # Load strategies from the correct CSV
 STRATEGIES_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'strategies.csv')
+print("[DEBUG] Absolute path to strategies.csv:", os.path.abspath(STRATEGIES_FILE_PATH))
+print("[DEBUG] strategies.csv exists:", os.path.exists(STRATEGIES_FILE_PATH))
 strategies_df = pd.read_csv(STRATEGIES_FILE_PATH, sep=';')
 print("[DEBUG] Loaded strategies.csv shape:", strategies_df.shape)
 print("[DEBUG] Loaded strategies.csv columns:", strategies_df.columns)
