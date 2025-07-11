@@ -10,7 +10,7 @@ export default function HomePage() {
           <Image src="/Image/HFClogo.png" alt="HerFoodCode Logo" width={80} height={80} className="mx-auto" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">HerFoodCode</h1>
-        <p className="text-md text-olive-700 font-medium mb-6 text-center">Your Hormone-Aware Food Companion</p>
+        <p className="text-md text-olive-700 font-medium mb-6 text-center">Decode which foods work for you.</p>
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 text-center text-gray-700">
           Decode your symptoms, understand your rhythms, and discover the foods that truly support your unique body.
         </div>
