@@ -129,9 +129,11 @@ async def strategies(intake_data: IntakeData):
     # 2. Extract just the names of the strategies
     recommended_names = [meta['strategy_name'] for meta in recommended_metadata]
     print("[DEBUG] Recommended names:", recommended_names)
+    print("[DEBUG] Strategie naam kolomwaarden:", strategies_df['Strategie naam'].unique())
     
     # 3. Filter the main DataFrame to get the full details for those strategies
     full_recommendations = strategies_df[strategies_df['Strategie naam'].isin(recommended_names)]
+    print("[DEBUG] Filtered DataFrame:", full_recommendations)
     
     # 4. Preserve the order returned by the retriever
     # Use .reindex() to handle cases where a strategy name might not be found in the df
