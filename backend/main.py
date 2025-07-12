@@ -30,16 +30,27 @@ async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 # CORS Middleware
+# Allow all possible Vercel production and preview URLs
+VERCEL_ALLOWED_ORIGINS = [
+    # Production
+    "https://hfc-app.vercel.app",
+    # Preview deploys (branch deploys, e.g. https://main--hfc-app.vercel.app)
+    "https://main--hfc-app.vercel.app",
+    "https://feature--hfc-app.vercel.app",
+    # Add more branch names as needed
+    # Old style preview deploys (e.g. https://hfc-app-<hash>-verenaschramas-projects.vercel.app)
+    "https://hfc-app.vercel.app",
+    "https://hfc-app-*.verenaschramas-projects.vercel.app",
+    # Add more known preview URLs if needed
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://hfc-app.vercel.app",
-        "https://hfc-eps9ieyj6-verenaschramas-projects.vercel.app",
-        "https://hfc-in87hwgo7-verenaschramas-projects.vercel.app"
-    ],
+    allow_origins=VERCEL_ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://([a-z0-9-]+--)?hfc-app\.vercel\.app|https://hfc-app-[a-z0-9]+-verenaschramas-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # Load environment variables
