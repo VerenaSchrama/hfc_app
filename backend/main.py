@@ -225,6 +225,12 @@ async def set_strategy(request: Request, db: Session = Depends(get_db), data: di
             db.add(new_trial)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f'Invalid trial period data: {str(e)}')
+    else:
+        # If no trial period provided, ensure current_strategy matches active trial period
+        active_trial = db.query(TrialPeriod).filter_by(user_id=user.id, is_active=True).first()
+        if active_trial and active_trial.strategy_name != strategy_name:
+            # Update the active trial period to match the new strategy
+            active_trial.strategy_name = strategy_name
     
     db.commit()
     return {"detail": "Strategy updated"}
@@ -431,10 +437,20 @@ async def get_profile(request: Request, db: Session = Depends(get_db)):
         details = strategies_df[strategies_df['Strategie naam'] == user.current_strategy]
         if not details.empty:
             strategy_details = details.to_dict(orient='records')[0]
+    
+    # Get active trial period for debugging
+    active_trial = db.query(TrialPeriod).filter_by(user_id=user.id, is_active=True).first()
+    
     return {
         "email": user.email,
         "current_strategy": user.current_strategy,
         "strategy_details": strategy_details,
+        "active_trial_period": {
+            "strategy_name": active_trial.strategy_name if active_trial else None,
+            "start_date": active_trial.start_date.isoformat() if active_trial else None,
+            "end_date": active_trial.end_date.isoformat() if active_trial else None,
+            "is_active": active_trial.is_active if active_trial else None
+        } if active_trial else None,
         # Add more fields as needed
     }
 
