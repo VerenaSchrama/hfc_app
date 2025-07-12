@@ -1,4 +1,5 @@
 // src/app/strategy_selection/page.tsx
+// Trigger redeploy - latest trial period fix
 'use client';
 
 import { useEffect, useState } from 'react';
