@@ -2,7 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")  # Use .env or Render env var
+# Get the original DATABASE_URL
+original_url = os.getenv("DATABASE_URL")
+
+# Convert to connection pooling URL (port 6543)
+if original_url and "supabase.co" in original_url:
+    # Replace port 5432 with 6543 for connection pooling
+    SQLALCHEMY_DATABASE_URL = original_url.replace(":5432", ":6543")
+else:
+    SQLALCHEMY_DATABASE_URL = original_url
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
