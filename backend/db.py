@@ -18,11 +18,11 @@ if original_url and "supabase.co" in original_url:
         # Replace port 5432 with 6543 (session pooler port)
         pooler_url = original_url.replace(":5432/", ":6543/")
         
-        # Add session pooler parameters
+        # Add session pooler parameters with proper format
         if "?" not in pooler_url:
-            SQLALCHEMY_DATABASE_URL = pooler_url + "?pgbouncer=true&sslmode=require&connect_timeout=10"
+            SQLALCHEMY_DATABASE_URL = pooler_url + "?pgbouncer=true&sslmode=require&connect_timeout=10&application_name=hfc_app"
         else:
-            SQLALCHEMY_DATABASE_URL = pooler_url + "&pgbouncer=true&sslmode=require&connect_timeout=10"
+            SQLALCHEMY_DATABASE_URL = pooler_url + "&pgbouncer=true&sslmode=require&connect_timeout=10&application_name=hfc_app"
         
         print(f"Using Supabase Session Pooler: {SQLALCHEMY_DATABASE_URL}")
     else:
@@ -43,8 +43,11 @@ engine = create_engine(
     # Session pooler specific settings
     pool_size=1,  # Use minimal pool size for session pooler
     max_overflow=0,  # Don't allow overflow connections
-    # Disable connection pooling at SQLAlchemy level when using pgbouncer
-    poolclass=None if "pgbouncer=true" in SQLALCHEMY_DATABASE_URL else None
+    # Use NullPool when using pgbouncer to avoid double pooling
+    poolclass=None if "pgbouncer=true" in SQLALCHEMY_DATABASE_URL else None,
+    # Additional settings for better compatibility
+    echo=False,  # Set to True for debugging
+    future=True  # Use SQLAlchemy 2.0 style
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
