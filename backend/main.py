@@ -169,31 +169,65 @@ async def advice(intake_data: IntakeData):
 
 @app.post("/api/v1/register", response_model=Token)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == user.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_pw = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
-    db_user = User(email=user.email, hashed_password=hashed_pw.decode('utf-8'))
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    # Create JWT
-    access_token = jwt.encode({
-        "sub": db_user.email,
-        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    }, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": access_token, "token_type": "bearer"}
+    try:
+        existing = db.query(User).filter(User.email == user.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        hashed_pw = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+        db_user = User(email=user.email, hashed_password=hashed_pw.decode('utf-8'))
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        # Create JWT
+        access_token = jwt.encode({
+            "sub": db_user.email,
+            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        }, SECRET_KEY, algorithm=ALGORITHM)
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        print(f"Registration error: {str(e)}")
+        # Check if it's a database connection error
+        if "Network is unreachable" in str(e) or "connection" in str(e).lower():
+            raise HTTPException(
+                status_code=503, 
+                detail="Database service temporarily unavailable. Please try again later."
+            )
+        # Re-raise other HTTP exceptions as-is
+        if isinstance(e, HTTPException):
+            raise e
+        # For other errors, return a generic error
+        raise HTTPException(
+            status_code=500, 
+            detail="An error occurred during registration. Please try again."
+        )
 
 @app.post("/api/v1/login", response_model=Token)
 def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user.email).first()
-    if not db_user or not bcrypt.checkpw(user.password.encode('utf-8'), db_user.hashed_password.encode('utf-8')):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    access_token = jwt.encode({
-        "sub": db_user.email,
-        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    }, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": access_token, "token_type": "bearer"}
+    try:
+        db_user = db.query(User).filter(User.email == user.email).first()
+        if not db_user or not bcrypt.checkpw(user.password.encode('utf-8'), db_user.hashed_password.encode('utf-8')):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        access_token = jwt.encode({
+            "sub": db_user.email,
+            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        }, SECRET_KEY, algorithm=ALGORITHM)
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        # Check if it's a database connection error
+        if "Network is unreachable" in str(e) or "connection" in str(e).lower():
+            raise HTTPException(
+                status_code=503, 
+                detail="Database service temporarily unavailable. Please try again later."
+            )
+        # Re-raise other HTTP exceptions as-is
+        if isinstance(e, HTTPException):
+            raise e
+        # For other errors, return a generic error
+        raise HTTPException(
+            status_code=500, 
+            detail="An error occurred during login. Please try again."
+        )
 
 @app.delete('/api/v1/delete_account')
 async def delete_account(request: Request, db: Session = Depends(get_db)):
