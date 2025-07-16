@@ -22,7 +22,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-create_db_and_tables()
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database tables on startup"""
+    try:
+        create_db_and_tables()
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Warning: Could not create database tables: {e}")
+        print("Application will continue without database initialization")
 
 @app.get("/health")
 async def health_check():
