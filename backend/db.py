@@ -6,25 +6,17 @@ from sqlalchemy.orm import sessionmaker
 # Get the original DATABASE_URL
 original_url = os.getenv("DATABASE_URL")
 
-# Use Supabase Session Pooler for IPv4 compatibility
+# Try direct connection with different SSL settings for IPv4 compatibility
 if original_url and "supabase.co" in original_url:
-    # Convert direct connection to session pooler connection
-    # Replace the port and add pooler-specific parameters
+    # Try direct connection with different SSL modes
     if "postgresql://" in original_url:
-        # Extract components from the original URL
-        # Format: postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
-        # Convert to: postgresql://postgres:[password]@db.[project-ref].supabase.co:6543/postgres?pgbouncer=true
-        
-        # Replace port 5432 with 6543 (session pooler port)
-        pooler_url = original_url.replace(":5432/", ":6543/")
-        
-        # Add session pooler parameters with proper format
-        if "?" not in pooler_url:
-            SQLALCHEMY_DATABASE_URL = pooler_url + "?pgbouncer=true&sslmode=require&connect_timeout=10&application_name=hfc_app"
+        # Try with sslmode=prefer instead of require
+        if "?" not in original_url:
+            SQLALCHEMY_DATABASE_URL = original_url + "?sslmode=prefer&connect_timeout=10&application_name=hfc_app"
         else:
-            SQLALCHEMY_DATABASE_URL = pooler_url + "&pgbouncer=true&sslmode=require&connect_timeout=10&application_name=hfc_app"
+            SQLALCHEMY_DATABASE_URL = original_url + "&sslmode=prefer&connect_timeout=10&application_name=hfc_app"
         
-        print(f"Using Supabase Session Pooler: {SQLALCHEMY_DATABASE_URL}")
+        print(f"Using direct connection with sslmode=prefer: {SQLALCHEMY_DATABASE_URL}")
     else:
         # Fallback to original URL with SSL
         if "?" not in original_url:
@@ -40,11 +32,9 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_recycle=300,
     pool_timeout=20,
-    # Session pooler specific settings
-    pool_size=1,  # Use minimal pool size for session pooler
-    max_overflow=0,  # Don't allow overflow connections
-    # Use NullPool when using pgbouncer to avoid double pooling
-    poolclass=None if "pgbouncer=true" in SQLALCHEMY_DATABASE_URL else None,
+    # Standard connection pooling settings
+    pool_size=5,
+    max_overflow=10,
     # Additional settings for better compatibility
     echo=False,  # Set to True for debugging
     future=True  # Use SQLAlchemy 2.0 style
