@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, DateT
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from db import engine
+from db import engine, supabase, supabase_connected
 
 Base = declarative_base()
 
@@ -55,4 +55,17 @@ class TrialPeriod(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 def create_db_and_tables():
-    Base.metadata.create_all(bind=engine) 
+    """Create database tables - SQLite fallback only"""
+    if engine:
+        # Only create SQLAlchemy tables for SQLite fallback
+        Base.metadata.create_all(bind=engine)
+        print("SQLite tables created successfully")
+    else:
+        # For Supabase, tables are managed through Supabase dashboard
+        print("Using Supabase - tables managed through Supabase dashboard")
+        print("Make sure the following tables exist in your Supabase project:")
+        print("- users")
+        print("- chat_messages") 
+        print("- tracked_symptoms")
+        print("- daily_logs")
+        print("- trial_periods") 
