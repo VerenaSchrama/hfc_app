@@ -54,6 +54,35 @@ async def health_check():
     """Health check endpoint for container orchestration"""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
+@app.get("/api/v1/test-db")
+async def test_database():
+    """Test database tables and connections"""
+    try:
+        from db import SupabaseDB, supabase
+        
+        # Test each table
+        tables = ['users', 'chat_messages', 'tracked_symptoms', 'daily_logs', 'trial_periods']
+        results = {}
+        
+        for table in tables:
+            try:
+                response = supabase.table(table).select('id').limit(1).execute()
+                results[table] = {"exists": True, "count": len(response.data) if response.data else 0}
+            except Exception as e:
+                results[table] = {"exists": False, "error": str(e)}
+        
+        return {
+            "status": "database_test",
+            "tables": results,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "database_test_failed",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 # CORS Middleware
 # Allow all possible Vercel production and preview URLs using regex
 # - https://hfc-app.vercel.app
@@ -282,36 +311,53 @@ async def set_strategy(request: Request, data: dict = Body(...)):
 
 @app.post('/api/v1/chat')
 async def chat(request: Request, data: ChatRequest):
-    user = await get_current_user(request)
-    from db import SupabaseDB
-    
-    # 1. Retrieve symptoms
-    symptoms = SupabaseDB.get_user_symptoms(user['id'])
-    symptom_names = [s['symptom'] for s in symptoms]
-    
-    # 2. Retrieve all logs
-    logs = SupabaseDB.get_user_logs(user['id'])
-    logs_summary = []
-    for log in logs:
-        logs_summary.append({
-            'date': log['date'],
-            'applied_strategy': log['applied_strategy'],
-            'energy': log['energy'],
-            'mood': log['mood'],
-            'symptom_scores': log['symptom_scores'],
-            'extra_symptoms': log['extra_symptoms'],
-            'extra_notes': log['extra_notes']
-        })
-    
-    # 3. Retrieve current strategy details
-    strategy_details = None
-    if user.get('current_strategy'):
-        details = strategies_df[strategies_df['Strategie naam'] == user['current_strategy']]
-        if not details.empty:
-            strategy_details = details.to_dict(orient='records')[0]
-    
-    # 4. Build user profile context
-    user_profile_context = f"""
+    try:
+        user = await get_current_user(request)
+        from db import SupabaseDB
+        
+        print(f"[DEBUG] Chat request from user: {user['email']}")
+        
+        # 1. Retrieve symptoms
+        try:
+            symptoms = SupabaseDB.get_user_symptoms(user['id'])
+            symptom_names = [s['symptom'] for s in symptoms]
+            print(f"[DEBUG] Retrieved {len(symptom_names)} symptoms")
+        except Exception as e:
+            print(f"[ERROR] Failed to get symptoms: {e}")
+            symptom_names = []
+        
+        # 2. Retrieve all logs
+        try:
+            logs = SupabaseDB.get_user_logs(user['id'])
+            logs_summary = []
+            for log in logs:
+                logs_summary.append({
+                    'date': log['date'],
+                    'applied_strategy': log['applied_strategy'],
+                    'energy': log['energy'],
+                    'mood': log['mood'],
+                    'symptom_scores': log['symptom_scores'],
+                    'extra_symptoms': log['extra_symptoms'],
+                    'extra_notes': log['extra_notes']
+                })
+            print(f"[DEBUG] Retrieved {len(logs_summary)} logs")
+        except Exception as e:
+            print(f"[ERROR] Failed to get logs: {e}")
+            logs_summary = []
+        
+        # 3. Retrieve current strategy details
+        strategy_details = None
+        if user.get('current_strategy'):
+            try:
+                details = strategies_df[strategies_df['Strategie naam'] == user['current_strategy']]
+                if not details.empty:
+                    strategy_details = details.to_dict(orient='records')[0]
+                print(f"[DEBUG] Retrieved strategy details: {strategy_details is not None}")
+            except Exception as e:
+                print(f"[ERROR] Failed to get strategy details: {e}")
+        
+        # 4. Build user profile context
+        user_profile_context = f"""
 User Profile:
 - Email: {user['email']}
 - Symptoms: {', '.join(symptom_names) if symptom_names else 'None'}
@@ -320,29 +366,58 @@ User Profile:
 - Strategy Details: {strategy_details if strategy_details else 'None'}
 - Progress/Logs: {logs_summary if logs_summary else 'None'}
 """
+        
+        # 5. Retrieve chat history
+        try:
+            chat_history = SupabaseDB.get_chat_messages(user['id'])
+            history = [(msg['sender'], msg['text']) for msg in chat_history]
+            print(f"[DEBUG] Retrieved {len(history)} chat messages")
+        except Exception as e:
+            print(f"[ERROR] Failed to get chat history: {e}")
+            history = []
+        
+        # 6. Append new user message
+        try:
+            SupabaseDB.create_chat_message(user['id'], 'user', data.question)
+            print(f"[DEBUG] Created user message")
+        except Exception as e:
+            print(f"[ERROR] Failed to create user message: {e}")
+        
+        # 7. Call RAG LLM with user profile context, chat history, and question
+        try:
+            rag_input = {
+                'user_profile': user_profile_context,
+                'chat_history': history,
+                'question': data.question
+            }
+            result = generate_advice(rag_input)
+            answer = result['answer'] if isinstance(result, dict) else result
+            print(f"[DEBUG] Generated RAG response: {len(answer)} characters")
+        except Exception as e:
+            print(f"[ERROR] Failed to generate RAG response: {e}")
+            answer = "Sorry, I'm having trouble processing your request right now. Please try again later."
+        
+        # 8. Store bot response
+        try:
+            SupabaseDB.create_chat_message(user['id'], 'bot', answer)
+            print(f"[DEBUG] Created bot message")
+        except Exception as e:
+            print(f"[ERROR] Failed to create bot message: {e}")
+        
+        # 9. Return updated chat history
+        try:
+            updated_history = SupabaseDB.get_chat_messages(user['id'])
+            return {'history': [{'sender': m['sender'], 'text': m['text'], 'timestamp': m['timestamp']} for m in updated_history]}
+        except Exception as e:
+            print(f"[ERROR] Failed to get updated chat history: {e}")
+            return {'history': [{'sender': 'user', 'text': data.question, 'timestamp': datetime.utcnow().isoformat()},
+                               {'sender': 'bot', 'text': answer, 'timestamp': datetime.utcnow().isoformat()}]}
     
-    # 5. Retrieve chat history
-    chat_history = SupabaseDB.get_chat_messages(user['id'])
-    history = [(msg['sender'], msg['text']) for msg in chat_history]
-    
-    # 6. Append new user message
-    SupabaseDB.create_chat_message(user['id'], 'user', data.question)
-    
-    # 7. Call RAG LLM with user profile context, chat history, and question
-    rag_input = {
-        'user_profile': user_profile_context,
-        'chat_history': history,
-        'question': data.question
-    }
-    result = generate_advice(rag_input)
-    answer = result['answer'] if isinstance(result, dict) else result
-    
-    # 8. Store bot response
-    SupabaseDB.create_chat_message(user['id'], 'bot', answer)
-    
-    # 9. Return updated chat history
-    updated_history = SupabaseDB.get_chat_messages(user['id'])
-    return {'history': [{'sender': m['sender'], 'text': m['text'], 'timestamp': m['timestamp']} for m in updated_history]}
+    except Exception as e:
+        print(f"[ERROR] Chat endpoint failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
 
 # --- Trial Period Endpoints ---
 @app.get('/api/v1/trial_periods')
