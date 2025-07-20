@@ -25,12 +25,30 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables on startup"""
+    print("🚀 Starting HerFoodCode API...")
+    
+    # Test database connection
+    from db import test_supabase_connection, supabase_connected
+    print(f"📊 Database connection status: {'✅ Supabase' if supabase_connected else '⚠️ SQLite fallback'}")
+    
     try:
         create_db_and_tables()
-        print("Database tables created successfully")
+        print("✅ Database initialization completed")
     except Exception as e:
-        print(f"Warning: Could not create database tables: {e}")
+        print(f"⚠️ Warning: Could not create database tables: {e}")
         print("Application will continue without database initialization")
+    
+    print("🎉 HerFoodCode API startup complete!")
+
+@app.get("/")
+async def root():
+    """Root endpoint for health checks and basic info"""
+    return {
+        "message": "HerFoodCode API is running",
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "1.0.0"
+    }
 
 @app.get("/health")
 async def health_check():
