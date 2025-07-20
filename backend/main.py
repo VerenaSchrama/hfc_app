@@ -391,10 +391,13 @@ User Profile:
                 'question': data.question
             }
             result = generate_advice(rag_input)
-            answer = result['answer'] if isinstance(result, dict) else result
+            # generate_advice always returns a dict with 'answer' key
+            answer = result['answer']
             print(f"[DEBUG] Generated RAG response: {len(answer)} characters")
         except Exception as e:
             print(f"[ERROR] Failed to generate RAG response: {e}")
+            import traceback
+            traceback.print_exc()
             answer = "Sorry, I'm having trouble processing your request right now. Please try again later."
         
         # 8. Store bot response

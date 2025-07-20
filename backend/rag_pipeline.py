@@ -5,6 +5,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from langchain.schema.messages import HumanMessage, AIMessage
 import os
 from dotenv import load_dotenv
 from langchain.schema.runnable import RunnablePassthrough
@@ -114,8 +115,17 @@ def generate_advice(user_input: dict) -> dict:
     # Always include user_profile in the system prompt
     user_profile = user_input.get('user_profile', '')
     query = user_input.get('question', '')
+    chat_history = user_input.get('chat_history', [])
 
     try:
+        # Convert chat history to LangChain message format
+        messages = []
+        for sender, text in chat_history:
+            if sender == 'user':
+                messages.append(HumanMessage(content=text))
+            elif sender == 'bot':
+                messages.append(AIMessage(content=text))
+
         prompt_template = PromptTemplate(
             input_variables=["context", "question", "user_profile"],
             template="""
@@ -144,11 +154,19 @@ Question:
 """
         )
 
+        # Create memory with existing chat history
         memory = ConversationBufferMemory(
             memory_key="chat_history",
             return_messages=True,
             output_key="answer"
         )
+        
+        # Load existing chat history into memory
+        for message in messages:
+            if isinstance(message, HumanMessage):
+                memory.chat_memory.add_user_message(message.content)
+            elif isinstance(message, AIMessage):
+                memory.chat_memory.add_ai_message(message.content)
 
         qa_chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
@@ -173,6 +191,8 @@ Question:
         }
     except Exception as e:
         print(f"[RAG] Error in generate_advice: {e}")
+        import traceback
+        traceback.print_exc()
         return {
             "answer": "I'm sorry, but I encountered an error while processing your request. Please try again later.",
             "sources": []
@@ -189,24 +209,38 @@ RAG_PROMPT_TEMPLATE = """
 """
 rag_prompt = ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
 
-rag_chain = (
-    {"context": main_retriever | format_docs, "question": RunnablePassthrough()}
-    | rag_prompt
-    | llm
-    | StrOutputParser()
-)
+# Initialize rag_chain only if main_retriever exists
+rag_chain = None
+if main_retriever is not None:
+    rag_chain = (
+        {"context": main_retriever | format_docs, "question": RunnablePassthrough()}
+        | rag_prompt
+        | llm
+        | StrOutputParser()
+    )
 
 def get_advice(question: str) -> str:
     """
     Get general nutritional advice from the RAG pipeline (no conversation memory).
     """
-    return rag_chain.invoke(question)
+    if rag_chain is None:
+        return "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."
+    try:
+        return rag_chain.invoke(question)
+    except Exception as e:
+        print(f"[RAG] Error in get_advice: {e}")
+        return "I'm sorry, but I encountered an error while processing your request. Please try again later."
 
 
 def get_strategies(user_input: dict) -> list:
     """
     Get 3 personalized strategies based on user input, using all intakeData fields and optional notes.
     """
+    # Check if strategy retriever is available
+    if strategy_retriever is None:
+        print("[RAG] Strategy retriever not loaded, returning empty list")
+        return []
+    
     symptoms = ensure_list(user_input.get('symptoms'))
     symptoms_note = user_input.get('symptoms_note', '')
     goals = ensure_list(user_input.get('goals'))
@@ -234,9 +268,13 @@ def get_strategies(user_input: dict) -> list:
 
     print(f"[RAG] Strategy selection query: {query}")
 
-    docs = strategy_retriever.invoke(query)
-    strategies = [doc.metadata for doc in docs]
-    return strategies
+    try:
+        docs = strategy_retriever.invoke(query)
+        strategies = [doc.metadata for doc in docs]
+        return strategies
+    except Exception as e:
+        print(f"[RAG] Error in get_strategies: {e}")
+        return []
 
 
 def get_recommendations(intake_data, df, top_k=3):
@@ -246,8 +284,7 @@ def get_recommendations(intake_data, df, top_k=3):
     goals = ", ".join(user_data_dict.get('goals', []))
     query_text = f"User is experiencing {symptoms} and has goals to {goals}."
 
-    # Create embeddings for the user query
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    # Use the global embeddings instance instead of creating a new one
     query_embedding = embeddings.embed_query(query_text)
 
     # Prepare the strategy embeddings from the DataFrame
