@@ -1,9 +1,9 @@
 # python rag_pipeline.py
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 import os
 from dotenv import load_dotenv
@@ -25,23 +25,34 @@ llm = ChatOpenAI(model="gpt-4", temperature=0, api_key=os.getenv("OPENAI_API_KEY
 embeddings = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Load vector stores
+strategy_vectorstore = None
+strategy_retriever = None
+main_vectorstore = None
+main_retriever = None
+
 try:
+    print(f"[RAG] Loading strategy vectorstore from: {STRATEGY_VECTORSTORE_PATH}")
     strategy_vectorstore = Chroma(
         persist_directory=STRATEGY_VECTORSTORE_PATH,
         embedding_function=embeddings,
         collection_name="strategies"
     )
     strategy_retriever = strategy_vectorstore.as_retriever(search_kwargs={"k": 3})
+    print("[RAG] Strategy vectorstore loaded successfully")
 
+    print(f"[RAG] Loading main vectorstore from: {MAIN_VECTORSTORE_PATH}")
     main_vectorstore = Chroma(
         persist_directory=MAIN_VECTORSTORE_PATH,
         embedding_function=embeddings
     )
     main_retriever = main_vectorstore.as_retriever()
+    print("[RAG] Main vectorstore loaded successfully")
 
 except Exception as e:
-    print(f"Error loading vector stores: {e}")
-    exit()
+    print(f"[RAG] Error loading vector stores: {e}")
+    print(f"[RAG] Strategy path exists: {os.path.exists(STRATEGY_VECTORSTORE_PATH)}")
+    print(f"[RAG] Main path exists: {os.path.exists(MAIN_VECTORSTORE_PATH)}")
+    # Don't exit, let the app continue with None retrievers
 
 
 def format_docs(docs):
@@ -92,13 +103,22 @@ def generate_advice(user_input: dict) -> dict:
     Generate advice using the conversational chatbot with memory.
     This is the original function for the chat interface.
     """
+    # Check if vectorstore is loaded
+    if main_retriever is None:
+        print("[RAG] Vectorstore not loaded, returning fallback response")
+        return {
+            "answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later or contact support if the problem persists.",
+            "sources": []
+        }
+    
     # Always include user_profile in the system prompt
     user_profile = user_input.get('user_profile', '')
     query = user_input.get('question', '')
 
-    prompt_template = PromptTemplate(
-        input_variables=["context", "question", "user_profile"],
-        template="""
+    try:
+        prompt_template = PromptTemplate(
+            input_variables=["context", "question", "user_profile"],
+            template="""
 You are a cycle-aware nutrition assistant based on holistic and scientific insights.
 
 You have access to the following up-to-date user profile:
@@ -122,35 +142,41 @@ Context:
 Question:
 {question}
 """
-    )
+        )
 
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True,
-        output_key="answer"
-    )
+        memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            return_messages=True,
+            output_key="answer"
+        )
 
-    qa_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=main_retriever,
-        memory=memory,
-        return_source_documents=True,
-        combine_docs_chain_kwargs={"prompt": prompt_template},
-        output_key="answer"
-    )
+        qa_chain = ConversationalRetrievalChain.from_llm(
+            llm=llm,
+            retriever=main_retriever,
+            memory=memory,
+            return_source_documents=True,
+            combine_docs_chain_kwargs={"prompt": prompt_template},
+            output_key="answer"
+        )
 
-    result = qa_chain({"question": query, "user_profile": user_profile})
+        result = qa_chain({"question": query, "user_profile": user_profile})
 
-    return {
-        "answer": result["answer"],
-        "sources": [
-            {
-                "content": doc.page_content,
-                "metadata": doc.metadata,
-            }
-            for doc in result.get("source_documents", [])
-        ]
-    }
+        return {
+            "answer": result["answer"],
+            "sources": [
+                {
+                    "content": doc.page_content,
+                    "metadata": doc.metadata,
+                }
+                for doc in result.get("source_documents", [])
+            ]
+        }
+    except Exception as e:
+        print(f"[RAG] Error in generate_advice: {e}")
+        return {
+            "answer": "I'm sorry, but I encountered an error while processing your request. Please try again later.",
+            "sources": []
+        }
 
 
 # RAG Chain for Simple Advice (no conversation memory)
