@@ -1,22 +1,29 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from supabase import create_client, Client
 
-# Force IPv4 for all PostgreSQL connections
-os.environ['PGHOST'] = 'db.qyydgmcfrfezdcejqxgo.supabase.co'
-os.environ['PGSSLMODE'] = 'prefer'
-os.environ['PGTIMEOUT'] = '10'
+# Load environment variables from .env file
+load_dotenv()
 
-# Get the original DATABASE_URL
+# Get Supabase environment variables
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+# Create Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+# Get the original DATABASE_URL for fallback
 original_url = os.getenv("DATABASE_URL")
 
 def create_database_url():
-    """Create a database URL that forces IPv4 connection to Supabase"""
+    """Create a database URL using Supabase connection string"""
     if not original_url or "supabase.co" not in original_url:
         return original_url
     
-    # Parse the Supabase URL manually
+    # Parse the Supabase URL
     # Format: postgresql://postgres:password@db.xxx.supabase.co:5432/postgres
     if "postgresql://" not in original_url:
         return original_url
@@ -44,12 +51,12 @@ def create_database_url():
         host = host_port
         port = "5432"
     
-    # Create new URL with IPv4 forcing parameters
+    # Create new URL with connection parameters
     new_url = f"postgresql://{credentials}@{host}:{port}/{database}"
     
     # Add connection parameters
     params = [
-        "sslmode=prefer",
+        "sslmode=require",
         "connect_timeout=10",
         "application_name=hfc_app",
         "client_encoding=utf8"
@@ -61,66 +68,28 @@ def create_database_url():
     else:
         new_url += "?" + "&".join(params)
     
-    print(f"Using IPv4-forced Supabase connection: {new_url}")
+    print(f"Using Supabase connection: {new_url}")
     return new_url
 
-def test_database_connection():
-    """Test if we can connect to the database"""
+def test_supabase_connection():
+    """Test Supabase client connection"""
     try:
-        import psycopg2
+        print("Testing Supabase client connection...")
         
-        # Parse connection details
-        db_url = os.getenv("DATABASE_URL")
-        if not db_url or "supabase.co" not in db_url:
-            return False
-            
-        url_parts = db_url.replace("postgresql://", "").split("@")
-        if len(url_parts) != 2:
-            return False
-            
-        credentials = url_parts[0]
-        host_db = url_parts[1]
-        
-        user, password = credentials.split(":")
-        host_port, database = host_db.split("/")
-        
-        if ":" in host_port:
-            host, port = host_port.split(":")
-        else:
-            host = host_port
-            port = "5432"
-        
-        print(f"Testing direct connection to: {host}:{port}/{database}")
-        
-        # Try direct connection
-        conn = psycopg2.connect(
-            host=host,
-            port=port,
-            database=database,
-            user=user,
-            password=password,
-            sslmode='prefer',
-            connect_timeout=10
-        )
-        
-        cursor = conn.cursor()
-        cursor.execute("SELECT version();")
-        version = cursor.fetchone()
-        print(f"✅ Direct connection successful! PostgreSQL version: {version[0]}")
-        
-        cursor.close()
-        conn.close()
+        # Test the Supabase client
+        response = supabase.table('users').select('*').limit(1).execute()
+        print("✅ Supabase client connection successful!")
         return True
         
     except Exception as e:
-        print(f"❌ Direct connection failed: {e}")
+        print(f"❌ Supabase client connection failed: {e}")
         return False
 
-# Test connection first
-connection_success = test_database_connection()
+# Test Supabase connection
+supabase_connection_success = test_supabase_connection()
 
 # Create the database URL
-if connection_success:
+if supabase_connection_success:
     SQLALCHEMY_DATABASE_URL = create_database_url()
     print("✅ Using Supabase database")
 else:
@@ -138,7 +107,7 @@ if "sqlite" in SQLALCHEMY_DATABASE_URL:
         echo=False
     )
 else:
-    # PostgreSQL configuration with explicit IPv4 forcing
+    # PostgreSQL configuration
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
         pool_pre_ping=True,
@@ -147,16 +116,7 @@ else:
         pool_size=5,
         max_overflow=10,
         echo=False,
-        future=True,
-        # Force IPv4 connection parameters
-        connect_args={
-            "host": "db.qyydgmcfrfezdcejqxgo.supabase.co",
-            "port": 5432,
-            "sslmode": "prefer",
-            "connect_timeout": 10,
-            "application_name": "hfc_app",
-            "client_encoding": "utf8"
-        }
+        future=True
     )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
