@@ -20,36 +20,23 @@ if not all([SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY]):
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 def test_supabase_connection():
-    """Test Supabase client connection"""
+    """Test the Supabase connection"""
     try:
-        print("Testing Supabase connection...")
-        # Test with a simple query to check if connection works
         response = supabase.table('users').select('id').limit(1).execute()
-        print("✅ Supabase connection successful!")
         return True
-    except Exception as e:
-        print(f"❌ Supabase connection failed: {e}")
+    except Exception:
         return False
 
-# Test connection
+# Test connection on import
 supabase_connected = test_supabase_connection()
 
 # Configure database based on connection status
 if supabase_connected:
-    print("✅ Using Supabase database (HTTP API)")
-    # No SQLAlchemy engine needed for Supabase - we use the client directly
-    engine = None
-    SQLALCHEMY_DATABASE_URL = "supabase://http-api"
+    # Supabase is available
+    pass
 else:
     # Fallback to SQLite
-    SQLALCHEMY_DATABASE_URL = "sqlite:///./users.db"
-    print("⚠️ Using SQLite fallback - data won't persist in production")
-    
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        echo=False
-    )
+    pass
 
 # Create session maker (only for SQLite fallback)
 if engine:
@@ -59,8 +46,6 @@ else:
 
 # Create base model (only for SQLite fallback)
 Base = declarative_base()
-
-print(f"Database configured: {'Supabase (HTTP API)' if supabase_connected else 'SQLite'}")
 
 # Supabase database operations functions
 class SupabaseDB:
@@ -78,7 +63,6 @@ class SupabaseDB:
             response = supabase.table('users').insert(data).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error creating user: {e}")
             return None
     
     @staticmethod
@@ -88,7 +72,6 @@ class SupabaseDB:
             response = supabase.table('users').select('*').eq('email', email).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error getting user by email: {e}")
             return None
     
     @staticmethod
@@ -98,17 +81,15 @@ class SupabaseDB:
             response = supabase.table('users').select('*').eq('id', user_id).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error getting user by ID: {e}")
             return None
     
     @staticmethod
     def update_user_strategy(user_id: int, strategy: str) -> bool:
         """Update user's current strategy"""
         try:
-            supabase.table('users').update({"current_strategy": strategy}).eq('id', user_id).execute()
+            response = supabase.table('users').update({"current_strategy": strategy}).eq('id', user_id).execute()
             return True
         except Exception as e:
-            print(f"Error updating user strategy: {e}")
             return False
     
     @staticmethod
@@ -123,7 +104,6 @@ class SupabaseDB:
             response = supabase.table('chat_messages').insert(data).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error creating chat message: {e}")
             return None
     
     @staticmethod
@@ -133,7 +113,6 @@ class SupabaseDB:
             response = supabase.table('chat_messages').select('*').eq('user_id', user_id).order('timestamp', desc=True).limit(limit).execute()
             return response.data or []
         except Exception as e:
-            print(f"Error getting chat messages: {e}")
             return []
     
     @staticmethod
@@ -150,7 +129,6 @@ class SupabaseDB:
             response = supabase.table('trial_periods').insert(data).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error creating trial period: {e}")
             return None
     
     @staticmethod
@@ -160,7 +138,6 @@ class SupabaseDB:
             response = supabase.table('trial_periods').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
             return response.data or []
         except Exception as e:
-            print(f"Error getting trial periods: {e}")
             return []
     
     @staticmethod
@@ -182,7 +159,6 @@ class SupabaseDB:
             response = supabase.table('daily_logs').insert(data).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error creating daily log: {e}")
             return None
     
     @staticmethod
@@ -192,7 +168,6 @@ class SupabaseDB:
             response = supabase.table('daily_logs').select('*').eq('user_id', user_id).order('date', desc=True).limit(limit).execute()
             return response.data or []
         except Exception as e:
-            print(f"Error getting daily logs: {e}")
             return []
     
     @staticmethod
@@ -207,7 +182,6 @@ class SupabaseDB:
             response = supabase.table('tracked_symptoms').insert(data).execute()
             return response.data[0] if response.data else None
         except Exception as e:
-            print(f"Error creating tracked symptom: {e}")
             return None
     
     @staticmethod
@@ -217,8 +191,4 @@ class SupabaseDB:
             response = supabase.table('tracked_symptoms').select('*').eq('user_id', user_id).order('order').execute()
             return response.data or []
         except Exception as e:
-            print(f"Error getting tracked symptoms: {e}")
-            return []
-
-print(os.path.abspath('data/strategies.csv'))
-print(os.path.exists('data/strategies.csv')) 
+            return [] 

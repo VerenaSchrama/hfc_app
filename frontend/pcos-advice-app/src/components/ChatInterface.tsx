@@ -55,11 +55,8 @@ export default function ChatInterface() {
       setIsLoading(true);
       localStorage.setItem('intakeData', JSON.stringify(currentInput));
       // Log voor navigatie
-      console.log('Navigating to /strategy_selection with intakeData:', localStorage.getItem('intakeData'));
-      setTimeout(() => {
-        router.push('/strategy_selection');
-        setIsLoading(false);
-      }, 1000);
+      router.push('/strategy_selection');
+      setIsLoading(false);
     }
   };
 
@@ -96,7 +93,6 @@ export default function ChatInterface() {
       [currentQuestion.key]: cleanedSelections
     };
     // Log en sla direct op
-    console.log('Saving intakeData to localStorage (multi-select):', updatedInput);
     localStorage.setItem('intakeData', JSON.stringify(updatedInput));
     setIntakeData(updatedInput);
   
@@ -120,7 +116,6 @@ export default function ChatInterface() {
       [currentQuestion.key]: text
     };
     // Log en sla direct op
-    console.log('Saving intakeData to localStorage (text):', updatedInput);
     localStorage.setItem('intakeData', JSON.stringify(updatedInput));
     setIntakeData(updatedInput);
     proceedToNextStep(updatedInput);
@@ -142,11 +137,9 @@ export default function ChatInterface() {
       ...(showFreeText && freeTextValue ? { [noteKey]: freeTextValue } : {}),
     };
     // Log en sla direct op
-    console.log('Saving intakeData to localStorage (free text):', updatedInput);
     localStorage.setItem('intakeData', JSON.stringify(updatedInput));
     setIntakeData(updatedInput);
     // Extra check: log localStorage direct voor navigatie
-    console.log('localStorage intakeData before navigation:', localStorage.getItem('intakeData'));
     proceedToNextStep(updatedInput);
     setFreeTextValue('');
     setShowFreeText(false);

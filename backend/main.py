@@ -24,20 +24,15 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables on startup"""
-    print("🚀 Starting HerFoodCode API...")
     
     # Test database connection
     from db import test_supabase_connection, supabase_connected
-    print(f"📊 Database connection status: {'✅ Supabase' if supabase_connected else '⚠️ SQLite fallback'}")
     
     try:
         create_db_and_tables()
-        print("✅ Database initialization completed")
     except Exception as e:
-        print(f"⚠️ Warning: Could not create database tables: {e}")
-        print("Application will continue without database initialization")
-    
-    print("🎉 HerFoodCode API startup complete!")
+        # Application will continue without database initialization
+        pass
 
 @app.get("/")
 async def root():
@@ -109,13 +104,30 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 
 # Load strategies from the correct CSV
 STRATEGIES_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'strategies.csv')
-print("[DEBUG] Absolute path to strategies.csv:", os.path.abspath(STRATEGIES_FILE_PATH))
-print("[DEBUG] strategies.csv exists:", os.path.exists(STRATEGIES_FILE_PATH))
-strategies_df = pd.read_csv(STRATEGIES_FILE_PATH, sep=';')
-print("[DEBUG] Loaded strategies.csv shape:", strategies_df.shape)
-print("[DEBUG] Loaded strategies.csv columns:", strategies_df.columns)
-print("[DEBUG] First row of strategies.csv:", strategies_df.head(1))
-strategies_df.fillna('', inplace=True)
+strategies_df = pd.read_csv(STRATEGIES_FILE_PATH, sep=',')
+
+# Map new English column names to expected structure
+column_mapping = {
+    'Strategy Name': 'Strategie naam',
+    'What will you be doing': 'Uitleg', 
+    'Why does it work': 'Waarom',
+    'Symptoms': 'Verhelpt klachten bij',
+    'Sources': 'Bron(nen)',
+    'Tips for today': 'Praktische tips'
+}
+
+# Rename columns to match expected structure
+strategies_df = strategies_df.rename(columns=column_mapping)
+
+# Clean the data - remove rows where strategy name is empty or NaN
+strategies_df = strategies_df.dropna(subset=['Strategie naam'])
+strategies_df = strategies_df[strategies_df['Strategie naam'].str.strip() != '']
+
+# Fill NaN values with empty strings for text columns
+text_columns = ['Uitleg', 'Waarom', 'Verhelpt klachten bij', 'Bron(nen)', 'Praktische tips']
+for col in text_columns:
+    if col in strategies_df.columns:
+        strategies_df[col] = strategies_df[col].fillna('')
 
 # Dependency to get Supabase client
 def get_supabase():
@@ -179,18 +191,13 @@ def sync_to_async(f):
 
 @app.post("/api/v1/strategies")
 async def strategies(intake_data: IntakeData):
-    print("[DEBUG] Received intake data:", intake_data.dict())
     # 1. Get the list of recommended strategy metadata from the RAG pipeline
     recommended_metadata = get_strategies(intake_data.dict())
-    print("[DEBUG] Recommended metadata:", recommended_metadata)
     # 2. Extract just the names of the strategies
     recommended_names = [meta['strategy_name'] for meta in recommended_metadata]
-    print("[DEBUG] Recommended names:", recommended_names)
-    print("[DEBUG] Strategie naam kolomwaarden:", strategies_df['Strategie naam'].unique())
     
     # 3. Filter the main DataFrame to get the full details for those strategies
     full_recommendations = strategies_df[strategies_df['Strategie naam'].isin(recommended_names)]
-    print("[DEBUG] Filtered DataFrame:", full_recommendations)
     
     # 4. Preserve the order returned by the retriever
     # Use .reindex() to handle cases where a strategy name might not be found in the df
@@ -238,7 +245,6 @@ def register(user: UserCreate):
         }, SECRET_KEY, algorithm=ALGORITHM)
         return {"access_token": access_token, "token_type": "bearer"}
     except Exception as e:
-        print(f"Registration error: {str(e)}")
         # Re-raise HTTP exceptions as-is
         if isinstance(e, HTTPException):
             raise e
@@ -264,7 +270,6 @@ def login(user: UserLogin):
         }, SECRET_KEY, algorithm=ALGORITHM)
         return {"access_token": access_token, "token_type": "bearer"}
     except Exception as e:
-        print(f"Login error: {str(e)}")
         # Re-raise HTTP exceptions as-is
         if isinstance(e, HTTPException):
             raise e
@@ -315,15 +320,11 @@ async def chat(request: Request, data: ChatRequest):
         user = await get_current_user(request)
         from db import SupabaseDB
         
-        print(f"[DEBUG] Chat request from user: {user['email']}")
-        
         # 1. Retrieve symptoms
         try:
             symptoms = SupabaseDB.get_user_symptoms(user['id'])
             symptom_names = [s['symptom'] for s in symptoms]
-            print(f"[DEBUG] Retrieved {len(symptom_names)} symptoms")
         except Exception as e:
-            print(f"[ERROR] Failed to get symptoms: {e}")
             symptom_names = []
         
         # 2. Retrieve all logs
@@ -340,9 +341,7 @@ async def chat(request: Request, data: ChatRequest):
                     'extra_symptoms': log['extra_symptoms'],
                     'extra_notes': log['extra_notes']
                 })
-            print(f"[DEBUG] Retrieved {len(logs_summary)} logs")
         except Exception as e:
-            print(f"[ERROR] Failed to get logs: {e}")
             logs_summary = []
         
         # 3. Retrieve current strategy details
@@ -352,9 +351,8 @@ async def chat(request: Request, data: ChatRequest):
                 details = strategies_df[strategies_df['Strategie naam'] == user['current_strategy']]
                 if not details.empty:
                     strategy_details = details.to_dict(orient='records')[0]
-                print(f"[DEBUG] Retrieved strategy details: {strategy_details is not None}")
             except Exception as e:
-                print(f"[ERROR] Failed to get strategy details: {e}")
+                pass
         
         # 4. Build user profile context
         user_profile_context = f"""
@@ -371,17 +369,14 @@ User Profile:
         try:
             chat_history = SupabaseDB.get_chat_messages(user['id'])
             history = [(msg['sender'], msg['text']) for msg in chat_history]
-            print(f"[DEBUG] Retrieved {len(history)} chat messages")
         except Exception as e:
-            print(f"[ERROR] Failed to get chat history: {e}")
             history = []
         
         # 6. Append new user message
         try:
             SupabaseDB.create_chat_message(user['id'], 'user', data.question)
-            print(f"[DEBUG] Created user message")
         except Exception as e:
-            print(f"[ERROR] Failed to create user message: {e}")
+            pass
         
         # 7. Call RAG LLM with user profile context, chat history, and question
         try:
@@ -393,33 +388,24 @@ User Profile:
             result = generate_advice(rag_input)
             # generate_advice always returns a dict with 'answer' key
             answer = result['answer']
-            print(f"[DEBUG] Generated RAG response: {len(answer)} characters")
         except Exception as e:
-            print(f"[ERROR] Failed to generate RAG response: {e}")
-            import traceback
-            traceback.print_exc()
             answer = "Sorry, I'm having trouble processing your request right now. Please try again later."
         
         # 8. Store bot response
         try:
             SupabaseDB.create_chat_message(user['id'], 'bot', answer)
-            print(f"[DEBUG] Created bot message")
         except Exception as e:
-            print(f"[ERROR] Failed to create bot message: {e}")
+            pass
         
         # 9. Return updated chat history
         try:
             updated_history = SupabaseDB.get_chat_messages(user['id'])
             return {'history': [{'sender': m['sender'], 'text': m['text'], 'timestamp': m['timestamp']} for m in updated_history]}
         except Exception as e:
-            print(f"[ERROR] Failed to get updated chat history: {e}")
             return {'history': [{'sender': 'user', 'text': data.question, 'timestamp': datetime.utcnow().isoformat()},
                                {'sender': 'bot', 'text': answer, 'timestamp': datetime.utcnow().isoformat()}]}
     
     except Exception as e:
-        print(f"[ERROR] Chat endpoint failed: {e}")
-        import traceback
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
 
 # --- Trial Period Endpoints ---
@@ -580,7 +566,7 @@ async def get_profile(request: Request):
         if not details.empty:
             strategy_details = details.to_dict(orient='records')[0]
     
-    # Get active trial period for debugging
+    # Get active trial period
     trials = SupabaseDB.get_user_trial_periods(user['id'])
     active_trial = next((trial for trial in trials if trial['is_active']), None)
     

@@ -14,15 +14,41 @@ COLLECTION_NAME = "strategies"
 
 # Load data from CSV
 try:
-    df = pd.read_csv(CSV_PATH, sep=';')
-    print(f"Successfully loaded {len(df)} strategies from {CSV_PATH}")
+    df = pd.read_csv(CSV_PATH, sep=',')
 except FileNotFoundError:
     print(f"Error: Could not find the CSV file at {CSV_PATH}")
     exit()
 
+# Map new English column names to expected structure
+column_mapping = {
+    'Strategy Name': 'Strategie naam',
+    'What will you be doing': 'Uitleg', 
+    'Why does it work': 'Waarom',
+    'Symptoms': 'Verhelpt klachten bij',
+    'Sources': 'Bron(nen)',
+    'Tips for today': 'Praktische tips'
+}
+
+# Rename columns to match expected structure
+df = df.rename(columns=column_mapping)
+
+# Clean the data - remove rows where strategy name is empty or NaN
+df = df.dropna(subset=['Strategie naam'])
+df = df[df['Strategie naam'].str.strip() != '']
+
+# Fill NaN values with empty strings for text columns
+text_columns = ['Uitleg', 'Waarom', 'Verhelpt klachten bij', 'Bron(nen)', 'Praktische tips']
+for col in text_columns:
+    if col in df.columns:
+        df[col] = df[col].fillna('')
+
 # Create LangChain Documents
 documents = []
 for _, row in df.iterrows():
+    # Skip rows with invalid strategy names
+    if pd.isna(row['Strategie naam']) or str(row['Strategie naam']).strip() == '':
+        continue
+        
     # A more descriptive content for better retrieval
     content = (
         f"Strategy '{row['Strategie naam']}' is designed to help with the following symptoms and goals: {row['Verhelpt klachten bij']}. "
@@ -40,8 +66,6 @@ for _, row in df.iterrows():
     }
     documents.append(Document(page_content=content, metadata=metadata))
 
-print(f"Created {len(documents)} LangChain documents.")
-
 # Initialize OpenAI embeddings
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
@@ -50,27 +74,9 @@ if not api_key:
 embedding_model = OpenAIEmbeddings(api_key=api_key)
 
 # Create and persist the vector store
-print(f"Creating vector store at {PERSIST_DIR}...")
 vectorstore = Chroma.from_documents(
     documents=documents,
     embedding=embedding_model,
     collection_name=COLLECTION_NAME,
     persist_directory=PERSIST_DIR,
-)
-
-print(f"✅ Vector store for strategies created successfully with {len(documents)} documents.") 
-
-# Debug: Inspect stored documents
-print("\n--- Inspecting stored strategy documents ---")
-try:
-    loaded_vs = Chroma(
-        persist_directory=PERSIST_DIR,
-        embedding_function=embedding_model,
-        collection_name=COLLECTION_NAME
-    )
-    docs = loaded_vs.similarity_search(".", k=5)
-    for i, doc in enumerate(docs):
-        print(f"Document {i+1} page_content: {doc.page_content}")
-        print(f"Document {i+1} metadata: {doc.metadata}\n")
-except Exception as e:
-    print(f"Error inspecting vectorstore: {e}") 
+) 

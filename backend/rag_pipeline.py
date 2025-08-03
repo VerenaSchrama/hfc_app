@@ -32,28 +32,22 @@ main_vectorstore = None
 main_retriever = None
 
 try:
-    print(f"[RAG] Loading strategy vectorstore from: {STRATEGY_VECTORSTORE_PATH}")
     strategy_vectorstore = Chroma(
         persist_directory=STRATEGY_VECTORSTORE_PATH,
         embedding_function=embeddings,
         collection_name="strategies"
     )
     strategy_retriever = strategy_vectorstore.as_retriever(search_kwargs={"k": 3})
-    print("[RAG] Strategy vectorstore loaded successfully")
 
-    print(f"[RAG] Loading main vectorstore from: {MAIN_VECTORSTORE_PATH}")
     main_vectorstore = Chroma(
         persist_directory=MAIN_VECTORSTORE_PATH,
         embedding_function=embeddings
     )
     main_retriever = main_vectorstore.as_retriever()
-    print("[RAG] Main vectorstore loaded successfully")
 
 except Exception as e:
-    print(f"[RAG] Error loading vector stores: {e}")
-    print(f"[RAG] Strategy path exists: {os.path.exists(STRATEGY_VECTORSTORE_PATH)}")
-    print(f"[RAG] Main path exists: {os.path.exists(MAIN_VECTORSTORE_PATH)}")
     # Don't exit, let the app continue with None retrievers
+    pass
 
 
 def format_docs(docs):
@@ -95,108 +89,41 @@ def build_question(user_input: dict) -> str:
         + "What should I eat?"
     )
 
-    print(f"[RAG] Chatbot advice question: {question}")
     return question
 
 
 def generate_advice(user_input: dict) -> dict:
-    """
-    Generate advice using the conversational chatbot with memory.
-    This is the original function for the chat interface.
-    """
-    # Check if vectorstore is loaded
-    if main_retriever is None:
-        print("[RAG] Vectorstore not loaded, returning fallback response")
-        return {
-            "answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later or contact support if the problem persists.",
-            "sources": []
-        }
+    """Generate advice using the chatbot approach with user profile context."""
+    if not strategy_retriever:
+        return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
+
+    # Build the question from user input
+    question = build_question(user_input)
     
-    # Always include user_profile in the system prompt
-    user_profile = user_input.get('user_profile', '')
-    query = user_input.get('question', '')
-    chat_history = user_input.get('chat_history', [])
-
+    # Create a conversational chain with memory
+    from langchain.chains import ConversationalRetrievalChain
+    from langchain.memory import ConversationBufferMemory
+    
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        return_messages=True
+    )
+    
+    # Create the chain
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=strategy_retriever,
+        memory=memory,
+        return_source_documents=True,
+        verbose=False
+    )
+    
     try:
-        # Convert chat history to LangChain message format
-        messages = []
-        for sender, text in chat_history:
-            if sender == 'user':
-                messages.append(HumanMessage(content=text))
-            elif sender == 'bot':
-                messages.append(AIMessage(content=text))
-
-        prompt_template = PromptTemplate(
-            input_variables=["context", "question", "user_profile"],
-            template="""
-You are a cycle-aware nutrition assistant based on holistic and scientific insights.
-
-You have access to the following up-to-date user profile:
-{user_profile}
-
-Always answer user questions helpfully and always provide answers in a warm, empowering tone and information dense way.
-
-For the foods, refer to ingredients and nutrients rather than recipes or dishes.
-
-If the source materials really don't mention anything related to the question, say:
-"There are limited recommendations for your question based on science, but what science does advise is…"
-
-Be concise, clear, and nurturing in your responses.
-Keep a warm and empowering tone.
-
-Answer based on the context below:
-
-Context:
-{context}
-
-Question:
-{question}
-"""
-        )
-
-        # Create memory with existing chat history
-        memory = ConversationBufferMemory(
-            memory_key="chat_history",
-            return_messages=True,
-            output_key="answer"
-        )
-        
-        # Load existing chat history into memory
-        for message in messages:
-            if isinstance(message, HumanMessage):
-                memory.chat_memory.add_user_message(message.content)
-            elif isinstance(message, AIMessage):
-                memory.chat_memory.add_ai_message(message.content)
-
-        qa_chain = ConversationalRetrievalChain.from_llm(
-            llm=llm,
-            retriever=main_retriever,
-            memory=memory,
-            return_source_documents=True,
-            combine_docs_chain_kwargs={"prompt": prompt_template},
-            output_key="answer"
-        )
-
-        result = qa_chain({"question": query, "user_profile": user_profile})
-
-        return {
-            "answer": result["answer"],
-            "sources": [
-                {
-                    "content": doc.page_content,
-                    "metadata": doc.metadata,
-                }
-                for doc in result.get("source_documents", [])
-            ]
-        }
+        # Invoke the chain with the question
+        result = qa_chain.invoke({"question": question})
+        return {"answer": result["answer"]}
     except Exception as e:
-        print(f"[RAG] Error in generate_advice: {e}")
-        import traceback
-        traceback.print_exc()
-        return {
-            "answer": "I'm sorry, but I encountered an error while processing your request. Please try again later.",
-            "sources": []
-        }
+        return {"answer": "I'm sorry, but I encountered an error while processing your request. Please try again."}
 
 
 # RAG Chain for Simple Advice (no conversation memory)
@@ -220,27 +147,27 @@ if main_retriever is not None:
     )
 
 def get_advice(question: str) -> str:
-    """
-    Get general nutritional advice from the RAG pipeline (no conversation memory).
-    """
-    if rag_chain is None:
+    """Get simple advice for a question."""
+    if not strategy_retriever:
         return "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."
+    
     try:
-        return rag_chain.invoke(question)
+        docs = strategy_retriever.invoke(question)
+        if not docs:
+            return "I don't have specific information about that. Please try asking about symptoms, cycle phases, or dietary strategies."
+        
+        # Use the first document for a simple response
+        doc = docs[0]
+        return doc.page_content
     except Exception as e:
-        print(f"[RAG] Error in get_advice: {e}")
-        return "I'm sorry, but I encountered an error while processing your request. Please try again later."
-
+        return "I'm sorry, but I encountered an error while processing your request. Please try again."
 
 def get_strategies(user_input: dict) -> list:
-    """
-    Get 3 personalized strategies based on user input, using all intakeData fields and optional notes.
-    """
-    # Check if strategy retriever is available
-    if strategy_retriever is None:
-        print("[RAG] Strategy retriever not loaded, returning empty list")
+    """Get strategy recommendations based on user input."""
+    if not strategy_retriever:
         return []
     
+    # Build query from user input
     symptoms = ensure_list(user_input.get('symptoms'))
     symptoms_note = user_input.get('symptoms_note', '')
     goals = ensure_list(user_input.get('goals'))
@@ -266,14 +193,11 @@ def get_strategies(user_input: dict) -> list:
         + "Looking for strategies that match this profile."
     )
 
-    print(f"[RAG] Strategy selection query: {query}")
-
     try:
         docs = strategy_retriever.invoke(query)
         strategies = [doc.metadata for doc in docs]
         return strategies
     except Exception as e:
-        print(f"[RAG] Error in get_strategies: {e}")
         return []
 
 
@@ -301,44 +225,6 @@ def get_recommendations(intake_data, df, top_k=3):
 
 
 if __name__ == '__main__':
-    print("--- Testing Strategy Retrieval ---")
-    test_input = {
-        "symptoms": ["Irregular cycles", "Acne", "Fatigue"],
-        "goals": ["Regulate cycle", "Improve skin", "Boost energy"]
-    }
-    recommended_strategies = get_strategies(test_input)
-    if recommended_strategies:
-        for i, strategy in enumerate(recommended_strategies, 1):
-            print(f"Strategy {i}: {strategy['strategy_name']}")
-            print(f"  Description: {strategy['explanation']}")
-    else:
-        print("No strategies were recommended.")
-    print("---------------------------------\n")
-
-    # Test with a simple query that should definitely match
-    print("--- Testing Simple Query ---")
-    simple_docs = strategy_retriever.invoke("Acne")
-    print(f"Simple query 'Acne' found {len(simple_docs)} documents")
-    for i, doc in enumerate(simple_docs[:3]):
-        print(f"Simple result {i+1}: {doc.metadata['strategy_name']}")
-    print("-----------------------------\n")
-
-    print("--- Testing Simple Advice ---")
-    test_question = "What can I eat to improve my energy levels during my luteal phase?"
-    advice = get_advice(test_question)
-    print(f"Advice for '{test_question}':")
-    print(advice)
-    print("------------------------------\n")
-
-    print("--- Testing Chatbot Advice ---")
-    chatbot_input = {
-        "symptoms": ["Irregular cycles", "Acne"],
-        "goals": ["Regulate cycle", "Improve skin"],
-        "preferences": ["Vegetarian", "No dairy"],
-        "cycle": "luteal"
-    }
-    chatbot_result = generate_advice(chatbot_input)
-    print(f"Chatbot advice:")
-    print(chatbot_result["answer"])
-    print("-----------------------------\n")
+    # This file is now used as a module, not for testing
+    pass
 

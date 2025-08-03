@@ -29,8 +29,6 @@ output_path.parent.mkdir(parents=True, exist_ok=True)
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(chunks, f, ensure_ascii=False, indent=2)
 
-print(f"✅ Extracted and chunked {len(chunks)} passages to {output_path}")
-
 import os
 import json
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -59,5 +57,3 @@ vectorstore = Chroma.from_documents(
     collection_name="langchain"
 )
 vectorstore.persist()
-
-print(f"✅ Vectorstore created and saved to: {persist_dir}")

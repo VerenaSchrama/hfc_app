@@ -55,17 +55,16 @@ class TrialPeriod(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 def create_db_and_tables():
-    """Create database tables - SQLite fallback only"""
-    if engine:
-        # Only create SQLAlchemy tables for SQLite fallback
-        Base.metadata.create_all(bind=engine)
-        print("SQLite tables created successfully")
+    """Create database tables"""
+    if supabase_connected:
+        # Using Supabase - tables managed through Supabase dashboard
+        # Make sure the following tables exist in your Supabase project:
+        # - users
+        # - chat_messages
+        # - tracked_symptoms
+        # - daily_logs
+        # - trial_periods
+        pass
     else:
-        # For Supabase, tables are managed through Supabase dashboard
-        print("Using Supabase - tables managed through Supabase dashboard")
-        print("Make sure the following tables exist in your Supabase project:")
-        print("- users")
-        print("- chat_messages") 
-        print("- tracked_symptoms")
-        print("- daily_logs")
-        print("- trial_periods") 
+        # Create SQLite tables
+        Base.metadata.create_all(bind=engine) 

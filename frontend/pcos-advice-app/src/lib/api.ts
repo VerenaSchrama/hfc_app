@@ -2,8 +2,26 @@
 import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log } from '../types';
 import { auth } from "./auth";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` : 'http://127.0.0.1:8000/api/v1';
-console.log("API_BASE_URL (api.ts):", API_BASE_URL);
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+  ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
+  : 'http://127.0.0.1:8000/api/v1';
+
+export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const token = auth.getToken();
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error("Failed to fetch with auth:", response.status, errorBody);
+        throw new Error('Failed to fetch with auth');
+    }
+    return response.json();
+};
 
 // src/lib/fetchAdvice.ts
 export async function fetchAdvice(intake: IntakeData): Promise<AdviceResponse> {
