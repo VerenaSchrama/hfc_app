@@ -33,10 +33,15 @@ supabase_connected = test_supabase_connection()
 # Configure database based on connection status
 if supabase_connected:
     # Supabase is available
-    pass
+    engine = None
 else:
     # Fallback to SQLite
-    pass
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./users.db"
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=False
+    )
 
 # Create session maker (only for SQLite fallback)
 if engine:
