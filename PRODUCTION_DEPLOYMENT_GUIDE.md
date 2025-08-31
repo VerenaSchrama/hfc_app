@@ -2,9 +2,9 @@
 
 ## 🏠 Local vs Production Deployment
 
-### Local Development (deploy.sh)
+### Local Development
 - **Purpose**: Run the app locally for development/testing
-- **Command**: `./deploy.sh`
+- **Command**: `uvicorn main:app --reload` (backend) + `npm run dev` (frontend)
 - **Result**: App runs on `http://localhost:3000` and `http://localhost:8000`
 - **Use Case**: Development, testing, debugging
 
@@ -19,7 +19,9 @@
 ### Step 1: Prepare Your Code
 ```bash
 # Test local deployment first (optional)
-./deploy.sh
+cd backend && uvicorn main:app --reload
+# In another terminal:
+cd frontend/pcos-advice-app && npm run dev
 
 # Verify everything works locally
 curl http://localhost:8000/health
@@ -33,15 +35,15 @@ curl http://localhost:3000
 2. **Create Render Account**: Sign up at [render.com](https://render.com)
 3. **Create Web Service**:
    - Connect your GitHub repo
-   - Select "Deploy from Dockerfile"
-   - Set build context to `backend/`
+   - Set build command: `pip install -r requirements.txt`
+   - Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - Set environment variables:
      ```
      OPENAI_API_KEY=your_openai_key
      SECRET_KEY=your_secret_key
      ALLOWED_ORIGINS=https://your-frontend-domain.com
      ```
-4. **Configure Volumes**: Use Render's persistent disk for vectorstore data
+4. **Configure Data**: Use Render's persistent disk for vectorstore data
 5. **Deploy**: Render will build and deploy automatically
 
 #### Option B: Railway
@@ -53,7 +55,7 @@ curl http://localhost:3000
 
 #### Option C: DigitalOcean App Platform
 1. **Create DigitalOcean Account**: Sign up at [digitalocean.com](https://digitalocean.com)
-2. **Create App**: Select "Deploy from Dockerfile"
+2. **Create App**: Select "Deploy from source code"
 3. **Configure**: Point to backend directory
 4. **Set Environment Variables**: Same as above
 5. **Deploy**: DigitalOcean builds and deploys

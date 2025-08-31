@@ -36,7 +36,6 @@ Ensure your GitHub repository has the correct structure:
 ```
 hfc_app/
 ├── backend/
-│   ├── Dockerfile              ✅ Ready
 │   ├── requirements.txt        ✅ Ready
 │   ├── main.py                 ✅ Ready
 │   ├── rag_pipeline.py         ✅ Ready
@@ -46,10 +45,9 @@ hfc_app/
 │   ├── package.json            ✅ Ready
 │   ├── next.config.ts          ✅ Ready
 │   └── src/                    ✅ Ready
-├── data/
-│   ├── vectorstore/            ✅ 20MB+ data
-│   └── processed/              ✅ Ready
-└── docker-compose.yml          ✅ Ready
+└── data/
+    ├── vectorstore/            ✅ 20MB+ data
+    └── processed/              ✅ Ready
 ```
 
 ### Step 2: Deploy Backend to Render
@@ -65,7 +63,7 @@ hfc_app/
 3. **Configure Service**:
    ```
    Name: hfc-backend
-   Environment: Docker
+   Environment: Python
    Region: Choose closest to your users
    Branch: main (or your default branch)
    Root Directory: backend/
@@ -73,8 +71,8 @@ hfc_app/
 
 #### 2.3 Configure Build Settings
 ```yaml
-Build Command: (auto-detected from Dockerfile)
-Start Command: (auto-detected from Dockerfile)
+Build Command: pip install -r requirements.txt
+Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
 #### 2.4 Set Environment Variables

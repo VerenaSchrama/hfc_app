@@ -96,7 +96,7 @@ def generate_advice(user_input: dict) -> dict:
     """Generate advice using the chatbot approach with user profile context."""
     if not strategy_retriever:
         return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
-
+    
     # Build the question from user input
     question = build_question(user_input)
     

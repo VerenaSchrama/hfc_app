@@ -196,4 +196,4 @@ class SupabaseDB:
             response = supabase.table('tracked_symptoms').select('*').eq('user_id', user_id).order('order').execute()
             return response.data or []
         except Exception as e:
-            return [] 
+            return []

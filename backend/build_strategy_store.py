@@ -79,4 +79,4 @@ vectorstore = Chroma.from_documents(
     embedding=embedding_model,
     collection_name=COLLECTION_NAME,
     persist_directory=PERSIST_DIR,
-) 
+)

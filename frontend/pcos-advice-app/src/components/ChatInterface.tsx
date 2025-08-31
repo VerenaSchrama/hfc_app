@@ -55,8 +55,8 @@ export default function ChatInterface() {
       setIsLoading(true);
       localStorage.setItem('intakeData', JSON.stringify(currentInput));
       // Log voor navigatie
-      router.push('/strategy_selection');
-      setIsLoading(false);
+        router.push('/strategy_selection');
+        setIsLoading(false);
     }
   };
 

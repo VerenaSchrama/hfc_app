@@ -66,22 +66,17 @@ trial_periods (id, user_id, strategy_name, start_date, end_date, is_active, crea
 
 ### Option 1: SQLite with Persistent Disk
 
-#### Step 1: Update Docker Configuration
-```dockerfile
-# In backend/Dockerfile, ensure database directory exists
-RUN mkdir -p /app/data && \
-    chown -R appuser:appuser /app
+#### Step 1: Ensure Database Directory
+```bash
+# In backend directory, ensure database directory exists
+mkdir -p data
 ```
 
-#### Step 2: Update docker-compose.yml
-```yaml
-volumes:
-  # Existing volumes
-  - ./backend/data:/app/data
-  - ./data/vectorstore:/app/data/vectorstore
-  - ./data/processed:/app/data/processed
-  # Add database volume
-  - ./backend/users.db:/app/users.db
+#### Step 2: Database File Location
+```bash
+# Database will be located at:
+# backend/users.db
+# This file will be included in the deployment
 ```
 
 #### Step 3: Render Persistent Disk Configuration
