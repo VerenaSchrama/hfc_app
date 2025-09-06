@@ -20,7 +20,7 @@ from datetime import datetime as dt
 app = FastAPI(
     title="HerFoodCode API",
     description="FastAPI backend for HerFoodCode app with RAG model integration",
-    version="1.0.0"
+    version="1.0.1"
 )
 
 @app.on_event("startup")
