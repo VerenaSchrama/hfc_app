@@ -23,7 +23,9 @@ interface ChatInterfaceProps {
   workbookData?: WorkbookData | null;
 }
 
-export default function ChatInterface({ workbookData: _workbookData }: ChatInterfaceProps) {
+export default function ChatInterface({ workbookData }: ChatInterfaceProps) {
+  // workbookData is available for future use in context-aware chat
+  console.log('Workbook data available:', workbookData ? 'Yes' : 'No');
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [intakeData, setIntakeData] = useState<Partial<IntakeData>>({});
