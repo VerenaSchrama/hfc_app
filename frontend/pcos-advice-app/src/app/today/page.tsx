@@ -5,7 +5,6 @@ import { TrialPeriod, UserProfile } from '@/types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import BottomNav from '@/components/BottomNav';
 
 interface StrategyDetails {
   'Strategie naam': string;
@@ -158,7 +157,6 @@ export default function TodayPage() {
         <div className="font-bold text-gray-900 mb-1">Today&apos;s Focus</div>
         <div className="text-gray-700 mb-2">Personalized focus coming soon!</div>
       </div>
-      <BottomNav />
     </div>
   );
 } 

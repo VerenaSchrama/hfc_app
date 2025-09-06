@@ -14,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }: React.PropsWithChildren) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-pink-50 min-h-screen flex flex-col`}>
+      <body className={`${inter.className} bg-background min-h-screen flex flex-col`}>
         <ClientHeaderWrapper />
         <main className="flex-1 w-full max-w-3xl mx-auto px-2 pb-24">{children}</main>
       </body>
