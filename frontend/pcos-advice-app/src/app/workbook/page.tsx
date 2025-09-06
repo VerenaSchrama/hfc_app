@@ -6,7 +6,7 @@ import { getWorkbook, generateWorkbook } from '../../lib/api';
 import { WorkbookData, UploadData } from '../../types';
 import MechanismCard from '../../components/MechanismCard';
 import WorkbookSection from '../../components/WorkbookSection';
-import ChatInterface from '../../components/ChatInterface';
+import WorkbookChatInterface from '../../components/WorkbookChatInterface';
 import UploadModal from '../../components/UploadModal';
 import { Upload, Archive, MessageCircle, Plus } from 'lucide-react';
 
@@ -130,10 +130,10 @@ export default function WorkbookPage() {
         </div>
       </div>
 
-      <div className="flex">
+      <div className="flex h-screen">
         {/* Main Workbook Content */}
-        <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'}`}>
-          <div className="p-6">
+        <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'} overflow-y-auto`}>
+          <div className="p-8">
             {/* Workbook Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">Your Personalized Workbook</h1>
@@ -180,13 +180,13 @@ export default function WorkbookPage() {
 
         {/* Chat Interface */}
         {showChat && (
-          <div className="w-1/3 border-l border-subtle bg-card">
-            <div className="p-5 border-b border-subtle">
-              <h3 className="text-xl font-semibold text-foreground mb-1">AI Assistant</h3>
+          <div className="w-1/3 border-l border-subtle bg-card flex flex-col">
+            <div className="p-6 border-b border-subtle">
+              <h3 className="text-xl font-semibold text-foreground mb-2">Workbook Assistant</h3>
               <p className="text-secondary">Ask questions about your mechanisms and interventions</p>
             </div>
-            <div className="h-[calc(100vh-200px)]">
-              <ChatInterface workbookData={workbookData} />
+            <div className="flex-1">
+              <WorkbookChatInterface workbookData={workbookData} />
             </div>
           </div>
         )}

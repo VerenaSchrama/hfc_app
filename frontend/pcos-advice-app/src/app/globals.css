@@ -2,15 +2,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --background: #fafafa;
-  --foreground: #1f2937;
+  --background: #f8fafc;
+  --foreground: #1e293b;
   --primary: #059669;
   --primary-light: #10b981;
   --primary-dark: #047857;
-  --secondary: #6b7280;
-  --muted: #9ca3af;
-  --border: #e5e7eb;
+  --secondary: #64748b;
+  --muted: #94a3b8;
+  --border: #e2e8f0;
   --card: #ffffff;
+  --accent: #f0fdf4;
+  --accent-border: #bbf7d0;
 }
 
 body {

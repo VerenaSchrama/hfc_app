@@ -93,9 +93,11 @@ export default function MechanismCard({
       {/* Mechanism Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-primary rounded-full"></div>
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+            <div className="w-4 h-4 border-2 border-white rounded-full"></div>
+          </div>
           <h3 className="text-xl font-semibold text-foreground">{mechanism.title}</h3>
-          <span className="bg-primary-light bg-opacity-20 text-primary px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
             active
           </span>
         </div>
@@ -131,7 +133,7 @@ export default function MechanismCard({
         {/* Interventions List */}
         <div className="space-y-3">
           {mechanismInterventions.map((intervention) => (
-            <div key={intervention.id} className="bg-primary-light bg-opacity-5 border border-primary-light border-opacity-20 rounded-lg p-4">
+            <div key={intervention.id} className="bg-accent border border-accent-border rounded-lg p-4">
               {editingIntervention === intervention.id ? (
                 <div className="space-y-3">
                   <input
@@ -190,7 +192,7 @@ export default function MechanismCard({
 
           {/* Add New Intervention Form */}
           {isAddingIntervention && (
-            <div className="bg-primary-light bg-opacity-5 border border-primary-light border-opacity-20 rounded-lg p-4">
+            <div className="bg-accent border border-accent-border rounded-lg p-4">
               <div className="space-y-3">
                 <input
                   type="text"
