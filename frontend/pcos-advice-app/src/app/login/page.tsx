@@ -29,18 +29,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-pink-50 to-white px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-100 p-8 flex flex-col items-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Login</h1>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-background px-4">
+      <div className="w-full max-w-md bg-card rounded-2xl shadow-lg border border-subtle p-8 flex flex-col items-center">
+        <h1 className="text-3xl font-bold text-foreground mb-6">Login</h1>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">Email</label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               placeholder="you@email.com"
               autoComplete="email"
               required
@@ -48,13 +48,13 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">Password</label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               placeholder="••••••••"
               autoComplete="current-password"
               required
@@ -62,20 +62,20 @@ export default function LoginPage() {
             />
           </div>
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+            <div className="text-red-600 text-sm bg-red-50 p-4 rounded-lg border border-red-200">
               {error}
             </div>
           )}
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full bg-pink-500 hover:bg-pink-600 disabled:bg-pink-300 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg shadow-sm mt-2"
+            className="w-full bg-primary hover:bg-primary-dark disabled:bg-muted text-white font-semibold py-3 px-6 rounded-lg transition-colors text-lg shadow-sm mt-2"
           >
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <Link href="/" className="w-full mt-4">
-          <button className="w-full border border-pink-500 text-pink-600 font-semibold py-3 px-6 rounded-lg bg-white hover:bg-pink-50 transition-colors text-lg shadow-sm">Back to Home</button>
+        <Link href="/" className="w-full mt-6">
+          <button className="w-full border border-primary text-primary font-semibold py-3 px-6 rounded-lg bg-card hover:bg-primary hover:bg-opacity-5 transition-colors text-lg shadow-sm">Back to Home</button>
         </Link>
       </div>
     </div>
