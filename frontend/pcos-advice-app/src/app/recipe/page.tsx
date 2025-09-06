@@ -24,26 +24,26 @@ export default function RecipePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-card border-b border-subtle px-6 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Recipes</h1>
-            <p className="text-gray-600">Hormone-friendly recipes for your health journey</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Recipes</h1>
+            <p className="text-secondary text-lg">Hormone-friendly recipes for your health journey</p>
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-6">
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🍽️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Recipe Collection</h2>
-          <p className="text-gray-600 mb-6">Coming soon! Personalized recipes based on your workbook interventions.</p>
-          <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 max-w-md mx-auto">
-            <p className="text-sm text-gray-700">
-              <strong>What to expect:</strong> AI-curated recipes that support your specific mechanisms and interventions, with nutritional insights and preparation tips.
+        <div className="text-center py-16">
+          <div className="text-6xl mb-6">🍽️</div>
+          <h2 className="text-2xl font-semibold text-foreground mb-3">Recipe Collection</h2>
+          <p className="text-secondary text-lg mb-8 max-w-2xl mx-auto">Coming soon! Personalized recipes based on your workbook interventions.</p>
+          <div className="bg-primary-light bg-opacity-10 border border-primary rounded-lg p-6 max-w-lg mx-auto">
+            <p className="text-base text-foreground leading-relaxed">
+              <strong className="text-primary">What to expect:</strong> AI-curated recipes that support your specific mechanisms and interventions, with nutritional insights and preparation tips.
             </p>
           </div>
         </div>

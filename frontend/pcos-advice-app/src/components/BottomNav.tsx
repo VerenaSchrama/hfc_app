@@ -31,11 +31,11 @@ export default function BottomNav() {
   };
   
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-around py-2 z-50 shadow-md">
+    <nav className="fixed bottom-0 left-0 w-full bg-card border-t border-subtle flex justify-around py-3 z-50 shadow-lg">
       {navItems.map(item => (
-        <Link key={item.href} href={item.href} className={`flex flex-col items-center flex-1 py-1 ${isActive(item.href) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}> 
-          <span className="text-2xl">{item.icon}</span>
-          <span className="text-xs mt-1">{item.label}</span>
+        <Link key={item.href} href={item.href} className={`flex flex-col items-center flex-1 py-2 ${isActive(item.href) ? 'text-primary font-semibold' : 'text-muted'}`}> 
+          <span className="text-2xl mb-1">{item.icon}</span>
+          <span className="text-xs font-medium">{item.label}</span>
         </Link>
       ))}
     </nav>

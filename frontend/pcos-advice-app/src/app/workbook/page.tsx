@@ -78,32 +78,32 @@ export default function WorkbookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-card border-b border-subtle px-6 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Workbook</h1>
-            <p className="text-gray-600">Your personalized hormonal health journey</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">My Workbook</h1>
+            <p className="text-secondary text-lg">Your personalized hormonal health journey</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowChat(!showChat)}
-              className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium"
             >
               <MessageCircle className="h-4 w-4" />
               {showChat ? 'Hide Chat' : 'Ask Chat'}
             </button>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary-light text-white rounded-lg hover:bg-primary transition-colors font-medium"
             >
               <Upload className="h-4 w-4" />
               Upload
             </button>
             <button
               onClick={() => setShowArchive(!showArchive)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-secondary text-white rounded-lg hover:bg-muted transition-colors font-medium"
             >
               <Archive className="h-4 w-4" />
               Archive
@@ -151,10 +151,10 @@ export default function WorkbookPage() {
 
         {/* Chat Interface */}
         {showChat && (
-          <div className="w-1/3 border-l border-gray-200 bg-white">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">AI Assistant</h3>
-              <p className="text-sm text-gray-600">Ask questions about your mechanisms and interventions</p>
+          <div className="w-1/3 border-l border-subtle bg-card">
+            <div className="p-5 border-b border-subtle">
+              <h3 className="text-xl font-semibold text-foreground mb-1">AI Assistant</h3>
+              <p className="text-secondary">Ask questions about your mechanisms and interventions</p>
             </div>
             <div className="h-[calc(100vh-200px)]">
               <ChatInterface workbookData={workbookData} />
@@ -174,17 +174,17 @@ export default function WorkbookPage() {
       {/* Archive View */}
       {showArchive && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl h-96 overflow-y-auto">
+          <div className="bg-card rounded-lg p-6 w-full max-w-4xl h-96 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Archive</h3>
+              <h3 className="text-xl font-semibold text-foreground">Archive</h3>
               <button
                 onClick={() => setShowArchive(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-secondary hover:text-foreground text-xl"
               >
                 ✕
               </button>
             </div>
-            <p className="text-gray-600">Archive functionality coming soon...</p>
+            <p className="text-secondary">Archive functionality coming soon...</p>
           </div>
         </div>
       )}
