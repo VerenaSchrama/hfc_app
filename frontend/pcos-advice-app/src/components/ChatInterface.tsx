@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { questions } from '../lib/questionFlow';
-import { IntakeData, Message } from '../types';
+import { IntakeData, Message, WorkbookData } from '../types';
 import MultiSelectOptions from './MultiSelectOptions';
 import { CycleEstimator } from './CycleEstimator';
 import { Bot, User } from 'lucide-react';
@@ -19,7 +19,11 @@ const CYCLE_OPTIONS = [
   { id: OPTION_IDS.NO_CYCLE, title: "I have no cycle", description: "For example due to pregnancy, menopause, PCOS or medical reasons" }
 ];
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  workbookData?: WorkbookData | null;
+}
+
+export default function ChatInterface({ workbookData }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [intakeData, setIntakeData] = useState<Partial<IntakeData>>({});
@@ -55,7 +59,7 @@ export default function ChatInterface() {
       setIsLoading(true);
       localStorage.setItem('intakeData', JSON.stringify(currentInput));
       // Log voor navigatie
-        router.push('/strategy_selection');
+        router.push('/workbook');
         setIsLoading(false);
     }
   };

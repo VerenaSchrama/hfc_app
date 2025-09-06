@@ -1,5 +1,5 @@
 // src/lib/api.ts
-import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log } from '../types';
+import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log, Mechanism, Intervention, DailyReflection, ArchiveItem } from '../types';
 import { auth } from "./auth";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
@@ -222,5 +222,109 @@ export async function getUserProfile(): Promise<UserProfile> {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!res.ok) throw new Error('Failed to fetch user profile');
+  return res.json();
+}
+
+// ===== WORKBOOK API FUNCTIONS =====
+
+export async function generateWorkbook(intakeData: IntakeData): Promise<{success: boolean, workbook: any, message: string}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(intakeData),
+  });
+  if (!res.ok) throw new Error('Failed to generate workbook');
+  return res.json();
+}
+
+export async function getWorkbook(): Promise<{success: boolean, workbook: any}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to fetch workbook');
+  return res.json();
+}
+
+export async function createMechanism(mechanismData: Partial<Mechanism>): Promise<{success: boolean, mechanism: any, message: string}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/mechanisms`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(mechanismData),
+  });
+  if (!res.ok) throw new Error('Failed to create mechanism');
+  return res.json();
+}
+
+export async function updateMechanism(mechanismId: string, mechanismData: Partial<Mechanism>): Promise<{success: boolean, message: string}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/mechanisms/${mechanismId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(mechanismData),
+  });
+  if (!res.ok) throw new Error('Failed to update mechanism');
+  return res.json();
+}
+
+export async function createIntervention(interventionData: Partial<Intervention>): Promise<{success: boolean, intervention: any, message: string}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/interventions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(interventionData),
+  });
+  if (!res.ok) throw new Error('Failed to create intervention');
+  return res.json();
+}
+
+export async function updateIntervention(interventionId: string, interventionData: Partial<Intervention>): Promise<{success: boolean, message: string}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/interventions/${interventionId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(interventionData),
+  });
+  if (!res.ok) throw new Error('Failed to update intervention');
+  return res.json();
+}
+
+export async function createReflection(reflectionData: Partial<DailyReflection>): Promise<{success: boolean, reflection: any, message: string}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/reflections`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(reflectionData),
+  });
+  if (!res.ok) throw new Error('Failed to create reflection');
+  return res.json();
+}
+
+export async function getArchive(): Promise<{success: boolean, archive: ArchiveItem[]}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/workbook/archive`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to fetch archive');
   return res.json();
 } 

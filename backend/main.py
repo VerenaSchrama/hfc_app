@@ -5,8 +5,10 @@ from pydantic import BaseModel
 from typing import List, Optional
 import pandas as pd
 from rag_pipeline import get_strategies, get_advice, generate_advice
+from workbook_rag import generate_workbook_from_intake, save_workbook_to_db, get_user_workbook
 import os
 import urllib.parse
+import uuid
 from models import create_db_and_tables
 from db import SessionLocal
 import bcrypt
@@ -582,6 +584,221 @@ async def get_profile(request: Request):
         } if active_trial else None,
         # Add more fields as needed
     }
+
+# ===== WORKBOOK API ENDPOINTS =====
+
+@app.post('/api/v1/workbook/generate')
+async def generate_workbook(request: Request, intake_data: dict = Body(...)):
+    """Generate initial workbook from user intake data using RAG pipeline."""
+    try:
+        user = await get_current_user(request)
+        
+        # Generate workbook using RAG pipeline
+        workbook_data = generate_workbook_from_intake(user['id'], intake_data)
+        
+        # Save to database
+        success = save_workbook_to_db(user['id'], workbook_data)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save workbook to database")
+        
+        return {
+            "success": True,
+            "workbook": workbook_data,
+            "message": "Workbook generated successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating workbook: {str(e)}")
+
+@app.get('/api/v1/workbook')
+async def get_workbook(request: Request):
+    """Get user's workbook data."""
+    try:
+        user = await get_current_user(request)
+        workbook_data = get_user_workbook(user['id'])
+        
+        return {
+            "success": True,
+            "workbook": workbook_data
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving workbook: {str(e)}")
+
+@app.post('/api/v1/workbook/mechanisms')
+async def create_mechanism(request: Request, mechanism_data: dict = Body(...)):
+    """Create a new mechanism."""
+    try:
+        user = await get_current_user(request)
+        
+        # Add user_id and generate ID
+        mechanism_data['user_id'] = user['id']
+        mechanism_data['id'] = str(uuid.uuid4())
+        mechanism_data['created_at'] = datetime.utcnow().isoformat()
+        mechanism_data['updated_at'] = datetime.utcnow().isoformat()
+        
+        # Save to database
+        db = SessionLocal()
+        from models import Mechanism
+        mechanism = Mechanism(**mechanism_data)
+        db.add(mechanism)
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "mechanism": mechanism_data,
+            "message": "Mechanism created successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating mechanism: {str(e)}")
+
+@app.put('/api/v1/workbook/mechanisms/{mechanism_id}')
+async def update_mechanism(request: Request, mechanism_id: str, mechanism_data: dict = Body(...)):
+    """Update a mechanism."""
+    try:
+        user = await get_current_user(request)
+        
+        # Update mechanism
+        db = SessionLocal()
+        from models import Mechanism
+        mechanism = db.query(Mechanism).filter(
+            Mechanism.id == mechanism_id,
+            Mechanism.user_id == user['id']
+        ).first()
+        
+        if not mechanism:
+            raise HTTPException(status_code=404, detail="Mechanism not found")
+        
+        # Update fields
+        for key, value in mechanism_data.items():
+            if hasattr(mechanism, key):
+                setattr(mechanism, key, value)
+        
+        mechanism.updated_at = datetime.utcnow()
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "message": "Mechanism updated successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating mechanism: {str(e)}")
+
+@app.post('/api/v1/workbook/interventions')
+async def create_intervention(request: Request, intervention_data: dict = Body(...)):
+    """Create a new intervention."""
+    try:
+        user = await get_current_user(request)
+        
+        # Add user_id and generate ID
+        intervention_data['user_id'] = user['id']
+        intervention_data['id'] = str(uuid.uuid4())
+        intervention_data['created_at'] = datetime.utcnow().isoformat()
+        intervention_data['updated_at'] = datetime.utcnow().isoformat()
+        
+        # Save to database
+        db = SessionLocal()
+        from models import Intervention
+        intervention = Intervention(**intervention_data)
+        db.add(intervention)
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "intervention": intervention_data,
+            "message": "Intervention created successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating intervention: {str(e)}")
+
+@app.put('/api/v1/workbook/interventions/{intervention_id}')
+async def update_intervention(request: Request, intervention_id: str, intervention_data: dict = Body(...)):
+    """Update an intervention."""
+    try:
+        user = await get_current_user(request)
+        
+        # Update intervention
+        db = SessionLocal()
+        from models import Intervention
+        intervention = db.query(Intervention).filter(
+            Intervention.id == intervention_id,
+            Intervention.user_id == user['id']
+        ).first()
+        
+        if not intervention:
+            raise HTTPException(status_code=404, detail="Intervention not found")
+        
+        # Update fields
+        for key, value in intervention_data.items():
+            if hasattr(intervention, key):
+                setattr(intervention, key, value)
+        
+        intervention.updated_at = datetime.utcnow()
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "message": "Intervention updated successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating intervention: {str(e)}")
+
+@app.post('/api/v1/workbook/reflections')
+async def create_reflection(request: Request, reflection_data: dict = Body(...)):
+    """Create a daily reflection."""
+    try:
+        user = await get_current_user(request)
+        
+        # Add user_id and generate ID
+        reflection_data['user_id'] = user['id']
+        reflection_data['id'] = str(uuid.uuid4())
+        reflection_data['created_at'] = datetime.utcnow().isoformat()
+        reflection_data['updated_at'] = datetime.utcnow().isoformat()
+        
+        # Save to database
+        db = SessionLocal()
+        from models import DailyReflection
+        reflection = DailyReflection(**reflection_data)
+        db.add(reflection)
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "reflection": reflection_data,
+            "message": "Reflection created successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating reflection: {str(e)}")
+
+@app.get('/api/v1/workbook/archive')
+async def get_archive(request: Request):
+    """Get user's archive items."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import ArchiveItem
+        archive_items = db.query(ArchiveItem).filter(ArchiveItem.user_id == user['id']).all()
+        db.close()
+        
+        return {
+            "success": True,
+            "archive": [item.__dict__ for item in archive_items]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving archive: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

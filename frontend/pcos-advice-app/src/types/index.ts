@@ -97,4 +97,92 @@ export interface Log {
     extra_symptoms?: string;
     extra_notes?: string;
     applied_strategy?: boolean; // Keep for backward compatibility
+}
+
+// ===== WORKBOOK TYPES =====
+
+export interface Mechanism {
+    id: string;
+    title: string;
+    description: string;
+    user_notes?: string;
+    confidence_score?: number; // From RAG pipeline
+    source?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Intervention {
+    id: string;
+    title: string;
+    description: string;
+    mechanism_id: string; // Links to mechanism
+    user_notes?: string;
+    is_tracking: boolean;
+    tracking_frequency?: 'daily' | 'weekly' | 'as_needed';
+    confidence_score?: number; // From RAG pipeline
+    source?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface DailyReflection {
+    id: string;
+    date: string;
+    energy_level: number; // 1-10 scale
+    mood: number; // 1-10 scale
+    symptoms: Record<string, number>; // symptom_name: severity_score
+    notes: string;
+    interventions_applied: string[]; // Array of intervention IDs
+    additional_notes?: string;
+    user_notes?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface WorkbookEntry {
+    id: string;
+    type: 'mechanism' | 'intervention' | 'reflection' | 'insight';
+    title: string;
+    content: string;
+    user_notes?: string;
+    source?: 'rag' | 'user' | 'chat' | 'upload';
+    tags?: string[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ArchiveItem {
+    id: string;
+    title: string;
+    content: string;
+    type: 'screenshot' | 'article' | 'text' | 'insight';
+    source_url?: string;
+    ai_insights?: string;
+    suggested_mechanisms?: string[];
+    suggested_interventions?: string[];
+    tags?: string[];
+    created_at: string;
+}
+
+export interface WorkbookData {
+    mechanisms: Mechanism[];
+    interventions: Intervention[];
+    reflections: DailyReflection[];
+    entries: WorkbookEntry[];
+    last_updated: string;
+}
+
+export interface UploadData {
+    type: 'screenshot' | 'article' | 'text';
+    content: string;
+    file?: File;
+    source_url?: string;
+}
+
+export interface ProgressMetrics {
+    mechanisms_tracked: number;
+    interventions_active: number;
+    reflections_this_week: number;
+    completion_rate: number; // percentage
 } 

@@ -54,6 +54,76 @@ class TrialPeriod(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+# ===== WORKBOOK MODELS =====
+
+class Mechanism(Base):
+    __tablename__ = 'mechanisms'
+    id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    user_notes = Column(String, nullable=True)
+    confidence_score = Column(Integer, nullable=True)  # 0-100
+    source = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Intervention(Base):
+    __tablename__ = 'interventions'
+    id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    mechanism_id = Column(String, ForeignKey('mechanisms.id'), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    user_notes = Column(String, nullable=True)
+    is_tracking = Column(Boolean, default=False)
+    tracking_frequency = Column(String, nullable=True)  # 'daily', 'weekly', 'as_needed'
+    confidence_score = Column(Integer, nullable=True)  # 0-100
+    source = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class DailyReflection(Base):
+    __tablename__ = 'daily_reflections'
+    id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    date = Column(Date, nullable=False)
+    energy_level = Column(Integer, nullable=False)  # 1-10
+    mood = Column(Integer, nullable=False)  # 1-10
+    symptoms = Column(JSON, nullable=False)  # {symptom_name: severity_score}
+    notes = Column(String, nullable=False)
+    interventions_applied = Column(JSON, nullable=False)  # Array of intervention IDs
+    additional_notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class WorkbookEntry(Base):
+    __tablename__ = 'workbook_entries'
+    id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    type = Column(String, nullable=False)  # 'mechanism', 'intervention', 'reflection', 'insight'
+    title = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    user_notes = Column(String, nullable=True)
+    source = Column(String, nullable=True)  # 'rag', 'user', 'chat', 'upload'
+    tags = Column(JSON, nullable=True)  # Array of strings
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ArchiveItem(Base):
+    __tablename__ = 'archive_items'
+    id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    type = Column(String, nullable=False)  # 'screenshot', 'article', 'text', 'insight'
+    source_url = Column(String, nullable=True)
+    ai_insights = Column(String, nullable=True)
+    suggested_mechanisms = Column(JSON, nullable=True)  # Array of strings
+    suggested_interventions = Column(JSON, nullable=True)  # Array of strings
+    tags = Column(JSON, nullable=True)  # Array of strings
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 def create_db_and_tables():
     """Create database tables"""
     if supabase_connected:

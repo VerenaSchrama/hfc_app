@@ -1,21 +1,24 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '../lib/auth';
 
 export default function BottomNav() {
   const { isLoggedIn, loading } = useAuth();
   const pathname = usePathname();
   if (loading || !isLoggedIn) return null;
   const navItems = [
-    { href: '/profile', label: 'Profile', icon: '👤' },
+    { href: '/workbook', label: 'Workbook', icon: '📖' },
     { href: '/today', label: 'Today', icon: '📅' },
     { href: '/chat', label: 'Chat', icon: '💬' },
     { href: '/community', label: 'Community', icon: '👥' },
-    { href: '/track', label: 'Track', icon: '📊' },
+    { href: '/profile', label: 'Profile', icon: '👤' },
   ];
   
   const isActive = (href: string) => {
+    if (href === '/workbook') {
+      return pathname === '/workbook';
+    }
     if (href === '/profile') {
       return pathname === '/profile';
     }
@@ -27,9 +30,6 @@ export default function BottomNav() {
     }
     if (href === '/community') {
       return pathname === '/community';
-    }
-    if (href === '/track') {
-      return pathname === '/track';
     }
     return false;
   };

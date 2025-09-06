@@ -1,8 +1,34 @@
 // src/app/page.tsx
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
+  const { isLoggedIn, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoggedIn && !loading) {
+      router.push('/workbook');
+    }
+  }, [isLoggedIn, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
+  if (isLoggedIn) {
+    return null; // Will redirect to workbook
+  }
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-pink-50 to-white px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-100 p-8 flex flex-col items-center">
@@ -10,9 +36,9 @@ export default function HomePage() {
           <Image src="/Image/HFClogo.png" alt="HerFoodCode Logo" width={80} height={80} className="mx-auto" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">HerFoodCode</h1>
-        <p className="text-md text-olive-700 font-medium mb-6 text-center">Decode which foods work for you.</p>
+        <p className="text-md text-olive-700 font-medium mb-6 text-center">Your Personalized Food Digital Workbook</p>
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 text-center text-gray-700">
-          Decode your symptoms, understand your rhythms, and discover the foods that truly support your unique body.
+          Track your hormonal health journey with personalized mechanisms, interventions, and daily reflections.
         </div>
         <div className="flex flex-col gap-4 w-full">
           <Link href="/register">
@@ -29,12 +55,12 @@ export default function HomePage() {
       </div>
       <div className="flex justify-center gap-8 mt-10">
         <div className="flex flex-col items-center">
-          <span className="bg-pink-100 text-pink-600 rounded-full p-3 mb-2 text-xl">💬</span>
-          <span className="text-xs text-gray-600 font-medium">Personal Chat</span>
+          <span className="bg-pink-100 text-pink-600 rounded-full p-3 mb-2 text-xl">📖</span>
+          <span className="text-xs text-gray-600 font-medium">Dynamic Workbook</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="bg-green-100 text-green-600 rounded-full p-3 mb-2 text-xl">🎯</span>
-          <span className="text-xs text-gray-600 font-medium">Smart Strategies</span>
+          <span className="bg-green-100 text-green-600 rounded-full p-3 mb-2 text-xl">💬</span>
+          <span className="text-xs text-gray-600 font-medium">AI Chat</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="bg-blue-100 text-blue-600 rounded-full p-3 mb-2 text-xl">📊</span>
