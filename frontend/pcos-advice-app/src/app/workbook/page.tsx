@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
 import { WorkbookData, UploadData } from '../../types';
+import MechanismCard from '../../components/MechanismCard';
 import WorkbookSection from '../../components/WorkbookSection';
 import ChatInterface from '../../components/ChatInterface';
 import UploadModal from '../../components/UploadModal';
-import { Upload, Archive, MessageCircle } from 'lucide-react';
+import { Upload, Archive, MessageCircle, Plus } from 'lucide-react';
 
 export default function WorkbookPage() {
   const { isLoggedIn, loading } = useAuth();
@@ -16,6 +17,7 @@ export default function WorkbookPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [showAddMechanism, setShowAddMechanism] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn && !loading) {
@@ -50,6 +52,22 @@ export default function WorkbookPage() {
 
   const handleWorkbookUpdate = (updatedData: Partial<WorkbookData>) => {
     setWorkbookData(prev => prev ? { ...prev, ...updatedData } : null);
+  };
+
+  const handleMechanismUpdate = (updatedMechanism: any) => {
+    if (workbookData) {
+      const updatedMechanisms = workbookData.mechanisms.map(m => 
+        m.id === updatedMechanism.id ? updatedMechanism : m
+      );
+      setWorkbookData({ ...workbookData, mechanisms: updatedMechanisms });
+    }
+  };
+
+  const handleInterventionUpdate = (newIntervention: any) => {
+    if (workbookData) {
+      const updatedInterventions = [...workbookData.interventions, newIntervention];
+      setWorkbookData({ ...workbookData, interventions: updatedInterventions });
+    }
   };
 
   const handleUpload = (uploadData: UploadData) => {
@@ -115,37 +133,48 @@ export default function WorkbookPage() {
       <div className="flex">
         {/* Main Workbook Content */}
         <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'}`}>
-          <div className="p-6 space-y-8">
+          <div className="p-6">
+            {/* Workbook Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-foreground mb-2">Your Personalized Workbook</h1>
+              <p className="text-secondary text-lg">Track your hormonal mechanisms and personalized interventions</p>
+            </div>
 
-            {/* Key Mechanisms Section */}
-            <WorkbookSection
-              title="Key Mechanisms"
-              subtitle="Underlying causes of your hormonal imbalances"
-              type="mechanisms"
-              data={workbookData?.mechanisms || []}
-              onUpdate={handleWorkbookUpdate}
-              placeholder="Add a new mechanism..."
-            />
+            {/* Mechanisms with Interventions */}
+            <div className="space-y-6">
+              {workbookData?.mechanisms?.map((mechanism) => (
+                <MechanismCard
+                  key={mechanism.id}
+                  mechanism={mechanism}
+                  interventions={workbookData?.interventions || []}
+                  onUpdate={handleMechanismUpdate}
+                  onInterventionUpdate={handleInterventionUpdate}
+                />
+              ))}
 
-            {/* Interventions Section */}
-            <WorkbookSection
-              title="Interventions"
-              subtitle="Nutrition, lifestyle, and routines to help regulate each mechanism"
-              type="interventions"
-              data={workbookData?.interventions || []}
-              onUpdate={handleWorkbookUpdate}
-              placeholder="Add a new intervention..."
-            />
+              {/* Add New Mechanism Button */}
+              <div className="text-center">
+                <button 
+                  onClick={() => setShowAddMechanism(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium mx-auto"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Mechanism
+                </button>
+              </div>
+            </div>
 
             {/* Daily Reflections Section */}
-            <WorkbookSection
-              title="Daily Reflections"
-              subtitle="Track your symptoms, mood, energy, and food log"
-              type="reflections"
-              data={workbookData?.reflections || []}
-              onUpdate={handleWorkbookUpdate}
-              placeholder="Add today's reflection..."
-            />
+            <div className="mt-12">
+              <WorkbookSection
+                title="Daily Reflections"
+                subtitle="Track your symptoms, mood, energy, and food log"
+                type="reflections"
+                data={workbookData?.reflections || []}
+                onUpdate={handleWorkbookUpdate}
+                placeholder="Add today's reflection..."
+              />
+            </div>
           </div>
         </div>
 
@@ -169,6 +198,36 @@ export default function WorkbookPage() {
           onClose={() => setShowUploadModal(false)}
           onUpload={handleUpload}
         />
+      )}
+
+      {/* Add Mechanism Modal */}
+      {showAddMechanism && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-card rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-foreground">Add New Mechanism</h3>
+              <button
+                onClick={() => setShowAddMechanism(false)}
+                className="text-secondary hover:text-foreground text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            <WorkbookSection
+              title=""
+              subtitle=""
+              type="mechanisms"
+              data={[]}
+              onUpdate={(data) => {
+                if (data.mechanisms) {
+                  handleWorkbookUpdate(data);
+                  setShowAddMechanism(false);
+                }
+              }}
+              placeholder="Add a new mechanism..."
+            />
+          </div>
+        </div>
       )}
 
       {/* Archive View */}
