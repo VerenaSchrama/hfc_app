@@ -1,5 +1,5 @@
 // src/lib/api.ts
-import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log, Mechanism, Intervention, DailyReflection, ArchiveItem } from '../types';
+import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log, Mechanism, Intervention, DailyReflection, ArchiveItem, WorkbookData } from '../types';
 import { auth } from "./auth";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
@@ -227,7 +227,7 @@ export async function getUserProfile(): Promise<UserProfile> {
 
 // ===== WORKBOOK API FUNCTIONS =====
 
-export async function generateWorkbook(intakeData: IntakeData): Promise<{success: boolean, workbook: any, message: string}> {
+export async function generateWorkbook(intakeData: IntakeData): Promise<{success: boolean, workbook: WorkbookData, message: string}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/workbook/generate`, {
     method: 'POST',
@@ -241,7 +241,7 @@ export async function generateWorkbook(intakeData: IntakeData): Promise<{success
   return res.json();
 }
 
-export async function getWorkbook(): Promise<{success: boolean, workbook: any}> {
+export async function getWorkbook(): Promise<{success: boolean, workbook: WorkbookData}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/workbook`, {
     headers: { 'Authorization': `Bearer ${token}` },
@@ -250,7 +250,7 @@ export async function getWorkbook(): Promise<{success: boolean, workbook: any}> 
   return res.json();
 }
 
-export async function createMechanism(mechanismData: Partial<Mechanism>): Promise<{success: boolean, mechanism: any, message: string}> {
+export async function createMechanism(mechanismData: Partial<Mechanism>): Promise<{success: boolean, mechanism: Mechanism, message: string}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/workbook/mechanisms`, {
     method: 'POST',
@@ -278,7 +278,7 @@ export async function updateMechanism(mechanismId: string, mechanismData: Partia
   return res.json();
 }
 
-export async function createIntervention(interventionData: Partial<Intervention>): Promise<{success: boolean, intervention: any, message: string}> {
+export async function createIntervention(interventionData: Partial<Intervention>): Promise<{success: boolean, intervention: Intervention, message: string}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/workbook/interventions`, {
     method: 'POST',
@@ -306,7 +306,7 @@ export async function updateIntervention(interventionId: string, interventionDat
   return res.json();
 }
 
-export async function createReflection(reflectionData: Partial<DailyReflection>): Promise<{success: boolean, reflection: any, message: string}> {
+export async function createReflection(reflectionData: Partial<DailyReflection>): Promise<{success: boolean, reflection: DailyReflection, message: string}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/workbook/reflections`, {
     method: 'POST',

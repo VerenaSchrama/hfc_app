@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
-import { WorkbookData, Mechanism, Intervention, DailyReflection } from '../../types';
+import { WorkbookData, UploadData } from '../../types';
 import WorkbookSection from '../../components/WorkbookSection';
 import ChatInterface from '../../components/ChatInterface';
 import UploadModal from '../../components/UploadModal';
 import ProgressIndicator from '../../components/ProgressIndicator';
-import { Plus, Upload, Archive, MessageCircle } from 'lucide-react';
+import { Upload, Archive, MessageCircle } from 'lucide-react';
 
 export default function WorkbookPage() {
   const { isLoggedIn, loading } = useAuth();
@@ -51,6 +51,13 @@ export default function WorkbookPage() {
 
   const handleWorkbookUpdate = (updatedData: Partial<WorkbookData>) => {
     setWorkbookData(prev => prev ? { ...prev, ...updatedData } : null);
+  };
+
+  const handleUpload = (uploadData: UploadData) => {
+    // TODO: Process upload data and update workbook
+    console.log('Upload data:', uploadData);
+    // For now, just close the modal
+    setShowUploadModal(false);
   };
 
   if (loading || isLoading) {
@@ -163,7 +170,7 @@ export default function WorkbookPage() {
       {showUploadModal && (
         <UploadModal
           onClose={() => setShowUploadModal(false)}
-          onUpload={handleWorkbookUpdate}
+          onUpload={handleUpload}
         />
       )}
 

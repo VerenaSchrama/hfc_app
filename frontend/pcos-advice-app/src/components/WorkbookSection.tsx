@@ -47,7 +47,7 @@ export default function WorkbookSection({
         
         if (response.success) {
           onUpdate({
-            mechanisms: [...data, response.mechanism]
+            mechanisms: [...(data as Mechanism[]), response.mechanism]
           });
         }
       } else if (type === 'interventions') {
@@ -62,7 +62,7 @@ export default function WorkbookSection({
         
         if (response.success) {
           onUpdate({
-            interventions: [...data, response.intervention]
+            interventions: [...(data as Intervention[]), response.intervention]
           });
         }
       } else if (type === 'reflections') {
@@ -78,7 +78,7 @@ export default function WorkbookSection({
         
         if (response.success) {
           onUpdate({
-            reflections: [...data, response.reflection]
+            reflections: [...(data as DailyReflection[]), response.reflection]
           });
         }
       }
@@ -285,7 +285,7 @@ export default function WorkbookSection({
         
         {data.length === 0 && !isAdding && (
           <div className="text-center py-8 text-gray-500">
-            <p>No {type} yet. Click "Add" to get started.</p>
+            <p>No {type} yet. Click &quot;Add&quot; to get started.</p>
           </div>
         )}
       </div>

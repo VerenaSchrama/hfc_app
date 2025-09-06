@@ -6,7 +6,7 @@ import { UploadData } from '../types';
 
 interface UploadModalProps {
   onClose: () => void;
-  onUpload: (data: any) => void;
+  onUpload: (data: UploadData) => void;
 }
 
 export default function UploadModal({ onClose, onUpload }: UploadModalProps) {
