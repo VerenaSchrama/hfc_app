@@ -23,7 +23,7 @@ interface ChatInterfaceProps {
   workbookData?: WorkbookData | null;
 }
 
-export default function ChatInterface({ workbookData: _workbookData }: ChatInterfaceProps) {
+export default function ChatInterface({ workbookData }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [intakeData, setIntakeData] = useState<Partial<IntakeData>>({});

@@ -79,7 +79,7 @@ export default function UploadModal({ onClose, onUpload }: UploadModalProps) {
               ].map(({ type, label, icon: Icon, description }) => (
                 <button
                   key={type}
-                  onClick={() => setUploadType(type as any)}
+                  onClick={() => setUploadType(type as 'screenshot' | 'article' | 'text')}
                   className={`p-4 border rounded-lg text-left transition-colors ${
                     uploadType === type
                       ? 'border-pink-500 bg-pink-50'
