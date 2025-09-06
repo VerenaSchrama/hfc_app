@@ -8,10 +8,9 @@ export default function BottomNav() {
   const pathname = usePathname();
   if (loading || !isLoggedIn) return null;
   const navItems = [
-    { href: '/workbook', label: 'Workbook', icon: '📖' },
     { href: '/today', label: 'Today', icon: '📅' },
-    { href: '/chat', label: 'Chat', icon: '💬' },
-    { href: '/community', label: 'Community', icon: '👥' },
+    { href: '/workbook', label: 'Workbook', icon: '📖' },
+    { href: '/recipe', label: 'Recipe', icon: '🍽️' },
     { href: '/profile', label: 'Profile', icon: '👤' },
   ];
   
@@ -25,11 +24,8 @@ export default function BottomNav() {
     if (href === '/today') {
       return pathname === '/today';
     }
-    if (href === '/chat') {
-      return pathname === '/chat';
-    }
-    if (href === '/community') {
-      return pathname === '/community';
+    if (href === '/recipe') {
+      return pathname === '/recipe';
     }
     return false;
   };

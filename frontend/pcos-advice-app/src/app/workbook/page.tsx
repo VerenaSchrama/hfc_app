@@ -7,7 +7,6 @@ import { WorkbookData, UploadData } from '../../types';
 import WorkbookSection from '../../components/WorkbookSection';
 import ChatInterface from '../../components/ChatInterface';
 import UploadModal from '../../components/UploadModal';
-import ProgressIndicator from '../../components/ProgressIndicator';
 import { Upload, Archive, MessageCircle } from 'lucide-react';
 
 export default function WorkbookPage() {
@@ -79,7 +78,7 @@ export default function WorkbookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -117,8 +116,6 @@ export default function WorkbookPage() {
         {/* Main Workbook Content */}
         <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'}`}>
           <div className="p-6 space-y-8">
-            {/* Progress Indicator */}
-            <ProgressIndicator workbookData={workbookData} />
 
             {/* Key Mechanisms Section */}
             <WorkbookSection
