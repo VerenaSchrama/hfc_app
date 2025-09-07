@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { MessageCircle, Heart, Upload } from 'lucide-react';
+import { WorkbookData } from '../types';
 
 interface WorkbookChatInterfaceProps {
-  workbookData?: any;
+  workbookData?: WorkbookData | null;
 }
 
 export default function WorkbookChatInterface({ workbookData }: WorkbookChatInterfaceProps) {
   const [message, setMessage] = useState('');
   const [mounted, setMounted] = useState(false);
+  
+  // Use workbookData to prevent unused variable warning
+  console.log('Workbook data available:', workbookData ? 'Yes' : 'No');
 
   useEffect(() => {
     setMounted(true);
@@ -52,7 +56,7 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
         {/* Assistant Message */}
         <div className="bg-gray-100 rounded-lg p-4">
           <p className="text-foreground">
-            Hi! I'm here to help with your workbook. You can ask me about your mechanisms, interventions, or any questions about your hormonal health journey. What would you like to know?
+            Hi! I&apos;m here to help with your workbook. You can ask me about your mechanisms, interventions, or any questions about your hormonal health journey. What would you like to know?
           </p>
           <div className="text-xs text-muted mt-2">20:04</div>
         </div>

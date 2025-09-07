@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
-import { WorkbookData, UploadData } from '../../types';
+import { WorkbookData, UploadData, Mechanism, Intervention } from '../../types';
 import MechanismCard from '../../components/MechanismCard';
 import WorkbookSection from '../../components/WorkbookSection';
 import WorkbookChatInterface from '../../components/WorkbookChatInterface';
@@ -23,6 +23,14 @@ export default function WorkbookPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (isLoggedIn && !loading) {
@@ -59,7 +67,7 @@ export default function WorkbookPage() {
     setWorkbookData(prev => prev ? { ...prev, ...updatedData } : null);
   };
 
-  const handleMechanismUpdate = (updatedMechanism: any) => {
+  const handleMechanismUpdate = (updatedMechanism: Mechanism) => {
     if (workbookData) {
       const updatedMechanisms = workbookData.mechanisms.map(m => 
         m.id === updatedMechanism.id ? updatedMechanism : m
@@ -68,7 +76,7 @@ export default function WorkbookPage() {
     }
   };
 
-  const handleInterventionUpdate = (newIntervention: any) => {
+  const handleInterventionUpdate = (newIntervention: Intervention) => {
     if (workbookData) {
       const updatedInterventions = [...workbookData.interventions, newIntervention];
       setWorkbookData({ ...workbookData, interventions: updatedInterventions });

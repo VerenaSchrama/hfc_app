@@ -230,7 +230,7 @@ export default function MechanismCard({
 
           {mechanismInterventions.length === 0 && !isAddingIntervention && (
             <div className="text-center py-4 text-muted text-sm">
-              No interventions yet. Click "Add" to get started.
+              No interventions yet. Click &quot;Add&quot; to get started.
             </div>
           )}
         </div>
