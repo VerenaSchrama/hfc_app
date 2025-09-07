@@ -44,74 +44,94 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-background px-4">
-      <div className="w-full max-w-md bg-card rounded-2xl shadow-lg border border-subtle p-8 flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-foreground mb-6">Create Account</h1>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-              placeholder="you@email.com"
-              autoComplete="email"
-              required
-              disabled={isLoading}
-            />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-card border-b border-subtle">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-center">
+            <h1 className="text-2xl font-bold text-foreground">HerFoodCode</h1>
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              required
-              disabled={isLoading}
-            />
-          </div>
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              required
-              disabled={isLoading}
-            />
-          </div>
-          {error && (
-            <div className="text-red-600 text-sm bg-red-50 p-4 rounded-lg border border-red-200">
-              {error}
-            </div>
-          )}
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary-dark disabled:bg-muted text-white font-semibold py-3 px-6 rounded-lg transition-colors text-lg shadow-sm mt-2"
-          >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-        <div className="mt-6 text-center">
-          <span className="text-secondary">Already have an account? </span>
-          <Link href="/login" className="text-primary hover:text-primary-dark font-medium">
-            Log in
-          </Link>
+          <p className="text-center text-text-muted text-sm mt-2">Decode which foods work for you.</p>
         </div>
-        <Link href="/" className="w-full mt-4">
-          <button className="w-full border border-primary text-primary font-semibold py-3 px-6 rounded-lg bg-card hover:bg-primary hover:bg-opacity-5 transition-colors text-lg shadow-sm">Back to Home</button>
-        </Link>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto px-6 py-12">
+        <div className="bg-card border border-subtle rounded-xl p-8">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-foreground mb-2">Create Your Account</h2>
+            <p className="text-text-muted">Start your personalized health journey</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground bg-background"
+                placeholder="you@email.com"
+                autoComplete="email"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground bg-background"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground bg-background"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            {error && (
+              <div className="text-red-600 text-sm bg-red-50 p-4 rounded-lg border border-red-200">
+                {error}
+              </div>
+            )}
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full bg-primary hover:bg-primary-dark disabled:bg-muted text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            >
+              {isLoading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-text-muted text-sm">
+              Already have an account?{' '}
+              <Link href="/login" className="text-primary hover:text-primary-dark font-medium">
+                Sign in
+              </Link>
+            </p>
+            <Link href="/" className="block mt-4 text-text-muted hover:text-foreground text-sm">
+              ← Back to Home
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
