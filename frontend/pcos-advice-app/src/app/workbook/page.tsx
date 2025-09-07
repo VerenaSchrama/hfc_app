@@ -146,16 +146,26 @@ export default function WorkbookPage() {
       <div className="flex h-screen">
         {/* Main Workbook Content */}
         <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'} overflow-y-auto`}>
-          <div className="p-8">
+          <div className="p-6">
             {/* Workbook Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">Your Personalized Workbook</h1>
-              <p className="text-secondary text-lg">Track your hormonal mechanisms and personalized interventions</p>
-              {/* Updated design - v2 - Cache bust: 67e24a1 */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg">⚙️</span>
+                </div>
+                <h1 className="text-2xl font-bold text-blue-600">Mechanisms</h1>
+              </div>
+              <button 
+                onClick={() => setShowUploadModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium"
+              >
+                <Upload className="h-4 w-4" />
+                Add Data
+              </button>
             </div>
 
-            {/* Mechanisms with Interventions */}
-            <div className="space-y-6">
+            {/* Mechanisms List */}
+            <div className="space-y-4">
               {workbookData?.mechanisms?.map((mechanism) => (
                 <MechanismCard
                   key={mechanism.id}
@@ -167,27 +177,15 @@ export default function WorkbookPage() {
               ))}
 
               {/* Add New Mechanism Button */}
-              <div className="text-center">
+              <div className="text-center mt-8">
                 <button 
                   onClick={() => setShowAddMechanism(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium mx-auto"
+                  className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium mx-auto border border-gray-300"
                 >
                   <Plus className="h-4 w-4" />
                   Add New Mechanism
                 </button>
               </div>
-            </div>
-
-            {/* Daily Reflections Section */}
-            <div className="mt-12">
-              <WorkbookSection
-                title="Daily Reflections"
-                subtitle="Track your symptoms, mood, energy, and food log"
-                type="reflections"
-                data={workbookData?.reflections || []}
-                onUpdate={handleWorkbookUpdate}
-                placeholder="Add today's reflection..."
-              />
             </div>
           </div>
         </div>
