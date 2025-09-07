@@ -20,7 +20,7 @@ from datetime import datetime as dt
 app = FastAPI(
     title="HerFoodCode API",
     description="FastAPI backend for HerFoodCode app with RAG model integration",
-    version="1.0.3"
+    version="1.0.4"
 )
 
 @app.on_event("startup")
@@ -96,10 +96,9 @@ app.add_middleware(
         "https://hfc-app-git-main-verenaschramas-projects.vercel.app",
         "https://hfc-fa6nnz1ka-verenaschramas-projects.vercel.app",
         "https://hfc-c1qsj4oaf-verenaschramas-projects.vercel.app",
-        "https://hfc-app.vercel.app",
-        "https://*.vercel.app"
+        "https://hfc-app.vercel.app"
     ],
-    allow_origin_regex=r"https://([a-z0-9-]+--)?hfc-app\.vercel\.app|https://hfc-app(-[a-z0-9]+)?-verenaschramas-projects\.vercel\.app",
+    allow_origin_regex=r"https://([a-z0-9-]+--)?hfc-app\.vercel\.app|https://hfc-app(-[a-z0-9]+)?-verenaschramas-projects\.vercel\.app|https://hfc-[a-z0-9]+-verenaschramas-projects\.vercel\.app|https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
