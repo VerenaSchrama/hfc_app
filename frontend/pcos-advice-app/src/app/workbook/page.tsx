@@ -44,10 +44,20 @@ export default function WorkbookPage() {
     try {
       setIsLoading(true);
       console.log('Loading workbook...');
+      console.log('API_BASE_URL:', process.env.NEXT_PUBLIC_API_URL);
       
       // Check if user is authenticated
       const token = auth.getToken();
       console.log('Auth token exists:', !!token);
+      console.log('Auth token value:', token);
+      
+      // Test API connectivity first
+      try {
+        const testResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/docs`);
+        console.log('Backend connectivity test:', testResponse.status);
+      } catch (testError) {
+        console.error('Backend connectivity test failed:', testError);
+      }
       
       const response = await getWorkbook();
       console.log('Get workbook response:', response);

@@ -3,8 +3,8 @@ import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log, Me
 import { auth } from "./auth";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
-  ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
-  : 'http://127.0.0.1:8000/api/v1';
+  ? process.env.NEXT_PUBLIC_API_URL
+  : 'http://127.0.0.1:8000';
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = auth.getToken();
@@ -229,7 +229,12 @@ export async function getUserProfile(): Promise<UserProfile> {
 
 export async function generateWorkbook(intakeData: IntakeData): Promise<{success: boolean, workbook: WorkbookData, message: string}> {
   const token = auth.getToken();
-  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/generate`, {
+  const url = `${API_BASE_URL}/api/v1/workbook/generate`;
+  console.log('generateWorkbook - URL:', url);
+  console.log('generateWorkbook - Token:', token ? 'exists' : 'missing');
+  console.log('generateWorkbook - Intake data:', intakeData);
+  
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -237,8 +242,19 @@ export async function generateWorkbook(intakeData: IntakeData): Promise<{success
     },
     body: JSON.stringify(intakeData),
   });
-  if (!res.ok) throw new Error('Failed to generate workbook');
-  return res.json();
+  
+  console.log('generateWorkbook - Response status:', res.status);
+  console.log('generateWorkbook - Response ok:', res.ok);
+  
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('generateWorkbook - Error response:', errorText);
+    throw new Error(`Failed to generate workbook: ${res.status} ${errorText}`);
+  }
+  
+  const result = await res.json();
+  console.log('generateWorkbook - Success result:', result);
+  return result;
 }
 
 export async function getWorkbook(): Promise<{success: boolean, workbook: WorkbookData}> {
