@@ -110,7 +110,7 @@ def generate_mechanisms_from_strategies(user_id: int, strategies: List[Dict], co
     ]
     
     for strategy in strategies:
-        strategy_text = f"{strategy.get('What will you be doing', '')} {strategy.get('Why does it work', '')}"
+        strategy_text = f"{strategy.get('explanation', '')} {strategy.get('why', '')}"
         
         # Check if strategy mentions any mechanisms
         for keyword in mechanism_keywords:
@@ -151,8 +151,8 @@ def generate_interventions_from_strategies(user_id: int, strategies: List[Dict],
             "id": str(uuid.uuid4()),
             "user_id": user_id,
             "mechanism_id": find_related_mechanism_advanced(strategy, mechanisms),
-            "title": strategy.get('Strategy Name', 'Nutrition Strategy'),
-            "description": f"{strategy.get('What will you be doing', '')}\n\nWhy: {strategy.get('Why does it work', '')}\n\nPractical tips: {strategy.get('Tips for today', '')}",
+            "title": strategy.get('strategy_name', 'Nutrition Strategy'),
+            "description": f"{strategy.get('explanation', '')}\n\nWhy: {strategy.get('why', '')}\n\nPractical tips: {strategy.get('practical_tips', '')}",
             "is_tracking": False,
             "tracking_frequency": "daily",
             "confidence_score": 85,  # High confidence for direct strategy matches
@@ -516,7 +516,7 @@ def get_strategies_for_mechanisms(mechanisms: List[Dict], intake_data: Dict[str,
         
         for strategy in mechanism_strategies:
             # Use strategy name as unique identifier
-            strategy_key = strategy.get('Strategy Name', '')
+            strategy_key = strategy.get('strategy_name', '')
             if strategy_key and strategy_key not in seen_strategies:
                 all_strategies.append(strategy)
                 seen_strategies.add(strategy_key)
@@ -530,8 +530,8 @@ def find_related_mechanism_advanced(strategy: Dict, mechanisms: List[Dict]) -> s
     if not mechanisms:
         return str(uuid.uuid4())
     
-    strategy_text = f"{strategy.get('What will you be doing', '')} {strategy.get('Why does it work', '')}".lower()
-    strategy_symptoms = strategy.get('Specific symptoms', '').lower()
+    strategy_text = f"{strategy.get('explanation', '')} {strategy.get('why', '')}".lower()
+    strategy_symptoms = strategy.get('helps_with', '').lower()
     
     best_mechanism = mechanisms[0]
     best_score = 0

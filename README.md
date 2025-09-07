@@ -1,6 +1,22 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-# HerFoodCode App - Dynamic Workbook (v2.0)
+# HerFoodCode App - Mechanism-First Dynamic Workbook (v2.0)
+
+## 🎯 **Current Architecture: Mechanism-First Approach**
+
+The app now uses a **mechanism-first architecture** that provides highly coherent and personalized workbooks:
+
+1. **Mechanism Detection**: GPT-4 analyzes user symptoms and identifies 1-3 key hormonal mechanisms (confidence 70+)
+2. **Targeted Strategy Retrieval**: Strategies are specifically retrieved to address each detected mechanism
+3. **Intervention Creation**: Interventions are created from mechanism-targeted strategies
+4. **Fallback Safety**: General strategies used if mechanism-specific retrieval fails
+
+### **Key Features:**
+- **Coherent Workbooks**: Mechanisms and interventions are perfectly aligned
+- **High Relevance**: All interventions directly address user's specific mechanisms
+- **Dynamic Chat**: Users can ask any question and get relevant responses
+- **Confidence-Based**: Only high-confidence mechanisms are included
+- **Robust Fallback**: Multiple safety nets prevent empty workbooks
 
 ## Getting Started
 
