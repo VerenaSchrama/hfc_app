@@ -14,10 +14,17 @@ from db import SessionLocal
 import json
 import os
 from openai import OpenAI
+from rag_pipeline import strategy_retriever
 
 def generate_workbook_from_intake(user_id: int, intake_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Generate initial workbook content using RAG pipeline based on user intake data.
+    Generate initial workbook content using MECHANISM-FIRST approach.
+    
+    NEW FLOW:
+    1. Generate mechanisms using GPT + book vector store
+    2. Retrieve strategies that specifically address each mechanism
+    3. Create interventions from mechanism-targeted strategies
+    4. Fallback to general strategies if mechanism-specific retrieval fails
     
     Args:
         user_id: User ID
@@ -30,19 +37,39 @@ def generate_workbook_from_intake(user_id: int, intake_data: Dict[str, Any]) -> 
     # Build context from intake data
     context = build_intake_context(intake_data)
     
-    # Use RAG pipeline to get relevant strategies
-    strategies = get_strategies(intake_data)
+    print("=== MECHANISM-FIRST WORKBOOK GENERATION ===")
     
-    # NEW: Generate mechanisms using GPT + book vector store
+    # STEP 1: Generate mechanisms using GPT + book vector store
+    print("Step 1: Generating mechanisms with GPT...")
     mechanisms = generate_mechanisms_with_gpt(user_id, intake_data, context)
+    print(f"Generated {len(mechanisms)} mechanisms")
     
-    # Generate interventions from strategies (link to new mechanisms)
+    # STEP 2: Retrieve strategies that specifically address each mechanism
+    print("Step 2: Retrieving mechanism-specific strategies...")
+    mechanism_strategies = get_strategies_for_mechanisms(mechanisms, intake_data)
+    print(f"Found {len(mechanism_strategies)} mechanism-specific strategies")
+    
+    # STEP 3: Fallback to general strategies if mechanism-specific retrieval failed
+    if not mechanism_strategies:
+        print("Step 3: Fallback to general strategies...")
+        fallback_strategies = get_strategies(intake_data)
+        print(f"Fallback: Found {len(fallback_strategies)} general strategies")
+        strategies = fallback_strategies
+    else:
+        strategies = mechanism_strategies
+    
+    # STEP 4: Generate interventions from strategies (link to mechanisms)
+    print("Step 4: Creating interventions from strategies...")
     interventions = generate_interventions_from_strategies(user_id, strategies, context, mechanisms)
+    print(f"Created {len(interventions)} interventions")
+    
+    print("=== WORKBOOK GENERATION COMPLETE ===")
     
     return {
         "mechanisms": mechanisms,
         "interventions": interventions,
-        "context": context
+        "context": context,
+        "strategy_source": "mechanism_specific" if mechanism_strategies else "general_fallback"
     }
 
 def build_intake_context(intake_data: Dict[str, Any]) -> str:
@@ -83,7 +110,7 @@ def generate_mechanisms_from_strategies(user_id: int, strategies: List[Dict], co
     ]
     
     for strategy in strategies:
-        strategy_text = f"{strategy.get('Explanation', '')} {strategy.get('Why', '')}"
+        strategy_text = f"{strategy.get('What will you be doing', '')} {strategy.get('Why does it work', '')}"
         
         # Check if strategy mentions any mechanisms
         for keyword in mechanism_keywords:
@@ -124,8 +151,8 @@ def generate_interventions_from_strategies(user_id: int, strategies: List[Dict],
             "id": str(uuid.uuid4()),
             "user_id": user_id,
             "mechanism_id": find_related_mechanism_advanced(strategy, mechanisms),
-            "title": strategy.get('Strategy name', 'Nutrition Strategy'),
-            "description": f"{strategy.get('Explanation', '')}\n\nWhy: {strategy.get('Why', '')}\n\nPractical tips: {strategy.get('Practical tips', '')}",
+            "title": strategy.get('Strategy Name', 'Nutrition Strategy'),
+            "description": f"{strategy.get('What will you be doing', '')}\n\nWhy: {strategy.get('Why does it work', '')}\n\nPractical tips: {strategy.get('Tips for today', '')}",
             "is_tracking": False,
             "tracking_frequency": "daily",
             "confidence_score": 85,  # High confidence for direct strategy matches
@@ -423,14 +450,88 @@ def call_gpt_for_mechanisms(prompt: str, user_id: int) -> List[Dict]:
         # Fallback to empty list
         return []
 
+def get_strategies_for_mechanism(mechanism: Dict, intake_data: Dict[str, Any]) -> List[Dict]:
+    """
+    Retrieve strategies that specifically address a given mechanism.
+    
+    Args:
+        mechanism: Mechanism dictionary with title, description, etc.
+        intake_data: User intake data for context
+    
+    Returns:
+        List of strategy dictionaries that address the mechanism
+    """
+    
+    try:
+        if not strategy_retriever:
+            return []
+        
+        # Build mechanism-specific query
+        symptoms = ', '.join(intake_data.get('symptoms', []))
+        goals = ', '.join(intake_data.get('goals', []))
+        cycle = intake_data.get('cycle', '')
+        
+        mechanism_title = mechanism.get('title', '')
+        mechanism_description = mechanism.get('description', '')
+        mechanism_symptoms = ', '.join(mechanism.get('relevant_symptoms', []))
+        
+        query = (
+            f"User symptoms: {symptoms}. "
+            f"User goals: {goals}. "
+            f"Cycle phase: {cycle}. "
+            f"Mechanism: {mechanism_title}. "
+            f"Mechanism description: {mechanism_description}. "
+            f"Mechanism symptoms: {mechanism_symptoms}. "
+            f"Looking for strategies that specifically address {mechanism_title} and help with {mechanism_symptoms}."
+        )
+        
+        # Retrieve strategies for this mechanism
+        docs = strategy_retriever.invoke(query)
+        strategies = [doc.metadata for doc in docs]
+        
+        print(f"Found {len(strategies)} strategies for mechanism: {mechanism_title}")
+        return strategies
+        
+    except Exception as e:
+        print(f"Error retrieving strategies for mechanism {mechanism.get('title', 'Unknown')}: {e}")
+        return []
+
+def get_strategies_for_mechanisms(mechanisms: List[Dict], intake_data: Dict[str, Any]) -> List[Dict]:
+    """
+    Retrieve strategies for multiple mechanisms, avoiding duplicates.
+    
+    Args:
+        mechanisms: List of mechanism dictionaries
+        intake_data: User intake data for context
+    
+    Returns:
+        List of unique strategy dictionaries
+    """
+    
+    all_strategies = []
+    seen_strategies = set()
+    
+    for mechanism in mechanisms:
+        mechanism_strategies = get_strategies_for_mechanism(mechanism, intake_data)
+        
+        for strategy in mechanism_strategies:
+            # Use strategy name as unique identifier
+            strategy_key = strategy.get('Strategy Name', '')
+            if strategy_key and strategy_key not in seen_strategies:
+                all_strategies.append(strategy)
+                seen_strategies.add(strategy_key)
+    
+    print(f"Total unique strategies found for {len(mechanisms)} mechanisms: {len(all_strategies)}")
+    return all_strategies
+
 def find_related_mechanism_advanced(strategy: Dict, mechanisms: List[Dict]) -> str:
     """Advanced mechanism linking using semantic similarity."""
     
     if not mechanisms:
         return str(uuid.uuid4())
     
-    strategy_text = f"{strategy.get('Explanation', '')} {strategy.get('Why', '')}".lower()
-    strategy_symptoms = strategy.get('helps_with', '').lower()
+    strategy_text = f"{strategy.get('What will you be doing', '')} {strategy.get('Why does it work', '')}".lower()
+    strategy_symptoms = strategy.get('Specific symptoms', '').lower()
     
     best_mechanism = mechanisms[0]
     best_score = 0
