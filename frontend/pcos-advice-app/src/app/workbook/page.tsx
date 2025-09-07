@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
-import { WorkbookData, UploadData, Mechanism, Intervention } from '../../types';
+import { WorkbookData, UploadData, Intervention } from '../../types';
 import MechanismCard from '../../components/MechanismCard';
 import WorkbookSection from '../../components/WorkbookSection';
 import WorkbookChatInterface from '../../components/WorkbookChatInterface';
@@ -67,14 +67,6 @@ export default function WorkbookPage() {
     setWorkbookData(prev => prev ? { ...prev, ...updatedData } : null);
   };
 
-  const handleMechanismUpdate = (updatedMechanism: Mechanism) => {
-    if (workbookData) {
-      const updatedMechanisms = workbookData.mechanisms.map(m => 
-        m.id === updatedMechanism.id ? updatedMechanism : m
-      );
-      setWorkbookData({ ...workbookData, mechanisms: updatedMechanisms });
-    }
-  };
 
   const handleInterventionUpdate = (newIntervention: Intervention) => {
     if (workbookData) {
@@ -171,7 +163,6 @@ export default function WorkbookPage() {
                   key={mechanism.id}
                   mechanism={mechanism}
                   interventions={workbookData?.interventions || []}
-                  onUpdate={handleMechanismUpdate}
                   onInterventionUpdate={handleInterventionUpdate}
                 />
               ))}

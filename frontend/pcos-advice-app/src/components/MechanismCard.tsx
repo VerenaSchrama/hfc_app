@@ -1,24 +1,19 @@
 'use client';
 import { useState } from 'react';
 import { Mechanism, Intervention } from '../types';
-import { Plus, Edit3, Save, X, Trash2, Lightbulb, Clock, ChevronDown, ChevronRight, MessageCircle, Target, BarChart3, Pencil } from 'lucide-react';
-import { createIntervention, updateIntervention } from '../lib/api';
+import { Plus, Edit3, Save, X, Lightbulb, Clock, ChevronDown, ChevronRight, MessageCircle, Target, BarChart3, Pencil } from 'lucide-react';
+import { createIntervention } from '../lib/api';
 
 interface MechanismCardProps {
   mechanism: Mechanism;
   interventions: Intervention[];
-  onUpdate: (updatedMechanism: Mechanism) => void;
   onInterventionUpdate: (newIntervention: Intervention) => void;
 }
 
-export default function MechanismCard({ mechanism, interventions, onUpdate, onInterventionUpdate }: MechanismCardProps) {
+export default function MechanismCard({ mechanism, interventions, onInterventionUpdate }: MechanismCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditingMechanism, setIsEditingMechanism] = useState(false);
-  const [editedMechanism, setEditedMechanism] = useState(mechanism);
   const [isAddingIntervention, setIsAddingIntervention] = useState(false);
-  const [newIntervention, setNewIntervention] = useState({ title: '', description: '', tracking_frequency: 'daily' });
-  const [editingInterventionId, setEditingInterventionId] = useState<string | null>(null);
-  const [editedIntervention, setEditedIntervention] = useState<Partial<Intervention>>({});
+  const [newIntervention, setNewIntervention] = useState({ title: '', description: '', tracking_frequency: 'daily' as 'daily' | 'weekly' | 'as_needed' });
   const [personalNotes, setPersonalNotes] = useState('Focus on timing of meals and exercise for better insulin sensitivity.');
 
   const mechanismInterventions = interventions.filter(
@@ -43,25 +38,6 @@ export default function MechanismCard({ mechanism, interventions, onUpdate, onIn
     }
   };
 
-  const handleEditMechanism = () => {
-    setIsEditingMechanism(true);
-    setEditedMechanism(mechanism);
-  };
-
-  const handleSaveMechanism = async () => {
-    try {
-      // TODO: Implement mechanism update API call
-      onUpdate(editedMechanism);
-      setIsEditingMechanism(false);
-    } catch (error) {
-      console.error('Error updating mechanism:', error);
-    }
-  };
-
-  const handleCancelMechanism = () => {
-    setIsEditingMechanism(false);
-    setEditedMechanism(mechanism);
-  };
 
   const handleAddIntervention = () => {
     setIsAddingIntervention(true);
@@ -88,26 +64,14 @@ export default function MechanismCard({ mechanism, interventions, onUpdate, onIn
   };
 
   const handleEditIntervention = (intervention: Intervention) => {
-    setEditingInterventionId(intervention.id);
-    setEditedIntervention(intervention);
+    // TODO: Implement intervention editing functionality
+    console.log('Edit intervention:', intervention);
   };
 
-  const handleUpdateIntervention = async (interventionId: string) => {
-    try {
-      await updateIntervention(interventionId, editedIntervention);
-      setEditingInterventionId(null);
-      setEditedIntervention({});
-      // Refresh data
-      window.location.reload();
-    } catch (error) {
-      console.error('Error updating intervention:', error);
-    }
-  };
 
   const handleCancel = () => {
     setIsAddingIntervention(false);
-    setEditingInterventionId(null);
-    setNewIntervention({ title: '', description: '', tracking_frequency: 'daily' });
+    setNewIntervention({ title: '', description: '', tracking_frequency: 'daily' as 'daily' | 'weekly' | 'as_needed' });
   };
 
   return (
