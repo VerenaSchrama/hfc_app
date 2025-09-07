@@ -314,13 +314,15 @@ BOOK CONTEXT:
 {book_context}
 
 TASK:
-Identify 3-5 key hormonal mechanisms that are most relevant to this user's profile. For each mechanism, provide:
+Identify 1-3 key hormonal mechanisms that are most relevant to this user's profile. Only include mechanisms you are confident about (confidence score 70+). If you're not sure about a mechanism, don't include it. For each mechanism, provide:
 
 1. **Mechanism Name**: Clear, specific name (e.g., "Insulin Resistance", "Chronic Inflammation")
 2. **Description**: 2-3 sentences explaining what this mechanism is and how it relates to their symptoms
-3. **Confidence Score**: 0-100 based on how well it matches their profile
+3. **Confidence Score**: 70-100 based on how well it matches their profile (only include if 70+)
 4. **Relevant Symptoms**: Which of their symptoms this mechanism could be causing
 5. **Source Evidence**: Specific references from the book content that support this mechanism
+
+IMPORTANT: Only include mechanisms with confidence score 70 or higher. If you're not confident about a mechanism, don't include it. It's better to have 1-2 high-confidence mechanisms than 3 low-confidence ones.
 
 MECHANISM CATEGORIES TO CONSIDER:
 - Blood Sugar & Insulin Issues (insulin resistance, blood sugar dysregulation)
@@ -387,24 +389,33 @@ def call_gpt_for_mechanisms(prompt: str, user_id: int) -> List[Dict]:
         response_data = json.loads(response.choices[0].message.content)
         mechanisms_data = response_data.get('mechanisms', [])
         
-        # Convert to standard format
+        # Convert to standard format and filter by confidence
         mechanisms = []
         for mechanism_data in mechanisms_data:
-            mechanism = {
-                "id": str(uuid.uuid4()),
-                "user_id": user_id,
-                "title": mechanism_data.get("title", ""),
-                "description": mechanism_data.get("description", ""),
-                "confidence_score": mechanism_data.get("confidence_score", 70),
-                "relevant_symptoms": mechanism_data.get("relevant_symptoms", []),
-                "source_evidence": mechanism_data.get("source_evidence", ""),
-                "category": mechanism_data.get("category", ""),
-                "source": "gpt_rag",
-                "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat()
-            }
-            mechanisms.append(mechanism)
+            confidence_score = mechanism_data.get("confidence_score", 70)
+            
+            # Only include mechanisms with confidence score 70 or higher
+            if confidence_score >= 70:
+                mechanism = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": user_id,
+                    "title": mechanism_data.get("title", ""),
+                    "description": mechanism_data.get("description", ""),
+                    "confidence_score": confidence_score,
+                    "relevant_symptoms": mechanism_data.get("relevant_symptoms", []),
+                    "source_evidence": mechanism_data.get("source_evidence", ""),
+                    "category": mechanism_data.get("category", ""),
+                    "source": "gpt_rag",
+                    "created_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat()
+                }
+                mechanisms.append(mechanism)
         
+        # Sort by confidence score (highest first) and limit to max 3
+        mechanisms.sort(key=lambda x: x["confidence_score"], reverse=True)
+        mechanisms = mechanisms[:3]
+        
+        print(f"GPT detected {len(mechanisms)} mechanisms with confidence >= 70")
         return mechanisms
         
     except Exception as e:
