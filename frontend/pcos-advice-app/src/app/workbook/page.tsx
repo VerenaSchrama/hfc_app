@@ -24,6 +24,12 @@ export default function WorkbookPage() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (isLoggedIn && !loading) {
+      loadWorkbook();
+    }
+  }, [isLoggedIn, loading]);
+
   if (!mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -31,12 +37,6 @@ export default function WorkbookPage() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (isLoggedIn && !loading) {
-      loadWorkbook();
-    }
-  }, [isLoggedIn, loading]);
 
   const loadWorkbook = async () => {
     try {
