@@ -265,7 +265,7 @@ export async function getWorkbook(): Promise<{success: boolean, workbook: Workbo
   if (!res.ok) {
     console.log('getWorkbook - Response not ok:', res.status, res.statusText);
     // Return empty workbook instead of throwing error
-    return { success: false, workbook: { mechanisms: [], interventions: [], reflections: [], last_updated: new Date().toISOString() } };
+    return { success: false, workbook: { mechanisms: [], interventions: [], reflections: [], entries: [], last_updated: new Date().toISOString() } };
   }
   return res.json();
 }

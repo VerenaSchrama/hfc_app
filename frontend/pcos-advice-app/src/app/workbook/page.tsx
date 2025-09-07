@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, auth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
@@ -22,25 +22,7 @@ export default function WorkbookPage() {
   const [showAddMechanism, setShowAddMechanism] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isLoggedIn && !loading) {
-      loadWorkbook();
-    }
-  }, [isLoggedIn, loading]);
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  const loadWorkbook = async () => {
+  const loadWorkbook = useCallback(async () => {
     try {
       setIsLoading(true);
       console.log('Loading workbook...');
@@ -99,7 +81,25 @@ export default function WorkbookPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn && !loading) {
+      loadWorkbook();
+    }
+  }, [isLoggedIn, loading, loadWorkbook]);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleWorkbookUpdate = (updatedData: Partial<WorkbookData>) => {
     setWorkbookData(prev => prev ? { ...prev, ...updatedData } : null);
