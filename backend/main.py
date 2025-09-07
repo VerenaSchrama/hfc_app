@@ -227,8 +227,10 @@ async def get_strategy_details(strategy_name: str):
 @app.post("/api/v1/advice")
 async def advice(intake_data: IntakeData):
     #Receives user intake data and returns general advice from the RAG pipeline.
+    # DEPRECATED: Use /api/v1/chat for dynamic questions
     response = get_advice(intake_data.dict())
     return response
+
 
 @app.post("/api/v1/register", response_model=Token)
 def register(user: UserCreate):
@@ -326,6 +328,7 @@ async def set_strategy(request: Request, data: dict = Body(...)):
 
 @app.post('/api/v1/chat')
 async def chat(request: Request, data: ChatRequest):
+    """Enhanced chat endpoint with dynamic user questions and profile context."""
     try:
         user = await get_current_user(request)
         from db import SupabaseDB
@@ -364,16 +367,15 @@ async def chat(request: Request, data: ChatRequest):
             except Exception as e:
                 pass
         
-        # 4. Build user profile context
-        user_profile_context = f"""
-User Profile:
-- Email: {user['email']}
-- Symptoms: {', '.join(symptom_names) if symptom_names else 'None'}
-- Goals: {user.get('goals', 'None')}
-- Current Strategy: {user.get('current_strategy', 'None')}
-- Strategy Details: {strategy_details if strategy_details else 'None'}
-- Progress/Logs: {logs_summary if logs_summary else 'None'}
-"""
+        # 4. Build user profile context using new function
+        from rag_pipeline import build_user_context
+        user_context = build_user_context({
+            'symptoms': symptom_names,
+            'goals': user.get('goals', []),
+            'cycle': user.get('cycle_phase', ''),
+            'dietaryRestrictions': user.get('dietary_restrictions', []),
+            'extraThoughts': user.get('additional_notes', '')
+        })
         
         # 5. Retrieve chat history
         try:
@@ -388,15 +390,10 @@ User Profile:
         except Exception as e:
             pass
         
-        # 7. Call RAG LLM with user profile context, chat history, and question
+        # 7. Call NEW RAG system with user's actual question and context
         try:
-            rag_input = {
-                'user_profile': user_profile_context,
-                'chat_history': history,
-                'question': data.question
-            }
-            result = generate_advice(rag_input)
-            # generate_advice always returns a dict with 'answer' key
+            from rag_pipeline import generate_advice
+            result = generate_advice(data.question, user_context)
             answer = result['answer']
         except Exception as e:
             answer = "Sorry, I'm having trouble processing your request right now. Please try again later."

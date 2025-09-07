@@ -62,8 +62,38 @@ def ensure_list(val):
     return [val]
 
 
+def build_user_context(user_input: dict) -> str:
+    """Build context string from user intake data for RAG queries."""
+    symptoms = ensure_list(user_input.get('symptoms'))
+    symptoms_note = user_input.get('symptoms_note', '')
+    goals = ensure_list(user_input.get('goals'))
+    goals_note = user_input.get('goals_note', '')
+    preferences = ensure_list(user_input.get('dietaryRestrictions')) or ensure_list(user_input.get('preferences'))
+    dietary_note = user_input.get('dietaryRestrictions_note', '')
+    cycle = user_input.get('cycle', '')
+    reason = user_input.get('reason', '')
+    whatWorks = user_input.get('whatWorks', '')
+    extraThoughts = user_input.get('extraThoughts', '')
+
+    context = (
+        f"User Profile:\n"
+        f"- Symptoms: {', '.join(symptoms)}\n"
+        + (f"- Symptom notes: {symptoms_note}\n" if symptoms_note else "")
+        + f"- Goals: {', '.join(goals)}\n"
+        + (f"- Goals notes: {goals_note}\n" if goals_note else "")
+        + f"- Dietary restrictions: {', '.join(preferences)}\n"
+        + (f"- Dietary notes: {dietary_note}\n" if dietary_note else "")
+        + f"- Cycle phase: {cycle}\n"
+        + (f"- Reason for using app: {reason}\n" if reason else "")
+        + (f"- What already works: {whatWorks}\n" if whatWorks else "")
+        + (f"- Additional thoughts: {extraThoughts}\n" if extraThoughts else "")
+    )
+    
+    return context
+
 def build_question(user_input: dict) -> str:
-    """Build a question from user input for the chatbot, using all intakeData fields and optional notes."""
+    """Build a question from user input for the chatbot, using all intakeData fields and optional notes.
+    DEPRECATED: Use build_user_context() + user's actual question instead."""
     symptoms = ensure_list(user_input.get('symptoms'))
     symptoms_note = user_input.get('symptoms_note', '')
     goals = ensure_list(user_input.get('goals'))
@@ -92,12 +122,48 @@ def build_question(user_input: dict) -> str:
     return question
 
 
-def generate_advice(user_input: dict) -> dict:
-    """Generate advice using the chatbot approach with user profile context."""
+def generate_advice(user_question: str, user_context: str = None) -> dict:
+    """Generate advice using the chatbot approach with user's actual question and context."""
     if not strategy_retriever:
         return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
     
-    # Build the question from user input
+    # Combine user's actual question with their context
+    if user_context:
+        full_question = f"{user_context}\n\nUser Question: {user_question}"
+    else:
+        full_question = user_question
+    
+    # Create a conversational chain with memory
+    from langchain.chains import ConversationalRetrievalChain
+    from langchain.memory import ConversationBufferMemory
+    
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        return_messages=True
+    )
+    
+    # Create the chain
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=strategy_retriever,
+        memory=memory,
+        return_source_documents=True,
+        verbose=False
+    )
+    
+    try:
+        # Invoke the chain with the user's actual question
+        result = qa_chain.invoke({"question": full_question})
+        return {"answer": result["answer"]}
+    except Exception as e:
+        return {"answer": "I'm sorry, but I encountered an error while processing your request. Please try again."}
+
+def generate_advice_legacy(user_input: dict) -> dict:
+    """Legacy function for backward compatibility. DEPRECATED: Use generate_advice() with actual user questions."""
+    if not strategy_retriever:
+        return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
+    
+    # Build the question from user input (legacy method)
     question = build_question(user_input)
     
     # Create a conversational chain with memory

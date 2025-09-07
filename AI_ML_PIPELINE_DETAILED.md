@@ -134,9 +134,11 @@ strategy_retriever = strategy_vectorstore.as_retriever(search_kwargs={"k": 3})
 ```
 
 ### **3.2 Query Building & Context Construction**
+
+**NEW Dynamic System** (Fixed):
 ```python
-def build_question(user_input: dict) -> str:
-    """Build a comprehensive question from user intake data."""
+def build_user_context(user_input: dict) -> str:
+    """Build context string from user intake data for RAG queries."""
     symptoms = ensure_list(user_input.get('symptoms'))
     goals = ensure_list(user_input.get('goals'))
     preferences = ensure_list(user_input.get('dietaryRestrictions'))
@@ -145,6 +147,35 @@ def build_question(user_input: dict) -> str:
     whatWorks = user_input.get('whatWorks', '')
     extraThoughts = user_input.get('extraThoughts', '')
 
+    context = (
+        f"User Profile:\n"
+        f"- Symptoms: {', '.join(symptoms)}\n"
+        + f"- Goals: {', '.join(goals)}\n"
+        + f"- Dietary restrictions: {', '.join(preferences)}\n"
+        + f"- Cycle phase: {cycle}\n"
+        + f"- Reason for using app: {reason}\n"
+        + f"- What already works: {whatWorks}\n"
+        + f"- Additional thoughts: {extraThoughts}\n"
+    )
+    return context
+
+def generate_advice(user_question: str, user_context: str = None) -> dict:
+    """Generate advice using user's actual question and context."""
+    if user_context:
+        full_question = f"{user_context}\n\nUser Question: {user_question}"
+    else:
+        full_question = user_question
+    
+    # Use RAG chain with user's actual question
+    result = qa_chain.invoke({"question": full_question})
+    return {"answer": result["answer"]}
+```
+
+**LEGACY Fixed System** (DEPRECATED):
+```python
+def build_question(user_input: dict) -> str:
+    """Build a comprehensive question from user intake data."""
+    # ... (same as above)
     question = (
         f"My symptoms are: {', '.join(symptoms)}. "
         + f"My goals are: {', '.join(goals)}. "
@@ -153,10 +184,15 @@ def build_question(user_input: dict) -> str:
         + f"My reason for using this app: {reason}. "
         + f"What already works for me: {whatWorks}. "
         + f"Extra thoughts: {extraThoughts}. "
-        + "What should I eat?"
+        + "What should I eat?"  # ← FIXED HARDCODED QUESTION
     )
     return question
 ```
+
+**Key Improvements**:
+- **Dynamic Questions**: Users can ask about sleep, exercise, supplements, etc.
+- **Better Context**: Profile provides background, question drives response
+- **Responsive**: Answers match what users actually want to know
 
 ### **3.3 RAG Chain Implementation**
 ```python
@@ -308,11 +344,58 @@ def find_related_mechanism(strategy: Dict, mechanisms: List[Dict]) -> str:
 
 ## 🔄 **Complete Data Flow**
 
-### **End-to-End Process:**
+### **NEW Dynamic System (Fixed):**
+```
+1. User Intake Data → User Profile Context
+   ↓
+2. User's Actual Question (Dynamic)
+   ↓
+3. Context + Question → RAG Query
+   ↓
+4. Vector Search (ChromaDB + OpenAI Embeddings)
+   ↓
+5. Strategy Retrieval (Top-K Similarity)
+   ↓
+6. GPT-based Mechanism Detection
+   ↓
+7. Intervention Mapping (Strategy → Mechanism)
+   ↓
+8. Confidence Scoring (GPT-based)
+   ↓
+9. Database Storage (Supabase + SQLAlchemy)
+   ↓
+10. Personalized Workbook Generation
+```
+
+### **Real-time Chat Integration (FIXED):**
+```python
+def generate_advice(user_question: str, user_context: str = None) -> dict:
+    """Generate contextual advice with user's actual question."""
+    
+    # Combine user's actual question with their context
+    if user_context:
+        full_question = f"{user_context}\n\nUser Question: {user_question}"
+    else:
+        full_question = user_question
+    
+    # Create conversational chain with memory
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=strategy_retriever,
+        memory=memory,
+        return_source_documents=True
+    )
+    
+    # Generate response to user's actual question
+    result = qa_chain.invoke({"question": full_question})
+    return {"answer": result["answer"]}
+```
+
+### **LEGACY Fixed System (DEPRECATED):**
 ```
 1. User Intake Data
    ↓
-2. Query Building (build_question)
+2. Query Building (build_question) → "What should I eat?" (FIXED)
    ↓
 3. Vector Search (ChromaDB + OpenAI Embeddings)
    ↓
@@ -329,26 +412,10 @@ def find_related_mechanism(strategy: Dict, mechanisms: List[Dict]) -> str:
 9. Personalized Workbook Generation
 ```
 
-### **Real-time Chat Integration:**
-```python
-def generate_advice(user_input: dict) -> dict:
-    """Generate contextual advice with conversation memory."""
-    
-    # Build question from user input
-    question = build_question(user_input)
-    
-    # Create conversational chain with memory
-    qa_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=strategy_retriever,
-        memory=memory,
-        return_source_documents=True
-    )
-    
-    # Generate response
-    result = qa_chain.invoke({"question": question})
-    return {"answer": result["answer"]}
-```
+**Key Improvements**:
+- **Dynamic Questions**: Users can ask about sleep, exercise, supplements, etc.
+- **Better Context**: Profile provides background, question drives response
+- **Responsive**: Answers match what users actually want to know
 
 ---
 
