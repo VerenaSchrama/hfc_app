@@ -151,6 +151,7 @@ export default function WorkbookPage() {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">Your Personalized Workbook</h1>
               <p className="text-secondary text-lg">Track your hormonal mechanisms and personalized interventions</p>
+              {/* Updated design - v2 */}
             </div>
 
             {/* Mechanisms with Interventions */}
