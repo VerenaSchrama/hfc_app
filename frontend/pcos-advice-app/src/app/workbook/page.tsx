@@ -116,10 +116,38 @@ export default function WorkbookPage() {
     setShowUploadModal(false);
   };
 
-  if (loading || isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Please log in</h2>
+          <p className="text-text-muted mb-6">You need to be logged in to access your workbook.</p>
+          <button 
+            onClick={() => router.push('/login')}
+            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading your workbook...</p>
+        </div>
       </div>
     );
   }
