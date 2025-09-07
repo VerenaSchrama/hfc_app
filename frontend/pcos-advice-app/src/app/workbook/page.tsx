@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../lib/auth';
+import { useRouter } from 'next/navigation';
+import { useAuth, auth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
 import { WorkbookData, UploadData, Intervention } from '../../types';
 import MechanismCard from '../../components/MechanismCard';
@@ -12,6 +13,7 @@ import { Upload, Archive, MessageCircle, Plus } from 'lucide-react';
 
 export default function WorkbookPage() {
   const { isLoggedIn, loading } = useAuth();
+  const router = useRouter();
   const [workbookData, setWorkbookData] = useState<WorkbookData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -41,19 +43,41 @@ export default function WorkbookPage() {
   const loadWorkbook = async () => {
     try {
       setIsLoading(true);
+      console.log('Loading workbook...');
+      
+      // Check if user is authenticated
+      const token = auth.getToken();
+      console.log('Auth token exists:', !!token);
+      
       const response = await getWorkbook();
+      console.log('Get workbook response:', response);
       
       if (response.success && response.workbook) {
+        console.log('Workbook found:', response.workbook);
         setWorkbookData(response.workbook);
       } else {
+        console.log('No workbook found, checking for intake data...');
         // If no workbook exists, generate one from intake data
         const intakeData = localStorage.getItem('intakeData');
+        console.log('Intake data exists:', !!intakeData);
+        
         if (intakeData) {
           const parsedIntake = JSON.parse(intakeData);
+          console.log('Parsed intake data:', parsedIntake);
+          
+          console.log('Generating workbook from intake data...');
           const generateResponse = await generateWorkbook(parsedIntake);
+          console.log('Generate workbook response:', generateResponse);
+          
           if (generateResponse.success) {
+            console.log('Workbook generated successfully:', generateResponse.workbook);
             setWorkbookData(generateResponse.workbook);
+          } else {
+            console.error('Failed to generate workbook:', generateResponse);
           }
+        } else {
+          console.log('No intake data found in localStorage, redirecting to intake...');
+          router.push('/intake');
         }
       }
     } catch (error) {
