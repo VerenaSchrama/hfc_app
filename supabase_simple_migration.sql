@@ -7,7 +7,11 @@ ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'suggested' CHECK (status IN
 
 -- Add status column to interventions table  
 ALTER TABLE interventions
-ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'suggested' CHECK (status IN ('suggested', 'active', 'archived'));
+ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'suggested' CHECK (status IN ('suggested', 'active', 'archived', 'completed'));
+
+-- Add trial_period_id column to interventions table to link with trial periods
+ALTER TABLE interventions
+ADD COLUMN IF NOT EXISTS trial_period_id INTEGER REFERENCES trial_periods(id) ON DELETE SET NULL;
 
 -- Create indexes for better performance on status queries
 CREATE INDEX IF NOT EXISTS idx_mechanisms_user_status ON mechanisms(user_id, status);

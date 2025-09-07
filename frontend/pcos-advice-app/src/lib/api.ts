@@ -387,4 +387,27 @@ export async function getSuggestedWorkbook(): Promise<{success: boolean, workboo
   });
   if (!res.ok) throw new Error('Failed to fetch suggested workbook');
   return res.json();
+}
+
+export async function completeIntervention(interventionId: string, trialData: {start_date: string, end_date: string, notes?: string}): Promise<{success: boolean, message: string, intervention: Intervention, mechanism: Mechanism, trial_period: any}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/interventions/${interventionId}/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(trialData),
+  });
+  if (!res.ok) throw new Error('Failed to complete intervention');
+  return res.json();
+}
+
+export async function getCompletedWorkbook(): Promise<{success: boolean, workbook: {interventions: Intervention[], trial_periods: Record<string, any>, last_updated: string}}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/completed`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to fetch completed workbook');
+  return res.json();
 } 

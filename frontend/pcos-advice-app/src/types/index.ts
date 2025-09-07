@@ -108,7 +108,7 @@ export interface Mechanism {
     user_notes?: string;
     confidence_score?: number; // From RAG pipeline
     source?: string;
-    status: 'suggested' | 'active' | 'archived';
+    status: 'suggested' | 'active' | 'archived' | 'completed';
     created_at: string;
     updated_at: string;
 }
@@ -123,7 +123,8 @@ export interface Intervention {
     tracking_frequency?: 'daily' | 'weekly' | 'as_needed';
     confidence_score?: number; // From RAG pipeline
     source?: string;
-    status: 'suggested' | 'active' | 'archived';
+    status: 'suggested' | 'active' | 'archived' | 'completed';
+    trial_period_id?: number;
     created_at: string;
     updated_at: string;
 }

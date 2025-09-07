@@ -95,7 +95,8 @@ class Intervention(Base):
     tracking_frequency = Column(String, nullable=True)  # 'daily', 'weekly', 'as_needed'
     confidence_score = Column(Integer, nullable=True)  # 0-100
     source = Column(String, nullable=True)
-    status = Column(String, default='suggested')  # 'suggested', 'active', 'archived'
+    status = Column(String, default='suggested')  # 'suggested', 'active', 'archived', 'completed'
+    trial_period_id = Column(Integer, ForeignKey('trial_periods.id'), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -112,6 +113,7 @@ class Intervention(Base):
             'confidence_score': self.confidence_score,
             'source': self.source,
             'status': self.status,
+            'trial_period_id': self.trial_period_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

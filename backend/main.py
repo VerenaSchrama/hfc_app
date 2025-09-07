@@ -977,6 +977,118 @@ async def get_suggested_workbook(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving suggested workbook: {str(e)}")
 
+@app.post('/api/v1/workbook/interventions/{intervention_id}/complete')
+async def complete_intervention(request: Request, intervention_id: str, trial_data: dict = Body(...)):
+    """Complete an intervention by assigning a trial period."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import Intervention, Mechanism, TrialPeriod
+        
+        # Get the intervention
+        intervention = db.query(Intervention).filter(
+            Intervention.id == intervention_id,
+            Intervention.user_id == user['id']
+        ).first()
+        
+        if not intervention:
+            db.close()
+            raise HTTPException(status_code=404, detail="Intervention not found")
+        
+        # Create trial period
+        trial_period = TrialPeriod(
+            user_id=user['id'],
+            strategy_name=intervention.title,
+            start_date=trial_data['start_date'],
+            end_date=trial_data['end_date'],
+            notes=trial_data.get('notes', '')
+        )
+        db.add(trial_period)
+        db.flush()  # Get the ID
+        
+        # Update intervention status to completed and link trial period
+        intervention.status = 'completed'
+        intervention.trial_period_id = trial_period.id
+        intervention.updated_at = datetime.utcnow()
+        
+        # Also activate the associated mechanism
+        mechanism = db.query(Mechanism).filter(
+            Mechanism.id == intervention.mechanism_id,
+            Mechanism.user_id == user['id']
+        ).first()
+        
+        if mechanism:
+            mechanism.status = 'active'
+            mechanism.updated_at = datetime.utcnow()
+        
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "message": "Intervention completed with trial period assigned",
+            "intervention": intervention.to_dict(),
+            "mechanism": mechanism.to_dict() if mechanism else None,
+            "trial_period": {
+                "id": trial_period.id,
+                "strategy_name": trial_period.strategy_name,
+                "start_date": trial_period.start_date.isoformat(),
+                "end_date": trial_period.end_date.isoformat(),
+                "notes": trial_period.notes
+            }
+        }
+        
+    except Exception as e:
+        db.rollback()
+        db.close()
+        raise HTTPException(status_code=500, detail=f"Error completing intervention: {str(e)}")
+
+@app.get('/api/v1/workbook/completed')
+async def get_completed_workbook(request: Request):
+    """Get user's completed interventions with trial periods."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import Intervention, TrialPeriod
+        
+        # Get completed interventions with trial period info
+        completed_interventions = db.query(Intervention).filter(
+            Intervention.user_id == user['id'],
+            Intervention.status == 'completed'
+        ).all()
+        
+        # Get trial periods for these interventions
+        trial_periods = {}
+        for intervention in completed_interventions:
+            if intervention.trial_period_id:
+                trial_period = db.query(TrialPeriod).filter(
+                    TrialPeriod.id == intervention.trial_period_id
+                ).first()
+                if trial_period:
+                    trial_periods[intervention.id] = {
+                        "id": trial_period.id,
+                        "strategy_name": trial_period.strategy_name,
+                        "start_date": trial_period.start_date.isoformat(),
+                        "end_date": trial_period.end_date.isoformat(),
+                        "notes": trial_period.notes
+                    }
+        
+        db.close()
+        
+        return {
+            "success": True,
+            "workbook": {
+                "interventions": [i.to_dict() for i in completed_interventions],
+                "trial_periods": trial_periods,
+                "last_updated": datetime.utcnow().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving completed workbook: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
