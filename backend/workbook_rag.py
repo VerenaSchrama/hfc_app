@@ -218,9 +218,9 @@ def get_user_workbook(user_id: int) -> Dict[str, Any]:
         db.close()
         
         return {
-            "mechanisms": [mechanism.__dict__ for mechanism in mechanisms],
-            "interventions": [intervention.__dict__ for intervention in interventions],
-            "reflections": [reflection.__dict__ for reflection in reflections],
+            "mechanisms": [mechanism.to_dict() for mechanism in mechanisms],
+            "interventions": [intervention.to_dict() for intervention in interventions],
+            "reflections": [reflection.to_dict() for reflection in reflections],
             "last_updated": datetime.utcnow().isoformat()
         }
         

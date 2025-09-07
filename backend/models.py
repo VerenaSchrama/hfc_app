@@ -67,6 +67,19 @@ class Mechanism(Base):
     source = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'description': self.description,
+            'user_notes': self.user_notes,
+            'confidence_score': self.confidence_score,
+            'source': self.source,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
 
 class Intervention(Base):
     __tablename__ = 'interventions'
@@ -82,6 +95,22 @@ class Intervention(Base):
     source = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'mechanism_id': self.mechanism_id,
+            'title': self.title,
+            'description': self.description,
+            'user_notes': self.user_notes,
+            'is_tracking': self.is_tracking,
+            'tracking_frequency': self.tracking_frequency,
+            'confidence_score': self.confidence_score,
+            'source': self.source,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
 
 class DailyReflection(Base):
     __tablename__ = 'daily_reflections'
@@ -96,6 +125,21 @@ class DailyReflection(Base):
     additional_notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'date': self.date.isoformat() if self.date else None,
+            'energy_level': self.energy_level,
+            'mood': self.mood,
+            'symptoms': self.symptoms,
+            'notes': self.notes,
+            'interventions_applied': self.interventions_applied,
+            'additional_notes': self.additional_notes,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
 
 class WorkbookEntry(Base):
     __tablename__ = 'workbook_entries'
