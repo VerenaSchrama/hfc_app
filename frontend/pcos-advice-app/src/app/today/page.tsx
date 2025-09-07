@@ -22,7 +22,6 @@ export default function TodayPage() {
   const [strategy, setStrategy] = useState<StrategyDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [trialPeriod, setTrialPeriod] = useState<TrialPeriod | null>(null);
-  const [currentDay, setCurrentDay] = useState(0);
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -56,20 +55,6 @@ export default function TodayPage() {
     fetchProfileAndData();
   }, [loading, isLoggedIn]); // Add loading and isLoggedIn to dependencies
 
-  useEffect(() => {
-    // Fetch logs for progress bar
-    const fetchLogs = async () => {
-      if (trialPeriod) {
-        const today = new Date();
-        const start = new Date(trialPeriod.start_date);
-        setCurrentDay(Math.max(1, Math.min(
-          Math.floor((today.getTime() - start.getTime()) / (1000*60*60*24)) + 1,
-          Math.floor((new Date(trialPeriod.end_date).getTime() - start.getTime()) / (1000*60*60*24)) + 1
-        )));
-      }
-    };
-    fetchLogs();
-  }, [trialPeriod]);
 
   if (loading || !isLoggedIn) return null;
   if (error) {
@@ -110,17 +95,6 @@ export default function TodayPage() {
           </div>
           <div className="flex flex-col sm:flex-row justify-between items-center w-full">
             <div className="flex-1">
-              <div className="text-sm text-gray-500 mb-1">
-                Day {currentDay} of {Math.floor((new Date(trialPeriod.end_date).getTime() - new Date(trialPeriod.start_date).getTime()) / (1000*60*60*24)) + 1}
-              </div>
-              {/* Progress Bar */}
-              <div className="w-full h-3 bg-pink-100 rounded-full overflow-hidden mb-2">
-                <div
-                  className="h-full bg-pink-400 transition-all duration-300"
-                  style={{ width: `${Math.round((currentDay / (Math.floor((new Date(trialPeriod.end_date).getTime() - new Date(trialPeriod.start_date).getTime()) / (1000*60*60*24)) + 1)) * 100)}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-400 mb-2">Progress through your strategy period</div>
               <div className="text-sm text-gray-500 mb-2 sm:mb-0">
                 Successfully applied: 0 days
               </div>

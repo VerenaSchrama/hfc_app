@@ -65,13 +65,6 @@ export default function HomePage() {
             <h3 className="text-lg font-semibold text-foreground mb-2">AI Assistant</h3>
             <p className="text-text-muted text-sm">Get personalized advice and answers about your health journey</p>
           </div>
-          <div className="bg-card border border-subtle rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-xl">📊</span>
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Progress Tracking</h3>
-            <p className="text-text-muted text-sm">Monitor your daily reflections and intervention effectiveness</p>
-          </div>
         </div>
 
         {/* CTA Section */}

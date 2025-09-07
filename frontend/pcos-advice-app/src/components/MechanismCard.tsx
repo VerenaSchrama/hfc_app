@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Mechanism, Intervention } from '../types';
-import { Plus, Edit3, Save, X, Lightbulb, Clock, ChevronDown, ChevronRight, MessageCircle, Target, BarChart3, Pencil } from 'lucide-react';
+import { Plus, Edit3, Save, X, Lightbulb, Clock, ChevronDown, ChevronRight, MessageCircle, Target } from 'lucide-react';
 import { createIntervention } from '../lib/api';
 
 interface MechanismCardProps {
@@ -14,7 +14,6 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAddingIntervention, setIsAddingIntervention] = useState(false);
   const [newIntervention, setNewIntervention] = useState({ title: '', description: '', tracking_frequency: 'daily' as 'daily' | 'weekly' | 'as_needed' });
-  const [personalNotes, setPersonalNotes] = useState('Focus on timing of meals and exercise for better insulin sensitivity.');
 
   const mechanismInterventions = interventions.filter(
     (i) => i.mechanism_id === mechanism.id
@@ -195,43 +194,6 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
             </div>
           </div>
 
-          {/* Progress Section */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <BarChart3 className="h-5 w-5 text-blue-500" />
-              <h4 className="font-semibold text-gray-900">Progress</h4>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Weekly Progress</span>
-                <span className="text-sm font-medium text-green-600">75%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '75%' }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Notes Section */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-gray-900">Notes</h4>
-              <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                <Pencil className="h-4 w-4" />
-              </button>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <textarea
-                value={personalNotes}
-                onChange={(e) => setPersonalNotes(e.target.value)}
-                className="w-full text-sm text-gray-700 resize-none focus:outline-none"
-                rows={3}
-                placeholder="Add your personal notes..."
-              />
-            </div>
-          </div>
         </div>
       )}
     </div>

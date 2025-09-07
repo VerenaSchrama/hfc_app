@@ -181,10 +181,3 @@ export interface UploadData {
     file?: File;
     source_url?: string;
 }
-
-export interface ProgressMetrics {
-    mechanisms_tracked: number;
-    interventions_active: number;
-    reflections_this_week: number;
-    completion_rate: number; // percentage
-} 
