@@ -262,7 +262,11 @@ export async function getWorkbook(): Promise<{success: boolean, workbook: Workbo
   const res = await fetch(`${API_BASE_URL}/api/v1/workbook`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
-  if (!res.ok) throw new Error('Failed to fetch workbook');
+  if (!res.ok) {
+    console.log('getWorkbook - Response not ok:', res.status, res.statusText);
+    // Return empty workbook instead of throwing error
+    return { success: false, workbook: { mechanisms: [], interventions: [], reflections: [], last_updated: new Date().toISOString() } };
+  }
   return res.json();
 }
 

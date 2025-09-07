@@ -62,11 +62,15 @@ export default function WorkbookPage() {
       const response = await getWorkbook();
       console.log('Get workbook response:', response);
       
-      if (response.success && response.workbook) {
-        console.log('Workbook found:', response.workbook);
+      // Check if workbook has any data (mechanisms or interventions)
+      const hasWorkbookData = response.success && response.workbook && 
+        (response.workbook.mechanisms.length > 0 || response.workbook.interventions.length > 0);
+      
+      if (hasWorkbookData) {
+        console.log('Workbook found with data:', response.workbook);
         setWorkbookData(response.workbook);
       } else {
-        console.log('No workbook found, checking for intake data...');
+        console.log('No workbook data found, checking for intake data...');
         // If no workbook exists, generate one from intake data
         const intakeData = localStorage.getItem('intakeData');
         console.log('Intake data exists:', !!intakeData);
