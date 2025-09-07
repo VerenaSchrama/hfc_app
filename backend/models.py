@@ -65,6 +65,7 @@ class Mechanism(Base):
     user_notes = Column(String, nullable=True)
     confidence_score = Column(Integer, nullable=True)  # 0-100
     source = Column(String, nullable=True)
+    status = Column(String, default='suggested')  # 'suggested', 'active', 'archived'
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -77,6 +78,7 @@ class Mechanism(Base):
             'user_notes': self.user_notes,
             'confidence_score': self.confidence_score,
             'source': self.source,
+            'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
@@ -93,6 +95,7 @@ class Intervention(Base):
     tracking_frequency = Column(String, nullable=True)  # 'daily', 'weekly', 'as_needed'
     confidence_score = Column(Integer, nullable=True)  # 0-100
     source = Column(String, nullable=True)
+    status = Column(String, default='suggested')  # 'suggested', 'active', 'archived'
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -108,6 +111,7 @@ class Intervention(Base):
             'tracking_frequency': self.tracking_frequency,
             'confidence_score': self.confidence_score,
             'source': self.source,
+            'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

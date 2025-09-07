@@ -347,4 +347,44 @@ export async function getArchive(): Promise<{success: boolean, archive: ArchiveI
   });
   if (!res.ok) throw new Error('Failed to fetch archive');
   return res.json();
+}
+
+// ===== NEW USER FLOW API FUNCTIONS =====
+
+export async function activateIntervention(interventionId: string): Promise<{success: boolean, message: string, intervention: Intervention, mechanism: Mechanism}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/interventions/${interventionId}/activate`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to activate intervention');
+  return res.json();
+}
+
+export async function archiveIntervention(interventionId: string): Promise<{success: boolean, message: string, intervention: Intervention, mechanism: Mechanism}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/interventions/${interventionId}/archive`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to archive intervention');
+  return res.json();
+}
+
+export async function getActiveWorkbook(): Promise<{success: boolean, workbook: WorkbookData}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/active`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to fetch active workbook');
+  return res.json();
+}
+
+export async function getSuggestedWorkbook(): Promise<{success: boolean, workbook: WorkbookData}> {
+  const token = auth.getToken();
+  const res = await fetch(`${API_BASE_URL}/api/v1/workbook/suggested`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Failed to fetch suggested workbook');
+  return res.json();
 } 

@@ -805,6 +805,178 @@ async def get_archive(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving archive: {str(e)}")
 
+# ===== NEW USER FLOW ENDPOINTS =====
+
+@app.post('/api/v1/workbook/interventions/{intervention_id}/activate')
+async def activate_intervention(request: Request, intervention_id: str):
+    """Activate an intervention and its associated mechanism."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import Intervention, Mechanism
+        
+        # Get the intervention
+        intervention = db.query(Intervention).filter(
+            Intervention.id == intervention_id,
+            Intervention.user_id == user['id']
+        ).first()
+        
+        if not intervention:
+            db.close()
+            raise HTTPException(status_code=404, detail="Intervention not found")
+        
+        # Update intervention status to active
+        intervention.status = 'active'
+        intervention.updated_at = datetime.utcnow()
+        
+        # Get and update the associated mechanism
+        mechanism = db.query(Mechanism).filter(
+            Mechanism.id == intervention.mechanism_id,
+            Mechanism.user_id == user['id']
+        ).first()
+        
+        if mechanism:
+            mechanism.status = 'active'
+            mechanism.updated_at = datetime.utcnow()
+        
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "message": "Intervention and mechanism activated successfully",
+            "intervention": intervention.to_dict(),
+            "mechanism": mechanism.to_dict() if mechanism else None
+        }
+        
+    except Exception as e:
+        db.rollback()
+        db.close()
+        raise HTTPException(status_code=500, detail=f"Error activating intervention: {str(e)}")
+
+@app.post('/api/v1/workbook/interventions/{intervention_id}/archive')
+async def archive_intervention(request: Request, intervention_id: str):
+    """Archive an intervention and its associated mechanism."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import Intervention, Mechanism
+        
+        # Get the intervention
+        intervention = db.query(Intervention).filter(
+            Intervention.id == intervention_id,
+            Intervention.user_id == user['id']
+        ).first()
+        
+        if not intervention:
+            db.close()
+            raise HTTPException(status_code=404, detail="Intervention not found")
+        
+        # Update intervention status to archived
+        intervention.status = 'archived'
+        intervention.updated_at = datetime.utcnow()
+        
+        # Get and update the associated mechanism
+        mechanism = db.query(Mechanism).filter(
+            Mechanism.id == intervention.mechanism_id,
+            Mechanism.user_id == user['id']
+        ).first()
+        
+        if mechanism:
+            mechanism.status = 'archived'
+            mechanism.updated_at = datetime.utcnow()
+        
+        db.commit()
+        db.close()
+        
+        return {
+            "success": True,
+            "message": "Intervention and mechanism archived successfully",
+            "intervention": intervention.to_dict(),
+            "mechanism": mechanism.to_dict() if mechanism else None
+        }
+        
+    except Exception as e:
+        db.rollback()
+        db.close()
+        raise HTTPException(status_code=500, detail=f"Error archiving intervention: {str(e)}")
+
+@app.get('/api/v1/workbook/active')
+async def get_active_workbook(request: Request):
+    """Get user's active mechanisms and interventions only."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import Mechanism, Intervention
+        
+        # Get active mechanisms
+        active_mechanisms = db.query(Mechanism).filter(
+            Mechanism.user_id == user['id'],
+            Mechanism.status == 'active'
+        ).all()
+        
+        # Get active interventions
+        active_interventions = db.query(Intervention).filter(
+            Intervention.user_id == user['id'],
+            Intervention.status == 'active'
+        ).all()
+        
+        db.close()
+        
+        return {
+            "success": True,
+            "workbook": {
+                "mechanisms": [m.to_dict() for m in active_mechanisms],
+                "interventions": [i.to_dict() for i in active_interventions],
+                "reflections": [],  # TODO: Add reflections
+                "entries": [],  # TODO: Add entries
+                "last_updated": datetime.utcnow().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving active workbook: {str(e)}")
+
+@app.get('/api/v1/workbook/suggested')
+async def get_suggested_workbook(request: Request):
+    """Get user's suggested mechanisms and interventions only."""
+    try:
+        user = await get_current_user(request)
+        
+        db = SessionLocal()
+        from models import Mechanism, Intervention
+        
+        # Get suggested mechanisms
+        suggested_mechanisms = db.query(Mechanism).filter(
+            Mechanism.user_id == user['id'],
+            Mechanism.status == 'suggested'
+        ).all()
+        
+        # Get suggested interventions
+        suggested_interventions = db.query(Intervention).filter(
+            Intervention.user_id == user['id'],
+            Intervention.status == 'suggested'
+        ).all()
+        
+        db.close()
+        
+        return {
+            "success": True,
+            "workbook": {
+                "mechanisms": [m.to_dict() for m in suggested_mechanisms],
+                "interventions": [i.to_dict() for i in suggested_interventions],
+                "reflections": [],
+                "entries": [],
+                "last_updated": datetime.utcnow().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving suggested workbook: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

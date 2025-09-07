@@ -214,11 +214,64 @@ def find_related_mechanism(strategy: Dict, mechanisms: List[Dict]) -> str:
     return best_mechanism["id"]
 
 def save_workbook_to_db(user_id: int, workbook_data: Dict[str, Any]) -> bool:
-    """Save generated workbook data to database."""
+    """Save generated workbook data to database with 'suggested' status."""
     
-    # TODO: Fix database saving - for now, just return True to allow frontend to work
-    print("Skipping database save for now - returning generated data directly")
-    return True
+    try:
+        db = SessionLocal()
+        
+        # Save mechanisms with 'suggested' status
+        for mechanism_data in workbook_data.get('mechanisms', []):
+            # Filter out extra fields that don't exist in the model
+            filtered_mechanism = {
+                'id': mechanism_data.get('id'),
+                'user_id': user_id,
+                'title': mechanism_data.get('title'),
+                'description': mechanism_data.get('description'),
+                'user_notes': mechanism_data.get('user_notes'),
+                'confidence_score': mechanism_data.get('confidence_score'),
+                'source': mechanism_data.get('source'),
+                'status': 'suggested',  # Set initial status as suggested
+                'created_at': datetime.utcnow(),
+                'updated_at': datetime.utcnow()
+            }
+            
+            mechanism = Mechanism(**filtered_mechanism)
+            db.add(mechanism)
+        
+        # Save interventions with 'suggested' status
+        for intervention_data in workbook_data.get('interventions', []):
+            # Filter out extra fields that don't exist in the model
+            filtered_intervention = {
+                'id': intervention_data.get('id'),
+                'user_id': user_id,
+                'mechanism_id': intervention_data.get('mechanism_id'),
+                'title': intervention_data.get('title'),
+                'description': intervention_data.get('description'),
+                'user_notes': intervention_data.get('user_notes'),
+                'is_tracking': intervention_data.get('is_tracking', False),
+                'tracking_frequency': intervention_data.get('tracking_frequency'),
+                'confidence_score': intervention_data.get('confidence_score'),
+                'source': intervention_data.get('source'),
+                'status': 'suggested',  # Set initial status as suggested
+                'created_at': datetime.utcnow(),
+                'updated_at': datetime.utcnow()
+            }
+            
+            intervention = Intervention(**filtered_intervention)
+            db.add(intervention)
+        
+        db.commit()
+        db.close()
+        
+        print(f"Successfully saved workbook data for user {user_id}")
+        return True
+        
+    except Exception as e:
+        print(f"Error saving workbook to database: {str(e)}")
+        if 'db' in locals():
+            db.rollback()
+            db.close()
+        return False
 
 def get_user_workbook(user_id: int) -> Dict[str, Any]:
     """Retrieve user's workbook data from database."""
