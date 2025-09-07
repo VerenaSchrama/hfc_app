@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageCircle, Heart, Upload } from 'lucide-react';
 
 interface WorkbookChatInterfaceProps {
@@ -9,6 +9,11 @@ interface WorkbookChatInterfaceProps {
 
 export default function WorkbookChatInterface({ workbookData }: WorkbookChatInterfaceProps) {
   const [message, setMessage] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const quickQuestions = [
     "How can I improve my insulin sensitivity faster?",
@@ -16,6 +21,21 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
     "Should I add any new interventions this week?",
     "How do I know if my cortisol is improving?"
   ];
+
+  if (!mounted) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 p-6 space-y-4">
+          <div className="bg-gray-100 rounded-lg p-4">
+            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div className="p-6 border-t border-subtle">
+          <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSendMessage = () => {
     if (message.trim()) {

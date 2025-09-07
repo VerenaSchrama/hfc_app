@@ -18,6 +18,11 @@ export default function WorkbookPage() {
   const [showChat, setShowChat] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showAddMechanism, setShowAddMechanism] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn && !loading) {
