@@ -6,7 +6,6 @@ import { useAuth, auth } from '../../lib/auth';
 import { getWorkbook, generateWorkbook } from '../../lib/api';
 import { WorkbookData, UploadData, Intervention } from '../../types';
 import MechanismCard from '../../components/MechanismCard';
-import WorkbookSection from '../../components/WorkbookSection';
 import WorkbookChatInterface from '../../components/WorkbookChatInterface';
 import UploadModal from '../../components/UploadModal';
 import { Upload, Archive, MessageCircle, Sparkles, Heart, Target, TrendingUp, BookOpen, Zap } from 'lucide-react';
@@ -104,7 +103,7 @@ export default function WorkbookPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoggedIn, router]);
+  }, [router]);
 
   useEffect(() => {
     setMounted(true);
@@ -124,9 +123,6 @@ export default function WorkbookPage() {
     );
   }
 
-  const handleWorkbookUpdate = (updatedData: Partial<WorkbookData>) => {
-    setWorkbookData(prev => prev ? { ...prev, ...updatedData } : null);
-  };
 
 
   const handleInterventionUpdate = (newIntervention: Intervention) => {

@@ -3,10 +3,16 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../../lib/auth';
 import { getWorkbook } from '../../lib/api';
+import { WorkbookData } from '../../types';
+
+interface WorkbookResponse {
+  success: boolean;
+  workbook: WorkbookData;
+}
 
 export default function DebugPage() {
   const [token, setToken] = useState<string | null>(null);
-  const [workbookData, setWorkbookData] = useState<any>(null);
+  const [workbookData, setWorkbookData] = useState<WorkbookResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,9 +34,9 @@ export default function DebugPage() {
       console.log('Workbook response:', response);
       
       setWorkbookData(response);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error testing workbook API:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
     }

@@ -22,23 +22,6 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
     (i) => i.mechanism_id === mechanism.id
   );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'monitoring': return 'bg-yellow-100 text-yellow-800';
-      case 'inactive': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-green-100 text-green-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active': return 'active';
-      case 'monitoring': return 'monitoring';
-      case 'inactive': return 'inactive';
-      default: return 'active';
-    }
-  };
 
 
   const handleAddIntervention = () => {
