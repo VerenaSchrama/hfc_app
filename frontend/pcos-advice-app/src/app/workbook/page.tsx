@@ -182,104 +182,88 @@ export default function WorkbookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 pb-20">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10"></div>
-        <div className="relative bg-white/80 backdrop-blur-sm border-b border-pink-200/50 px-6 py-12 shadow-lg">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                  <Sparkles className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                    My Workbook
-                  </h1>
-                  <p className="text-gray-600 text-xl">Your personalized hormonal health journey</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setShowChat(!showChat)}
-                  className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
-                  <MessageCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  {showChat ? 'Hide Chat' : 'Ask AI'}
-                </button>
-                <button
-                  onClick={() => setShowUploadModal(true)}
-                  className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
-                  <Upload className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  Upload
-                </button>
-                <button
-                  onClick={() => setShowArchive(!showArchive)}
-                  className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
-                  <Archive className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  Archive
-                </button>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">My Workbook</h1>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowChat(!showChat)}
+              className="flex items-center gap-2 px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {showChat ? 'Hide Chat' : 'Ask AI'}
+            </button>
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
+            >
+              <Upload className="h-4 w-4" />
+              Upload
+            </button>
+            <button
+              onClick={() => setShowArchive(!showArchive)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-500 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Archive className="h-4 w-4" />
+              Archive
+            </button>
           </div>
         </div>
-      </div>
 
-      <div className="flex h-screen">
+        <div className="flex h-screen">
         {/* Main Workbook Content */}
         <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'} overflow-y-auto`}>
-          <div className="max-w-7xl mx-auto p-8">
+          <div className="max-w-4xl mx-auto">
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-200/50 hover:shadow-xl transition-all duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
-                    <Target className="h-6 w-6 text-white" />
+                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                    <Target className="h-5 w-5 text-pink-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-900">{workbookData?.mechanisms?.length || 0}</p>
-                    <p className="text-gray-600 font-medium">Mechanisms</p>
+                    <p className="text-gray-600">Mechanisms</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-200/50 hover:shadow-xl transition-all duration-300">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <Zap className="h-6 w-6 text-white" />
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-900">{workbookData?.interventions?.length || 0}</p>
-                    <p className="text-gray-600 font-medium">Interventions</p>
+                    <p className="text-gray-600">Interventions</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-indigo-200/50 hover:shadow-xl transition-all duration-300">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-white" />
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-900">
                       {workbookData?.interventions?.filter(i => i.status === 'active').length || 0}
                     </p>
-                    <p className="text-gray-600 font-medium">Active</p>
+                    <p className="text-gray-600">Active</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Mechanisms Section */}
-            <div className="space-y-8">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Heart className="h-6 w-6 text-white" />
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <Heart className="h-5 w-5 text-pink-600" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900">Your Mechanisms</h2>
-                  <p className="text-gray-600 text-lg">Personalized strategies for your hormonal health</p>
+                  <h2 className="text-2xl font-semibold text-gray-900">Your Mechanisms</h2>
+                  <p className="text-gray-600">Personalized strategies for your hormonal health</p>
                 </div>
               </div>
 
@@ -301,17 +285,17 @@ export default function WorkbookPage() {
 
                 {/* Empty State */}
                 {(!workbookData?.mechanisms || workbookData.mechanisms.length === 0) && (
-                  <div className="text-center py-16">
-                    <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <BookOpen className="h-12 w-12 text-pink-500" />
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BookOpen className="h-8 w-8 text-pink-500" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">No mechanisms yet</h3>
-                    <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No mechanisms yet</h3>
+                    <p className="text-gray-600 mb-6 max-w-md mx-auto">
                       Complete your intake form to generate personalized mechanisms and interventions for your hormonal health journey.
                     </p>
                     <button 
                       onClick={() => router.push('/intake')}
-                      className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                      className="px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors font-semibold"
                     >
                       Complete Intake
                     </button>
@@ -324,15 +308,15 @@ export default function WorkbookPage() {
 
         {/* Chat Interface */}
         {showChat && (
-          <div className="w-1/3 border-l border-pink-200/50 bg-white/70 backdrop-blur-sm flex flex-col shadow-xl">
-            <div className="p-6 border-b border-pink-200/50 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
+          <div className="w-1/3 border-l border-gray-200 bg-white flex flex-col shadow-lg">
+            <div className="p-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <MessageCircle className="h-5 w-5 text-white" />
+                <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <MessageCircle className="h-4 w-4 text-pink-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">AI Assistant</h3>
-                  <p className="text-gray-600">Ask questions about your workbook</p>
+                  <h3 className="text-lg font-semibold text-gray-900">AI Assistant</h3>
+                  <p className="text-gray-600 text-sm">Ask questions about your workbook</p>
                 </div>
               </div>
             </div>
@@ -353,14 +337,14 @@ export default function WorkbookPage() {
 
       {/* Archive View */}
       {showArchive && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 w-full max-w-4xl h-96 overflow-y-auto shadow-2xl border border-pink-200/50">
-            <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl h-96 overflow-y-auto shadow-lg border border-gray-100">
+            <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
-                  <Archive className="h-5 w-5 text-white" />
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Archive className="h-4 w-4 text-gray-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Archive</h3>
+                <h3 className="text-xl font-semibold text-gray-900">Archive</h3>
               </div>
               <button
                 onClick={() => setShowArchive(false)}
@@ -378,6 +362,7 @@ export default function WorkbookPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
