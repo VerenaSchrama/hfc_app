@@ -146,22 +146,45 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Your Profile</h1>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 pb-20">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10"></div>
+        <div className="relative bg-white/80 backdrop-blur-sm border-b border-pink-200/50 px-6 py-12 shadow-lg">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                  <span className="text-white text-2xl">👤</span>
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                    Your Profile
+                  </h1>
+                  <p className="text-gray-600 text-xl">Manage your health journey</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-8">
 
         {/* Current Strategy */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Current Strategy</h2>
-              <p className="text-gray-600 mt-1">{trialPeriod ? trialPeriod.strategy_name : 'No active strategy'}</p>
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-pink-200/50 p-8 mb-8">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-xl">🎯</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Current Strategy</h2>
+                <p className="text-gray-600 mt-1 text-lg">{trialPeriod ? trialPeriod.strategy_name : 'No active strategy'}</p>
+              </div>
             </div>
             {trialPeriod && (
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold border border-green-200">
                 Active
               </span>
             )}
@@ -173,21 +196,21 @@ export default function ProfilePage() {
                   Day {currentDay} of {Math.floor((new Date(trialPeriod.end_date).getTime() - new Date(trialPeriod.start_date).getTime()) / (1000*60*60*24)) + 1}
                 </div>
                 {/* Progress Bar */}
-                <div className="w-full h-3 bg-pink-100 rounded-full overflow-hidden mb-2">
+                <div className="w-full h-4 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full overflow-hidden mb-4 shadow-inner">
                   <div
-                    className="h-full bg-pink-400 transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 shadow-lg"
                     style={{ width: `${Math.round((currentDay / (Math.floor((new Date(trialPeriod.end_date).getTime() - new Date(trialPeriod.start_date).getTime()) / (1000*60*60*24)) + 1)) * 100)}%` }}
                   ></div>
                 </div>
-                <div className="text-xs text-gray-400 mb-2">Progress through your strategy period</div>
-                <div className="text-sm text-gray-500 mb-2 sm:mb-0">
+                <div className="text-sm text-gray-600 mb-4 font-medium">Progress through your strategy period</div>
+                <div className="text-lg text-gray-700 mb-6 font-semibold">
                   Successfully applied: {daysApplied} days
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                  <button onClick={handleViewDetails} className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors">
+                <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                  <button onClick={handleViewDetails} className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold">
                     View Details
                   </button>
-                  <button type="button" onClick={handleNewStrategy} className="border border-pink-500 text-pink-600 font-semibold py-2 px-4 rounded-lg bg-white hover:bg-pink-50 transition-colors">
+                  <button type="button" onClick={handleNewStrategy} className="border-2 border-pink-500 text-pink-600 font-semibold py-3 px-6 rounded-xl bg-white hover:bg-pink-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     New Strategy
                   </button>
                   <button type="button" onClick={() => {
@@ -195,7 +218,7 @@ export default function ProfilePage() {
                     setNewStart(trialPeriod?.start_date || null);
                     setNewEnd(trialPeriod?.end_date || null);
                     setTrialError(null);
-                  }} className="border border-pink-500 text-pink-600 font-semibold py-2 px-4 rounded-lg bg-white hover:bg-pink-50 transition-colors">
+                  }} className="border-2 border-purple-500 text-purple-600 font-semibold py-3 px-6 rounded-xl bg-white hover:bg-purple-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     Change trial period
                   </button>
                 </div>
@@ -207,32 +230,37 @@ export default function ProfilePage() {
         </div>
 
         {/* User Profile */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Profile</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Goals</h3>
-              <div className="space-y-1">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-pink-200/50 p-8 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-lg">👤</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Your Profile</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Goals</h3>
+              <div className="space-y-2">
                 {(profile?.goals || []).map((goal: string, index: number) => (
-                  <div key={index} className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded">
+                  <div key={index} className="text-sm text-gray-700 bg-white/80 px-3 py-2 rounded-lg border border-pink-200 font-medium">
                     {goal}
                   </div>
                 ))}
               </div>
             </div>
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Symptoms</h3>
-              <div className="space-y-1">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-200">
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Symptoms</h3>
+              <div className="space-y-2">
                 {(profile?.symptoms || []).map((symptom: string, index: number) => (
-                  <div key={index} className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded">
+                  <div key={index} className="text-sm text-gray-700 bg-white/80 px-3 py-2 rounded-lg border border-purple-200 font-medium">
                     {symptom}
                   </div>
                 ))}
               </div>
             </div>
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Dietary Preferences</h3>
-              <div className="space-y-1">
+            <div className="bg-gradient-to-r from-indigo-50 to-pink-50 rounded-xl p-4 border border-indigo-200">
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Dietary Preferences</h3>
+              <div className="space-y-2">
                 {(() => {
                   let intake = null;
                   if (typeof window !== 'undefined') {
@@ -243,52 +271,57 @@ export default function ProfilePage() {
                   }
                   return (intake?.dietaryRestrictions || []).length > 0
                     ? intake.dietaryRestrictions.map((pref: string, idx: number) => (
-                        <div key={idx} className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded">{pref}</div>
+                        <div key={idx} className="text-sm text-gray-700 bg-white/80 px-3 py-2 rounded-lg border border-indigo-200 font-medium">{pref}</div>
                       ))
-                    : <div className="text-sm text-gray-400 italic">None specified</div>;
+                    : <div className="text-sm text-gray-500 italic">None specified</div>;
                 })()}
               </div>
             </div>
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Cycle Phase</h3>
-              <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded">
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
+              <h3 className="font-bold text-gray-900 mb-3 text-lg">Cycle Phase</h3>
+              <div className="text-sm text-gray-700 bg-white/80 px-3 py-2 rounded-lg border border-pink-200 font-medium mb-2">
                 {cyclePhase}
               </div>
-              <div className="text-xs text-gray-500 mt-2">
+              <div className="text-xs text-gray-600 leading-relaxed">
                 {cycleExplanation}
               </div>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <Link href="/intake" className="flex-1">
-              <button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
+              <button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 Update Profile
               </button>
             </Link>
           </div>
         </div>
         {/* Recent Progress */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Progress</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-pink-600">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-pink-200/50 p-8 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-lg">📊</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Recent Progress</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 border border-pink-200">
+              <div className="text-3xl font-bold text-pink-600 mb-2">
                 {todayLog?.applied_strategy ? '✓' : '✗'}
               </div>
-              <div className="text-sm text-gray-600">Strategy Followed Today</div>
+              <div className="text-sm text-gray-700 font-semibold">Strategy Followed Today</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-pink-600">{todayLog?.energy ? `${todayLog.energy}/5` : '-'}</div>
-              <div className="text-sm text-gray-600">Energy Level</div>
+            <div className="text-center bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
+              <div className="text-3xl font-bold text-purple-600 mb-2">{todayLog?.energy ? `${todayLog.energy}/5` : '-'}</div>
+              <div className="text-sm text-gray-700 font-semibold">Energy Level</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-pink-600">{todayLog?.mood ? todayLog.mood : '-'}</div>
-              <div className="text-sm text-gray-600">Mood</div>
+            <div className="text-center bg-gradient-to-r from-indigo-50 to-pink-50 rounded-xl p-6 border border-indigo-200">
+              <div className="text-3xl font-bold text-indigo-600 mb-2">{todayLog?.mood ? todayLog.mood : '-'}</div>
+              <div className="text-sm text-gray-700 font-semibold">Mood</div>
             </div>
           </div>
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center mt-8">
             <Link href="/track">
-              <button className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-sm">
+              <button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 Add Today&apos;s Log
               </button>
             </Link>
@@ -296,15 +329,17 @@ export default function ProfilePage() {
         </div>
 
         {/* Action Buttons */}
-        <button
-          onClick={handleLogout}
-          className="w-full mb-4 px-4 py-2 text-pink-600 border border-pink-500 rounded-lg hover:bg-pink-50 transition-colors text-lg font-semibold"
-        >
-          Logout
-        </button>
-        <button onClick={handleDeleteAccount} className="w-full mt-0 border border-red-400 text-red-600 font-semibold py-3 px-6 rounded-lg bg-white hover:bg-red-50 transition-colors text-lg shadow-sm">
-          Delete Account
-        </button>
+        <div className="space-y-4">
+          <button
+            onClick={handleLogout}
+            className="w-full px-6 py-4 text-pink-600 border-2 border-pink-500 rounded-xl hover:bg-pink-50 transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          >
+            Logout
+          </button>
+          <button onClick={handleDeleteAccount} className="w-full border-2 border-red-400 text-red-600 font-semibold py-4 px-6 rounded-xl bg-white hover:bg-red-50 transition-all duration-300 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            Delete Account
+          </button>
+        </div>
       </div>
       {showTrialModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">

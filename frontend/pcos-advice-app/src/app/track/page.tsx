@@ -321,63 +321,106 @@ export default function TrackPage() {
   const allStrategyNames = Array.from(new Set(trialPeriods.map(tp => tp.strategy_name)));
 
   return (
-    <div className="flex flex-col items-center min-h-[70vh] py-8 px-2">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col gap-6">
-        <h1 className="text-2xl font-bold mb-1 text-gray-900 text-center">Daily Check-in</h1>
-        <p className="text-center text-green-900 mb-4">How are you feeling today?</p>
-        {/* Strategy Card */}
-        <div className="bg-gradient-to-r from-orange-50 to-green-50 border border-orange-100 rounded-xl p-4 mb-2 flex flex-col gap-1 relative">
-          {trialPeriod && (
-            <span className="absolute top-2 right-4 bg-red-100 text-red-500 text-xs font-bold px-3 py-1 rounded-full">
-              Day {currentDay} out of {totalDays}
-            </span>
-          )}
-          <div className="font-semibold text-lg text-gray-900">Current Strategy</div>
-          <div className="font-bold text-base text-orange-900 mt-1">{profile?.strategy_details?.['Strategie naam'] || strategy}</div>
-          <div className="text-gray-700 text-sm">{profile?.strategy_details?.Uitleg || 'No description available.'}</div>
-        </div>
-        {/* Did you apply strategy? */}
-        {(!logStored || editMode) && (
-          <div className="flex items-center gap-4 mb-2">
-            <span className="w-48 text-gray-700">Did you successfully apply the strategy today?</span>
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold border transition-colors ${appliedStrategy === true ? 'bg-purple-500 text-white border-purple-500' : 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50'}`}
-              onClick={() => setAppliedStrategy(true)}
-              type="button"
-            >
-              Yes ✓
-            </button>
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold border transition-colors ${appliedStrategy === false ? 'bg-purple-500 text-white border-purple-500' : 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50'}`}
-              onClick={() => setAppliedStrategy(false)}
-              type="button"
-            >
-              Not today
-            </button>
-          </div>
-        )}
-        {showApplyStrategyError && (
-          <div className="text-red-500 text-sm mb-2">Please select if you applied the strategy today.</div>
-        )}
-        {/* Score Your Symptoms Block or Confirmation */}
-        {logStored && !editMode ? (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex flex-col items-center mb-4">
-            <div className="text-green-700 font-semibold mb-2">You successfully entered today&apos;s log.</div>
-            <button
-              className="bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded-xl transition-colors"
-              onClick={() => setEditMode(true)}
-            >
-              Edit log
-            </button>
-          </div>
-        ) : (
-          <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-semibold text-lg text-gray-900">Score your symptoms</div>
-              {!editingSymptoms && (
-                <button className="text-purple-600 font-medium underline text-sm" onClick={() => { setEditingSymptoms(true); setEditSymptomsList(symptoms); }}>Edit symptoms</button>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 pb-20">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10"></div>
+        <div className="relative bg-white/80 backdrop-blur-sm border-b border-pink-200/50 px-6 py-12 shadow-lg">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                  <span className="text-white text-2xl">📊</span>
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                    Daily Check-in
+                  </h1>
+                  <p className="text-gray-600 text-xl">How are you feeling today?</p>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-8">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-pink-200/50 p-8 flex flex-col gap-6">
+          {/* Strategy Card */}
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-2xl p-6 mb-4 flex flex-col gap-3 relative shadow-lg">
+            {trialPeriod && (
+              <span className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                Day {currentDay} out of {totalDays}
+              </span>
+            )}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-lg">🎯</span>
+              </div>
+              <div>
+                <div className="font-bold text-xl text-gray-900">Current Strategy</div>
+                <div className="font-semibold text-lg text-pink-700 mt-1">{profile?.strategy_details?.['Strategie naam'] || strategy}</div>
+              </div>
+            </div>
+            <div className="text-gray-700 text-base leading-relaxed">{profile?.strategy_details?.Uitleg || 'No description available.'}</div>
+          </div>
+          {/* Did you apply strategy? */}
+          {(!logStored || editMode) && (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-pink-200/50 shadow-lg">
+              <div className="flex items-center gap-6 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-lg">✓</span>
+                </div>
+                <span className="text-lg font-semibold text-gray-900">Did you successfully apply the strategy today?</span>
+              </div>
+              <div className="flex gap-4">
+                <button
+                  className={`px-6 py-3 rounded-xl font-semibold border transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${appliedStrategy === true ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white border-pink-500' : 'bg-white text-pink-700 border-pink-300 hover:bg-pink-50'}`}
+                  onClick={() => setAppliedStrategy(true)}
+                  type="button"
+                >
+                  Yes ✓
+                </button>
+                <button
+                  className={`px-6 py-3 rounded-xl font-semibold border transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${appliedStrategy === false ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white border-pink-500' : 'bg-white text-pink-700 border-pink-300 hover:bg-pink-50'}`}
+                  onClick={() => setAppliedStrategy(false)}
+                  type="button"
+                >
+                  Not today
+                </button>
+              </div>
+            </div>
+          )}
+          {showApplyStrategyError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 font-medium text-center">Please select if you applied the strategy today.</div>
+          )}
+          {/* Score Your Symptoms Block or Confirmation */}
+          {logStored && !editMode ? (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 flex flex-col items-center mb-6 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <span className="text-white text-2xl">✓</span>
+              </div>
+              <div className="text-green-700 font-bold text-lg mb-4">You successfully entered today&apos;s log.</div>
+              <button
+                className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                onClick={() => setEditMode(true)}
+              >
+                Edit log
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-pink-200/50 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <span className="text-white text-lg">📊</span>
+                  </div>
+                  <div className="font-bold text-xl text-gray-900">Score your symptoms</div>
+                </div>
+                {!editingSymptoms && (
+                  <button className="text-pink-600 font-semibold underline text-sm hover:text-pink-700 transition-colors" onClick={() => { setEditingSymptoms(true); setEditSymptomsList(symptoms); }}>Edit symptoms</button>
+                )}
+              </div>
             {editingSymptoms ? (
               <div className="flex flex-col gap-2">
                 {editSymptomsList.map((symptom, idx) => (
@@ -442,136 +485,146 @@ export default function TrackPage() {
             ) : (
               <>
                 {/* Energy Slider */}
-                <div className="flex items-center gap-4">
-                  <span className="w-32 text-gray-700">Energy</span>
-                  <input type="range" min={1} max={5} value={scores.Energy} onChange={e => handleSlider("Energy", Number(e.target.value))} className="flex-1 accent-purple-400" />
-                  <span className="w-8 text-center">{scores.Energy}</span>
+                <div className="flex items-center gap-6 p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl border border-pink-200">
+                  <span className="w-32 text-gray-900 font-semibold">Energy</span>
+                  <input type="range" min={1} max={5} value={scores.Energy} onChange={e => handleSlider("Energy", Number(e.target.value))} className="flex-1 accent-pink-500" />
+                  <span className="w-12 text-center text-lg font-bold text-pink-600">{scores.Energy}</span>
                 </div>
                 {/* Mood Slider */}
-                <div className="flex items-center gap-4">
-                  <span className="w-32 text-gray-700">Mood</span>
-                  <input type="range" min={1} max={5} value={scores.Mood} onChange={e => handleSlider("Mood", Number(e.target.value))} className="flex-1 accent-purple-400" />
-                  <span className="w-8 text-center">{scores.Mood}</span>
+                <div className="flex items-center gap-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200">
+                  <span className="w-32 text-gray-900 font-semibold">Mood</span>
+                  <input type="range" min={1} max={5} value={scores.Mood} onChange={e => handleSlider("Mood", Number(e.target.value))} className="flex-1 accent-purple-500" />
+                  <span className="w-12 text-center text-lg font-bold text-purple-600">{scores.Mood}</span>
                 </div>
                 {/* Symptom Sliders */}
                 {symptoms.map((symptom) => (
-                  <div key={symptom} className="flex items-center gap-4">
-                    <span className="w-32 text-gray-700">{symptom}</span>
-                    <input type="range" min={1} max={5} value={scores[symptom] || 1} onChange={e => handleSlider(symptom, Number(e.target.value))} className="flex-1 accent-purple-400" />
-                    <span className="w-8 text-center">{scores[symptom] || 1}</span>
+                  <div key={symptom} className="flex items-center gap-6 p-4 bg-gradient-to-r from-gray-50 to-pink-50 rounded-xl border border-gray-200">
+                    <span className="w-32 text-gray-900 font-semibold">{symptom}</span>
+                    <input type="range" min={1} max={5} value={scores[symptom] || 1} onChange={e => handleSlider(symptom, Number(e.target.value))} className="flex-1 accent-pink-500" />
+                    <span className="w-12 text-center text-lg font-bold text-pink-600">{scores[symptom] || 1}</span>
                   </div>
                 ))}
                 {/* Extra Symptoms */}
-                <div className="flex flex-col gap-1 mt-2">
-                  <label htmlFor="extraSymptoms" className="text-gray-700 font-medium">Extra symptoms</label>
+                <div className="flex flex-col gap-3 mt-6">
+                  <label htmlFor="extraSymptoms" className="text-gray-900 font-semibold text-lg">Extra symptoms</label>
                   <input
                     id="extraSymptoms"
                     type="text"
                     value={extraSymptoms}
                     onChange={e => setExtraSymptoms(e.target.value)}
                     placeholder="Describe any other symptoms..."
-                    className="border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    className="border border-pink-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-500 transition-all duration-300"
                   />
                 </div>
                 {/* Extra Notes */}
-                <div className="flex flex-col gap-1 mt-2">
-                  <label htmlFor="extraNotes" className="text-gray-700 font-medium">Extra notes</label>
+                <div className="flex flex-col gap-3 mt-6">
+                  <label htmlFor="extraNotes" className="text-gray-900 font-semibold text-lg">Extra notes</label>
                   <textarea
                     id="extraNotes"
                     value={extraNotes}
                     onChange={e => setExtraNotes(e.target.value)}
                     placeholder="Anything else you want to add about today?"
-                    className="border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-purple-200 min-h-[60px]"
+                    className="border border-pink-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-500 min-h-[80px] transition-all duration-300"
                   />
                 </div>
-                {logError && <div className="text-red-500 text-center mt-2">{logError}</div>}
-                <button className="mt-4 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded-xl self-center transition-colors" onClick={handleStoreLog}>Store todays logs</button>
+                {logError && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 font-medium text-center mt-4">{logError}</div>}
+                <button className="mt-6 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl self-center transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={handleStoreLog}>Store today's logs</button>
               </>
             )}
           </div>
         )}
-        {/* Progress Overview Block */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 mt-2">
-          <div className="font-semibold text-lg text-gray-900 mb-2">This Week&apos;s Progress</div>
-          <div className="flex justify-between text-sm">
-            <span>Strategy followed</span>
-            <span className="font-bold text-purple-600">{daysAppliedTrial}/{trialTotalDays} days</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Average energy</span>
-            <span className="font-bold text-purple-600">{avgEnergy}/5</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Average mood</span>
-            <span className="font-bold text-purple-600">{avgMood}/5</span>
-          </div>
-        </div>
-        {/* Calendar Log Overview */}
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-xl p-6 mt-4 flex flex-col items-center">
-          <div className="flex items-center justify-between mb-2">
-            <button onClick={() => handleMonthChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">&lt; Prev</button>
-            <div className="font-bold text-xl text-purple-900 flex items-center gap-2">
-              <span className="inline-block w-6 h-6 rounded-full border-2 border-purple-400 flex items-center justify-center mr-1">🎯</span>
-              {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          {/* Progress Overview Block */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-pink-200/50 shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-lg">📈</span>
+              </div>
+              <div className="font-bold text-xl text-gray-900">This Week's Progress</div>
             </div>
-            <button onClick={() => handleMonthChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">Next &gt;</button>
-          </div>
-          <div className="text-gray-700 mb-4"> Strategy & Log Overview ({getMonthDays(currentMonth).length} days)</div>
-          <div className="grid grid-cols-7 gap-3 mb-4">
-            {getMonthDays(currentMonth).map(dateObj => {
-              const dateStr = toLocalDateString(dateObj);
-              const log = logs.find((l: Log) => l.date === dateStr);
-              const trial = strategyMap[dateStr];
-              const isToday = dateStr === new Date().toISOString().slice(0, 10);
-              let status: "today" | "success" | "none" = "none";
-              if (isToday) status = "today";
-              if (log && log.applied_strategy) status = "success";
-              const strategyColor = trial ? STRATEGY_COLORS[trial.strategy_name] || "bg-gray-100 border-gray-300 text-gray-500" : "bg-white border-gray-200 text-gray-400";
-              const strategyIcon = trial ? STRATEGY_ICONS[trial.strategy_name] || "" : "";
-              return (
-                <div
-                  key={dateStr}
-                  className={`w-10 h-10 flex flex-col items-center justify-center rounded-full border-2 text-lg font-semibold transition-all cursor-pointer ${strategyColor} ${status === "today" ? "ring-2 ring-blue-400" : ""}`}
-                  onClick={() => handleDayClick(dateStr)}
-                  title={trial ? trial.strategy_name : undefined}
-                >
-                  <span>{dateObj.getDate()}</span>
-                  {strategyIcon && <span className="text-xs">{strategyIcon}</span>}
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Strategy Legend */}
-          {allStrategyNames.length > 0 && (
-            <div className="w-full mb-4 p-3 bg-white rounded-lg border border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2 text-center"> Your strategies </h4>
-              <div className="flex flex-wrap justify-center gap-3">
-                {allStrategyNames.map(strategyName => (
-                  <div key={strategyName} className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full border-2 ${STRATEGY_COLORS[strategyName] || "bg-gray-100 border-gray-300"}`}>
-                      {STRATEGY_ICONS[strategyName as keyof typeof STRATEGY_ICONS] && <span className="text-xs">{STRATEGY_ICONS[strategyName as keyof typeof STRATEGY_ICONS]}</span>}
-                    </div>
-                    <span className="text-sm text-gray-700">{strategyName}</span>
-                  </div>
-                ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
+                <div className="text-sm text-gray-600 mb-1">Strategy followed</div>
+                <div className="text-2xl font-bold text-pink-600">{daysAppliedTrial}/{trialTotalDays} days</div>
+              </div>
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-200">
+                <div className="text-sm text-gray-600 mb-1">Average energy</div>
+                <div className="text-2xl font-bold text-purple-600">{avgEnergy}/5</div>
+              </div>
+              <div className="bg-gradient-to-r from-indigo-50 to-pink-50 rounded-xl p-4 border border-indigo-200">
+                <div className="text-sm text-gray-600 mb-1">Average mood</div>
+                <div className="text-2xl font-bold text-indigo-600">{avgMood}/5</div>
               </div>
             </div>
-          )}
+          </div>
+          {/* Calendar Log Overview */}
+          <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 border border-pink-200 rounded-2xl p-8 mt-6 flex flex-col items-center shadow-lg">
+            <div className="flex items-center justify-between mb-6 w-full">
+              <button onClick={() => handleMonthChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="px-4 py-2 rounded-xl bg-white/80 hover:bg-white border border-pink-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">&lt; Prev</button>
+              <div className="font-bold text-2xl text-gray-900 flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-lg">🎯</span>
+                </div>
+                {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              </div>
+              <button onClick={() => handleMonthChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="px-4 py-2 rounded-xl bg-white/80 hover:bg-white border border-pink-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">Next &gt;</button>
+            </div>
+            <div className="text-gray-700 mb-6 text-lg font-medium"> Strategy & Log Overview ({getMonthDays(currentMonth).length} days)</div>
+            <div className="grid grid-cols-7 gap-4 mb-8">
+              {getMonthDays(currentMonth).map(dateObj => {
+                const dateStr = toLocalDateString(dateObj);
+                const log = logs.find((l: Log) => l.date === dateStr);
+                const trial = strategyMap[dateStr];
+                const isToday = dateStr === new Date().toISOString().slice(0, 10);
+                let status: "today" | "success" | "none" = "none";
+                if (isToday) status = "today";
+                if (log && log.applied_strategy) status = "success";
+                const strategyColor = trial ? STRATEGY_COLORS[trial.strategy_name] || "bg-gray-100 border-gray-300 text-gray-500" : "bg-white border-gray-200 text-gray-400";
+                const strategyIcon = trial ? STRATEGY_ICONS[trial.strategy_name] || "" : "";
+                return (
+                  <div
+                    key={dateStr}
+                    className={`w-12 h-12 flex flex-col items-center justify-center rounded-2xl border-2 text-lg font-semibold transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${strategyColor} ${status === "today" ? "ring-4 ring-pink-400" : ""}`}
+                    onClick={() => handleDayClick(dateStr)}
+                    title={trial ? trial.strategy_name : undefined}
+                  >
+                    <span>{dateObj.getDate()}</span>
+                    {strategyIcon && <span className="text-xs">{strategyIcon}</span>}
+                  </div>
+                );
+              })}
+            </div>
           
-          <div className="flex gap-4 mb-2 text-sm">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full border-2 border-blue-400 bg-blue-50 inline-block"></span> Today</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full border-2 border-green-400 bg-green-50 inline-block"></span> Success</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full border-2 border-red-400 bg-red-50 inline-block"></span> Not successful</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full border-2 border-gray-200 bg-white inline-block"></span> No log</span>
+            {/* Strategy Legend */}
+            {allStrategyNames.length > 0 && (
+              <div className="w-full mb-6 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-pink-200 shadow-lg">
+                <h4 className="font-bold text-gray-900 mb-4 text-center text-lg"> Your strategies </h4>
+                <div className="flex flex-wrap justify-center gap-4">
+                  {allStrategyNames.map(strategyName => (
+                    <div key={strategyName} className="flex items-center gap-3 bg-gradient-to-r from-pink-50 to-purple-50 px-4 py-2 rounded-xl border border-pink-200">
+                      <div className={`w-6 h-6 rounded-full border-2 ${STRATEGY_COLORS[strategyName] || "bg-gray-100 border-gray-300"}`}>
+                        {STRATEGY_ICONS[strategyName as keyof typeof STRATEGY_ICONS] && <span className="text-xs">{STRATEGY_ICONS[strategyName as keyof typeof STRATEGY_ICONS]}</span>}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">{strategyName}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="flex gap-6 mb-6 text-sm">
+              <span className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl border border-blue-200"><span className="w-4 h-4 rounded-full border-2 border-blue-400 bg-blue-50"></span> Today</span>
+              <span className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-xl border border-green-200"><span className="w-4 h-4 rounded-full border-2 border-green-400 bg-green-50"></span> Success</span>
+              <span className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-xl border border-red-200"><span className="w-4 h-4 rounded-full border-2 border-red-400 bg-red-50"></span> Not successful</span>
+              <span className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-200"><span className="w-4 h-4 rounded-full border-2 border-gray-200 bg-white"></span> No log</span>
+            </div>
+            <div className="text-green-700 font-bold bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl px-6 py-3 mb-4 text-center">100% succesvol</div>
+            <div className="text-gray-700 mb-4 text-center">1/1 logged days</div>
+            <div className="flex gap-8 mb-6">
+              <div className="flex flex-col items-center bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 rounded-xl border border-green-200"><span className="text-green-600 font-bold text-xl">↗ 1</span><span className="text-xs text-gray-500">Current streak</span></div>
+              <div className="flex flex-col items-center bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-xl border border-blue-200"><span className="text-blue-600 font-bold text-xl">📅 1</span><span className="text-xs text-gray-500">Total logged</span></div>
+            </div>
+            <div className="bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 rounded-2xl px-6 py-4 text-center font-semibold w-full shadow-lg">🎉 Great! You&apos;re doing great following your strategy!</div>
           </div>
-          <div className="text-green-700 font-bold bg-green-100 rounded-lg px-4 py-1 mb-2">100% succesvol</div>
-          <div className="text-gray-700 mb-2">1/1 logged days</div>
-          <div className="flex gap-8 mb-2">
-            <div className="flex flex-col items-center"><span className="text-green-600 font-bold text-lg">↗ 1</span><span className="text-xs text-gray-500">Current streak</span></div>
-            <div className="flex flex-col items-center"><span className="text-blue-600 font-bold text-lg">📅 1</span><span className="text-xs text-gray-500">Total logged</span></div>
-          </div>
-          <div className="bg-blue-50 text-blue-700 rounded-lg px-4 py-2 mt-2 text-center font-medium w-full">🎉 Great! You&apos;re doing great following your strategy!</div>
         </div>
       </div>
       {/* Modal for viewing previous logs */}
