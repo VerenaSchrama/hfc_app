@@ -8,7 +8,7 @@ import { WorkbookData, UploadData, Intervention } from '../../types';
 import MechanismCard from '../../components/MechanismCard';
 import WorkbookChatInterface from '../../components/WorkbookChatInterface';
 import UploadModal from '../../components/UploadModal';
-import { Upload, Archive, MessageCircle, Sparkles, Heart, Target, TrendingUp, BookOpen, Zap } from 'lucide-react';
+import { Upload, Archive, MessageCircle, Heart, Target, TrendingUp, BookOpen, Zap } from 'lucide-react';
 
 export default function WorkbookPage() {
   const { isLoggedIn, loading } = useAuth();
