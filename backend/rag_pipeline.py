@@ -157,6 +157,7 @@ def generate_advice(user_question: str, user_context: str = None) -> dict:
         retriever=strategy_retriever,
         memory=memory,
         return_source_documents=True,
+        output_key="answer",
         verbose=False
     )
     
@@ -199,6 +200,7 @@ def generate_advice_legacy(user_input: dict) -> dict:
         retriever=strategy_retriever,
         memory=memory,
         return_source_documents=True,
+        output_key="answer",
         verbose=False
     )
     
