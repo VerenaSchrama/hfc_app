@@ -41,38 +41,62 @@ export default function WorkbookPage() {
         console.error('Backend connectivity test failed:', testError);
       }
       
-      const response = await getWorkbook();
-      console.log('Get workbook response:', response);
-      
-      // Check if workbook has any data (mechanisms or interventions)
-      const hasWorkbookData = response.success && response.workbook && 
-        (response.workbook.mechanisms.length > 0 || response.workbook.interventions.length > 0);
-      
-      if (hasWorkbookData) {
-        console.log('Workbook found with data:', response.workbook);
-        setWorkbookData(response.workbook);
-      } else {
-        console.log('No workbook data found, checking for intake data...');
-        // If no workbook exists, generate one from intake data
-        const intakeData = localStorage.getItem('intakeData');
-        console.log('Intake data exists:', !!intakeData);
+      try {
+        const response = await getWorkbook();
+        console.log('Get workbook response:', response);
         
-        if (intakeData) {
-          const parsedIntake = JSON.parse(intakeData);
-          console.log('Parsed intake data:', parsedIntake);
+        // Check if workbook has any data (mechanisms or interventions)
+        const hasWorkbookData = response.success && response.workbook && 
+          (response.workbook.mechanisms.length > 0 || response.workbook.interventions.length > 0);
+        
+        if (hasWorkbookData) {
+          console.log('Workbook found with data:', response.workbook);
+          setWorkbookData(response.workbook);
+        } else {
+          console.log('No workbook data found, checking for intake data...');
+          // If no workbook exists, generate one from intake data
+          const intakeData = localStorage.getItem('intakeData');
+          console.log('Intake data exists:', !!intakeData);
           
-          console.log('Generating workbook from intake data...');
-          const generateResponse = await generateWorkbook(parsedIntake);
-          console.log('Generate workbook response:', generateResponse);
-          
-          if (generateResponse.success) {
-            console.log('Workbook generated successfully:', generateResponse.workbook);
-            setWorkbookData(generateResponse.workbook);
+          if (intakeData) {
+            const parsedIntake = JSON.parse(intakeData);
+            console.log('Parsed intake data:', parsedIntake);
+            
+            console.log('Generating workbook from intake data...');
+            const generateResponse = await generateWorkbook(parsedIntake);
+            console.log('Generate workbook response:', generateResponse);
+            
+            if (generateResponse.success) {
+              console.log('Workbook generated successfully:', generateResponse.workbook);
+              setWorkbookData(generateResponse.workbook);
+            } else {
+              console.error('Failed to generate workbook:', generateResponse);
+            }
           } else {
-            console.error('Failed to generate workbook:', generateResponse);
+            console.log('No intake data found in localStorage, redirecting to intake...');
+            router.push('/intake');
+          }
+        }
+      } catch (workbookError) {
+        console.error('Error fetching workbook:', workbookError);
+        // Try to generate workbook from intake data as fallback
+        const intakeData = localStorage.getItem('intakeData');
+        if (intakeData) {
+          console.log('Attempting to generate workbook from intake data as fallback...');
+          try {
+            const parsedIntake = JSON.parse(intakeData);
+            const generateResponse = await generateWorkbook(parsedIntake);
+            if (generateResponse.success) {
+              console.log('Workbook generated successfully as fallback:', generateResponse.workbook);
+              setWorkbookData(generateResponse.workbook);
+            } else {
+              console.error('Failed to generate workbook as fallback:', generateResponse);
+            }
+          } catch (generateError) {
+            console.error('Failed to generate workbook as fallback:', generateError);
           }
         } else {
-          console.log('No intake data found in localStorage, redirecting to intake...');
+          console.log('No intake data found, redirecting to intake...');
           router.push('/intake');
         }
       }

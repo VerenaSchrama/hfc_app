@@ -259,15 +259,24 @@ export async function generateWorkbook(intakeData: IntakeData): Promise<{success
 
 export async function getWorkbook(): Promise<{success: boolean, workbook: WorkbookData}> {
   const token = auth.getToken();
+  console.log('getWorkbook - Making request to:', `${API_BASE_URL}/api/v1/workbook`);
+  console.log('getWorkbook - Token exists:', !!token);
+  
   const res = await fetch(`${API_BASE_URL}/api/v1/workbook`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
+  
+  console.log('getWorkbook - Response status:', res.status, res.statusText);
+  
   if (!res.ok) {
-    console.log('getWorkbook - Response not ok:', res.status, res.statusText);
-    // Return empty workbook instead of throwing error
-    return { success: false, workbook: { mechanisms: [], interventions: [], reflections: [], entries: [], last_updated: new Date().toISOString() } };
+    const errorText = await res.text();
+    console.error('getWorkbook - Error response:', errorText);
+    throw new Error(`Failed to fetch workbook: ${res.status} - ${errorText}`);
   }
-  return res.json();
+  
+  const data = await res.json();
+  console.log('getWorkbook - Success response:', data);
+  return data;
 }
 
 export async function createMechanism(mechanismData: Partial<Mechanism>): Promise<{success: boolean, mechanism: Mechanism, message: string}> {
