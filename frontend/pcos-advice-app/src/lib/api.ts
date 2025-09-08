@@ -389,7 +389,7 @@ export async function getSuggestedWorkbook(): Promise<{success: boolean, workboo
   return res.json();
 }
 
-export async function completeIntervention(interventionId: string, trialData: {start_date: string, end_date: string, notes?: string}): Promise<{success: boolean, message: string, intervention: Intervention, mechanism: Mechanism, trial_period: any}> {
+export async function completeIntervention(interventionId: string, trialData: {start_date: string, end_date: string, notes?: string}): Promise<{success: boolean, message: string, intervention: Intervention, mechanism: Mechanism, trial_period: {id: number, strategy_name: string, start_date: string, end_date: string, notes: string}}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/api/v1/workbook/interventions/${interventionId}/complete`, {
     method: 'POST',
@@ -403,7 +403,7 @@ export async function completeIntervention(interventionId: string, trialData: {s
   return res.json();
 }
 
-export async function getCompletedWorkbook(): Promise<{success: boolean, workbook: {interventions: Intervention[], trial_periods: Record<string, any>, last_updated: string}}> {
+export async function getCompletedWorkbook(): Promise<{success: boolean, workbook: {interventions: Intervention[], trial_periods: Record<string, {id: number, strategy_name: string, start_date: string, end_date: string, notes: string}>, last_updated: string}}> {
   const token = auth.getToken();
   const res = await fetch(`${API_BASE_URL}/api/v1/workbook/completed`, {
     headers: { 'Authorization': `Bearer ${token}` },

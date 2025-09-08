@@ -81,7 +81,7 @@ export default function WorkbookPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, router]);
 
   useEffect(() => {
     setMounted(true);
