@@ -84,9 +84,9 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
       setChatHistory(prev => [...prev, newUserMessage]);
 
       try {
-        const token = auth.getToken();
+        const token = auth.getValidToken();
         if (!token) {
-          throw new Error('No authentication token');
+          throw new Error('Authentication expired. Please log in again.');
         }
 
         console.log('Making chat API call...');
@@ -100,6 +100,10 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
         });
 
         console.log('Chat API response:', response.status);
+        
+        // Handle authentication errors globally
+        auth.handleApiError(response);
+        
         if (response.ok) {
           const data = await response.json();
           console.log('Chat response received:', data.history?.length || 0, 'messages');
@@ -108,7 +112,6 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
           const errorText = await response.text();
           console.error('Chat API error:', response.status, errorText);
           
-          // Handle authentication errors specifically
           if (response.status === 401) {
             throw new Error('Authentication expired. Please log in again.');
           }

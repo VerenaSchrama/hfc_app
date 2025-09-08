@@ -7,7 +7,11 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
   : 'http://127.0.0.1:8000';
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const token = auth.getToken();
+    const token = auth.getValidToken();
+    if (!token) {
+        throw new Error('Authentication required. Please log in again.');
+    }
+    
     const response = await fetch(url, {
         ...options,
         headers: {
@@ -15,10 +19,19 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
             'Authorization': `Bearer ${token}`,
         },
     });
+    
+    // Handle authentication errors globally
+    auth.handleApiError(response);
+    
     if (!response.ok) {
         const errorBody = await response.text();
         console.error("Failed to fetch with auth:", response.status, errorBody);
-        throw new Error('Failed to fetch with auth');
+        
+        if (response.status === 401) {
+            throw new Error('Authentication expired. Please log in again.');
+        }
+        
+        throw new Error(`Request failed: ${response.status}`);
     }
     return response.json();
 };
