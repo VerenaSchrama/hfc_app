@@ -124,6 +124,10 @@ def build_question(user_input: dict) -> str:
 
 def generate_advice(user_question: str, user_context: str = None) -> dict:
     """Generate advice using the chatbot approach with user's actual question and context."""
+    print(f"RAG Debug: strategy_retriever is {strategy_retriever}")
+    print(f"RAG Debug: user_question: {user_question}")
+    print(f"RAG Debug: user_context: {user_context}")
+    
     if not strategy_retriever:
         return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
     
@@ -156,7 +160,8 @@ def generate_advice(user_question: str, user_context: str = None) -> dict:
         result = qa_chain.invoke({"question": full_question})
         return {"answer": result["answer"]}
     except Exception as e:
-        return {"answer": "I'm sorry, but I encountered an error while processing your request. Please try again."}
+        print(f"RAG Error: {str(e)}")
+        return {"answer": f"I'm sorry, but I encountered an error while processing your request. Error: {str(e)}"}
 
 def generate_advice_legacy(user_input: dict) -> dict:
     """Legacy function for backward compatibility. DEPRECATED: Use generate_advice() with actual user questions."""
