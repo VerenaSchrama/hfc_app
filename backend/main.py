@@ -51,6 +51,19 @@ async def health_check():
     """Health check endpoint for container orchestration"""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
+@app.get("/api/v1/test-rag")
+async def test_rag():
+    """Test RAG pipeline functionality"""
+    try:
+        from rag_pipeline import strategy_retriever, generate_advice
+        return {
+            "strategy_retriever_loaded": strategy_retriever is not None,
+            "test_question": "What should I eat?",
+            "test_result": generate_advice("What should I eat?", "Test context")
+        }
+    except Exception as e:
+        return {"error": str(e), "strategy_retriever_loaded": False}
+
 @app.get("/api/v1/test-db")
 async def test_database():
     """Test database tables and connections"""
