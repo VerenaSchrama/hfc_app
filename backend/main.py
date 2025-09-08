@@ -406,10 +406,14 @@ async def chat(request: Request, data: ChatRequest):
         # 7. Call NEW RAG system with user's actual question and context
         try:
             from rag_pipeline import generate_advice
+            print(f"Chat Debug: Calling generate_advice with question: {data.question}")
+            print(f"Chat Debug: User context: {user_context}")
             result = generate_advice(data.question, user_context)
+            print(f"Chat Debug: RAG result: {result}")
             answer = result['answer']
         except Exception as e:
-            answer = "Sorry, I'm having trouble processing your request right now. Please try again later."
+            print(f"Chat Error: {str(e)}")
+            answer = f"Sorry, I'm having trouble processing your request right now. Error: {str(e)}"
         
         # 8. Store bot response
         try:
