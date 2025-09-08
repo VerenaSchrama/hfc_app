@@ -100,16 +100,16 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
   };
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
       {/* Mechanism Header - Always Visible */}
       <div 
-        className="p-6 cursor-pointer hover:bg-gray-100 transition-colors"
+        className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <Target className="h-4 w-4 text-white" />
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center shadow-sm">
+              <Target className="h-5 w-5 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">{mechanism.title}</h3>
@@ -125,7 +125,7 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
                 e.stopPropagation();
                 // TODO: Implement ask about this functionality
               }}
-              className="flex items-center gap-1 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="flex items-center gap-1 px-3 py-1 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
             >
               <MessageCircle className="h-4 w-4" />
               <span className="text-sm">Ask About This</span>
@@ -135,7 +135,7 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
-              className="p-1 hover:bg-gray-200 rounded transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               {isExpanded ? <ChevronDown className="h-5 w-5 text-gray-600" /> : <ChevronRight className="h-5 w-5 text-gray-600" />}
             </button>
@@ -153,23 +153,23 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
               <h4 className="font-semibold text-gray-900">Interventions</h4>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               {mechanismInterventions.map((intervention) => (
-                <div key={intervention.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                <div key={intervention.id} className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
+                    <div className={`w-3 h-3 rounded-full ${
                       intervention.status === 'completed' ? 'bg-blue-500' :
                       intervention.status === 'active' ? 'bg-green-500' :
                       'bg-gray-400'
                     }`}></div>
-                    <span className="text-sm text-gray-900">{intervention.title}</span>
+                    <span className="text-sm font-medium text-gray-900">{intervention.title}</span>
                     {intervention.status === 'completed' && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
                         Completed
                       </span>
                     )}
                     {intervention.status === 'active' && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
                         Active
                       </span>
                     )}
@@ -178,7 +178,7 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
                     {intervention.status === 'suggested' && (
                       <button
                         onClick={() => handleCompleteIntervention(intervention)}
-                        className="flex items-center gap-1 px-2 py-1 text-xs bg-teal-100 text-teal-700 rounded-md hover:bg-teal-200 transition-colors"
+                        className="flex items-center gap-1 px-3 py-1 text-xs bg-pink-100 text-pink-700 rounded-md hover:bg-pink-200 transition-colors font-medium"
                         title="Complete with trial period"
                       >
                         <CheckCircle className="h-3 w-3" />
@@ -188,7 +188,7 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
                     <Clock className="h-4 w-4 text-gray-400" />
                     <button
                       onClick={() => handleEditIntervention(intervention)}
-                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       <Edit3 className="h-3 w-3" />
                     </button>

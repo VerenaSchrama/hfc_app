@@ -53,12 +53,12 @@ export default function TrialPeriodModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5 text-teal-600" />
+            <Calendar className="h-5 w-5 text-pink-600" />
             <h2 className="text-lg font-semibold text-gray-900">Assign Trial Period</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
           >
             <X className="h-5 w-5" />
           </button>
@@ -127,8 +127,8 @@ export default function TrialPeriodModal({
 
             {/* Duration Info */}
             {startDate && endDate && (
-              <div className="bg-teal-50 border border-teal-200 rounded-md p-3">
-                <div className="flex items-center space-x-2 text-sm text-teal-700">
+              <div className="bg-pink-50 border border-pink-200 rounded-md p-3">
+                <div className="flex items-center space-x-2 text-sm text-pink-700">
                   <Clock className="h-4 w-4" />
                   <span>
                     Duration: {Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days
@@ -142,13 +142,13 @@ export default function TrialPeriodModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors shadow-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-pink-600 border border-transparent rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors shadow-sm"
               >
                 Complete Intervention
               </button>
