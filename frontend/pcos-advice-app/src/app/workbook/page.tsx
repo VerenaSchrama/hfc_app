@@ -9,7 +9,7 @@ import MechanismCard from '../../components/MechanismCard';
 import WorkbookSection from '../../components/WorkbookSection';
 import WorkbookChatInterface from '../../components/WorkbookChatInterface';
 import UploadModal from '../../components/UploadModal';
-import { Upload, Archive, MessageCircle, Plus } from 'lucide-react';
+import { Upload, Archive, MessageCircle, Sparkles, Heart, Target, TrendingUp, BookOpen, Zap } from 'lucide-react';
 
 export default function WorkbookPage() {
   const { isLoggedIn, loading } = useAuth();
@@ -19,7 +19,6 @@ export default function WorkbookPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
-  const [showAddMechanism, setShowAddMechanism] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const loadWorkbook = useCallback(async () => {
@@ -119,8 +118,8 @@ export default function WorkbookPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-500"></div>
       </div>
     );
   }
@@ -146,21 +145,27 @@ export default function WorkbookPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-20 w-20 border-4 border-pink-200 border-t-pink-500 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-lg font-medium">Loading your personalized workbook...</p>
+        </div>
       </div>
     );
   }
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Please log in</h2>
-          <p className="text-text-muted mb-6">You need to be logged in to access your workbook.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <BookOpen className="h-10 w-10 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome to Your Workbook</h2>
+          <p className="text-gray-600 text-lg mb-8">Please log in to access your personalized hormonal health journey</p>
           <button 
             onClick={() => router.push('/login')}
-            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
+            className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             Go to Login
           </button>
@@ -171,56 +176,58 @@ export default function WorkbookPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-text-muted">Loading your workbook...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Please log in to access your workbook</h1>
+          <div className="animate-spin rounded-full h-20 w-20 border-4 border-pink-200 border-t-pink-500 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-lg font-medium">Loading your workbook...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-8 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Workbook</h1>
-            <p className="text-gray-600 text-lg">Your personalized hormonal health journey</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowChat(!showChat)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors font-medium shadow-sm"
-            >
-              <MessageCircle className="h-4 w-4" />
-              {showChat ? 'Hide Chat' : 'Ask Chat'}
-            </button>
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-medium shadow-sm"
-            >
-              <Upload className="h-4 w-4" />
-              Upload
-            </button>
-            <button
-              onClick={() => setShowArchive(!showArchive)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-sm"
-            >
-              <Archive className="h-4 w-4" />
-              Archive
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 pb-20">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10"></div>
+        <div className="relative bg-white/80 backdrop-blur-sm border-b border-pink-200/50 px-6 py-12 shadow-lg">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                    My Workbook
+                  </h1>
+                  <p className="text-gray-600 text-xl">Your personalized hormonal health journey</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setShowChat(!showChat)}
+                  className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  <MessageCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  {showChat ? 'Hide Chat' : 'Ask AI'}
+                </button>
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  <Upload className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Upload
+                </button>
+                <button
+                  onClick={() => setShowArchive(!showArchive)}
+                  className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  <Archive className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  Archive
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -228,44 +235,92 @@ export default function WorkbookPage() {
       <div className="flex h-screen">
         {/* Main Workbook Content */}
         <div className={`flex-1 ${showChat ? 'w-2/3' : 'w-full'} overflow-y-auto`}>
-          <div className="p-6">
-            {/* Workbook Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-                  <span className="text-white text-xl">⚙️</span>
+          <div className="max-w-7xl mx-auto p-8">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-200/50 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{workbookData?.mechanisms?.length || 0}</p>
+                    <p className="text-gray-600 font-medium">Mechanisms</p>
+                  </div>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">Mechanisms</h1>
               </div>
-              <button 
-                onClick={() => setShowUploadModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors font-medium shadow-sm"
-              >
-                <Upload className="h-4 w-4" />
-                Add Data
-              </button>
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-200/50 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <Zap className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{workbookData?.interventions?.length || 0}</p>
+                    <p className="text-gray-600 font-medium">Interventions</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-indigo-200/50 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {workbookData?.interventions?.filter(i => i.status === 'active').length || 0}
+                    </p>
+                    <p className="text-gray-600 font-medium">Active</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Mechanisms List */}
-            <div className="space-y-4">
-              {workbookData?.mechanisms?.map((mechanism) => (
-                <MechanismCard
-                  key={mechanism.id}
-                  mechanism={mechanism}
-                  interventions={workbookData?.interventions || []}
-                  onInterventionUpdate={handleInterventionUpdate}
-                />
-              ))}
+            {/* Mechanisms Section */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Heart className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Your Mechanisms</h2>
+                  <p className="text-gray-600 text-lg">Personalized strategies for your hormonal health</p>
+                </div>
+              </div>
 
-              {/* Add New Mechanism Button */}
-              <div className="text-center mt-8">
-                <button 
-                  onClick={() => setShowAddMechanism(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium mx-auto border border-gray-300"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add New Mechanism
-                </button>
+              {/* Mechanisms List */}
+              <div className="space-y-6">
+                {workbookData?.mechanisms?.map((mechanism, index) => (
+                  <div 
+                    key={mechanism.id} 
+                    className="transform hover:scale-[1.02] transition-all duration-300"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <MechanismCard
+                      mechanism={mechanism}
+                      interventions={workbookData?.interventions || []}
+                      onInterventionUpdate={handleInterventionUpdate}
+                    />
+                  </div>
+                ))}
+
+                {/* Empty State */}
+                {(!workbookData?.mechanisms || workbookData.mechanisms.length === 0) && (
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <BookOpen className="h-12 w-12 text-pink-500" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">No mechanisms yet</h3>
+                    <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
+                      Complete your intake form to generate personalized mechanisms and interventions for your hormonal health journey.
+                    </p>
+                    <button 
+                      onClick={() => router.push('/intake')}
+                      className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    >
+                      Complete Intake
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -273,10 +328,17 @@ export default function WorkbookPage() {
 
         {/* Chat Interface */}
         {showChat && (
-          <div className="w-1/3 border-l border-subtle bg-card flex flex-col">
-            <div className="p-6 border-b border-subtle">
-              <h3 className="text-xl font-semibold text-foreground mb-2">Workbook Assistant</h3>
-              <p className="text-secondary">Ask questions about your mechanisms and interventions</p>
+          <div className="w-1/3 border-l border-pink-200/50 bg-white/70 backdrop-blur-sm flex flex-col shadow-xl">
+            <div className="p-6 border-b border-pink-200/50 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">AI Assistant</h3>
+                  <p className="text-gray-600">Ask questions about your workbook</p>
+                </div>
+              </div>
             </div>
             <div className="flex-1">
               <WorkbookChatInterface workbookData={workbookData} />
@@ -293,50 +355,30 @@ export default function WorkbookPage() {
         />
       )}
 
-      {/* Add Mechanism Modal */}
-      {showAddMechanism && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-foreground">Add New Mechanism</h3>
-              <button
-                onClick={() => setShowAddMechanism(false)}
-                className="text-secondary hover:text-foreground text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            <WorkbookSection
-              title=""
-              subtitle=""
-              type="mechanisms"
-              data={[]}
-              onUpdate={(data) => {
-                if (data.mechanisms) {
-                  handleWorkbookUpdate(data);
-                  setShowAddMechanism(false);
-                }
-              }}
-              placeholder="Add a new mechanism..."
-            />
-          </div>
-        </div>
-      )}
-
       {/* Archive View */}
       {showArchive && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg p-6 w-full max-w-4xl h-96 overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-foreground">Archive</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 w-full max-w-4xl h-96 overflow-y-auto shadow-2xl border border-pink-200/50">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
+                  <Archive className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Archive</h3>
+              </div>
               <button
                 onClick={() => setShowArchive(false)}
-                className="text-secondary hover:text-foreground text-xl"
+                className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
             </div>
-            <p className="text-secondary">Archive functionality coming soon...</p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Archive className="h-8 w-8 text-gray-500" />
+              </div>
+              <p className="text-gray-600 text-lg">Archive functionality coming soon...</p>
+            </div>
           </div>
         </div>
       )}
