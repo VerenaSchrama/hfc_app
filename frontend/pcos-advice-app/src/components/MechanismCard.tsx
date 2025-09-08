@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { Mechanism, Intervention } from '../types';
-import { Plus, Edit3, Save, X, Lightbulb, Clock, ChevronDown, ChevronRight, MessageCircle, Target } from 'lucide-react';
-import { createIntervention } from '../lib/api';
+import { Plus, Edit3, Save, X, Lightbulb, Clock, ChevronDown, ChevronRight, MessageCircle, Target, CheckCircle } from 'lucide-react';
+import { createIntervention, completeIntervention } from '../lib/api';
+import TrialPeriodModal from './TrialPeriodModal';
 
 interface MechanismCardProps {
   mechanism: Mechanism;
@@ -14,6 +15,8 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAddingIntervention, setIsAddingIntervention] = useState(false);
   const [newIntervention, setNewIntervention] = useState({ title: '', description: '', tracking_frequency: 'daily' as 'daily' | 'weekly' | 'as_needed' });
+  const [trialModalOpen, setTrialModalOpen] = useState(false);
+  const [selectedIntervention, setSelectedIntervention] = useState<Intervention | null>(null);
 
   const mechanismInterventions = interventions.filter(
     (i) => i.mechanism_id === mechanism.id
@@ -65,6 +68,29 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
   const handleEditIntervention = (intervention: Intervention) => {
     // TODO: Implement intervention editing functionality
     console.log('Edit intervention:', intervention);
+  };
+
+  const handleCompleteIntervention = (intervention: Intervention) => {
+    setSelectedIntervention(intervention);
+    setTrialModalOpen(true);
+  };
+
+  const handleTrialPeriodConfirm = async (trialData: { start_date: string; end_date: string; notes?: string }) => {
+    if (!selectedIntervention) return;
+
+    try {
+      const result = await completeIntervention(selectedIntervention.id, trialData);
+      console.log('Intervention completed:', result);
+      
+      // Update the intervention in the parent component
+      onInterventionUpdate(result.intervention);
+      
+      setTrialModalOpen(false);
+      setSelectedIntervention(null);
+    } catch (error) {
+      console.error('Error completing intervention:', error);
+      alert('Failed to complete intervention');
+    }
   };
 
 
@@ -131,10 +157,34 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
               {mechanismInterventions.map((intervention) => (
                 <div key={intervention.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className={`w-2 h-2 rounded-full ${
+                      intervention.status === 'completed' ? 'bg-blue-500' :
+                      intervention.status === 'active' ? 'bg-green-500' :
+                      'bg-gray-400'
+                    }`}></div>
                     <span className="text-sm text-gray-900">{intervention.title}</span>
+                    {intervention.status === 'completed' && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        Completed
+                      </span>
+                    )}
+                    {intervention.status === 'active' && (
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        Active
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
+                    {intervention.status === 'suggested' && (
+                      <button
+                        onClick={() => handleCompleteIntervention(intervention)}
+                        className="flex items-center gap-1 px-2 py-1 text-xs bg-teal-100 text-teal-700 rounded-md hover:bg-teal-200 transition-colors"
+                        title="Complete with trial period"
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                        Complete
+                      </button>
+                    )}
                     <Clock className="h-4 w-4 text-gray-400" />
                     <button
                       onClick={() => handleEditIntervention(intervention)}
@@ -196,6 +246,17 @@ export default function MechanismCard({ mechanism, interventions, onIntervention
 
         </div>
       )}
+
+      {/* Trial Period Modal */}
+      <TrialPeriodModal
+        isOpen={trialModalOpen}
+        onClose={() => {
+          setTrialModalOpen(false);
+          setSelectedIntervention(null);
+        }}
+        onConfirm={handleTrialPeriodConfirm}
+        interventionTitle={selectedIntervention?.title || ''}
+      />
     </div>
   );
 }
