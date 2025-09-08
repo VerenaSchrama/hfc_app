@@ -129,6 +129,11 @@ def generate_advice(user_question: str, user_context: str = None) -> dict:
     print(f"RAG Debug: user_context: {user_context}")
     
     if not strategy_retriever:
+        print("RAG Error: strategy_retriever is None - vector store not loaded")
+        return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("RAG Error: OPENAI_API_KEY not set")
         return {"answer": "I'm sorry, but I'm having trouble accessing my knowledge base right now. Please try again later."}
     
     # Combine user's actual question with their context
@@ -161,7 +166,15 @@ def generate_advice(user_question: str, user_context: str = None) -> dict:
         return {"answer": result["answer"]}
     except Exception as e:
         print(f"RAG Error: {str(e)}")
-        return {"answer": f"I'm sorry, but I encountered an error while processing your request. Error: {str(e)}"}
+        # Provide a fallback response based on common questions
+        if "eat" in user_question.lower() or "food" in user_question.lower():
+            return {"answer": "For PCOS management, focus on anti-inflammatory foods like leafy greens, berries, fatty fish, and whole grains. Avoid processed foods and refined sugars. Consider working with a nutritionist for personalized meal planning."}
+        elif "exercise" in user_question.lower() or "workout" in user_question.lower():
+            return {"answer": "Regular exercise is crucial for PCOS management. Aim for 150 minutes of moderate activity per week, including both cardio and strength training. Start slowly and gradually increase intensity."}
+        elif "stress" in user_question.lower() or "cortisol" in user_question.lower():
+            return {"answer": "Stress management is important for PCOS. Try meditation, deep breathing, yoga, or other relaxation techniques. Consider speaking with a healthcare provider about stress management strategies."}
+        else:
+            return {"answer": "I'm sorry, but I encountered an error while processing your request. Please try again later or contact support if the issue persists."}
 
 def generate_advice_legacy(user_input: dict) -> dict:
     """Legacy function for backward compatibility. DEPRECATED: Use generate_advice() with actual user questions."""
