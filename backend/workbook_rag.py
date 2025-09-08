@@ -214,16 +214,16 @@ def find_related_mechanism(strategy: Dict, mechanisms: List[Dict]) -> str:
     return best_mechanism["id"]
 
 def save_workbook_to_db(user_id: int, workbook_data: Dict[str, Any]) -> bool:
-    """Save generated workbook data to database with 'suggested' status."""
+    """Save generated workbook data to Supabase with 'suggested' status."""
     
     try:
-        db = SessionLocal()
+        from db import supabase
         
         # Save mechanisms with 'suggested' status
+        mechanisms_to_save = []
         for mechanism_data in workbook_data.get('mechanisms', []):
-            # Filter out extra fields that don't exist in the model
             filtered_mechanism = {
-                'id': mechanism_data.get('id'),
+                'id': mechanism_data.get('id') or str(uuid.uuid4()),  # Generate UUID if not provided
                 'user_id': user_id,
                 'title': mechanism_data.get('title'),
                 'description': mechanism_data.get('description'),
@@ -231,18 +231,21 @@ def save_workbook_to_db(user_id: int, workbook_data: Dict[str, Any]) -> bool:
                 'confidence_score': mechanism_data.get('confidence_score'),
                 'source': mechanism_data.get('source'),
                 'status': 'suggested',  # Set initial status as suggested
-                'created_at': datetime.utcnow(),
-                'updated_at': datetime.utcnow()
+                'created_at': datetime.utcnow().isoformat(),
+                'updated_at': datetime.utcnow().isoformat()
             }
-            
-            mechanism = Mechanism(**filtered_mechanism)
-            db.add(mechanism)
+            mechanisms_to_save.append(filtered_mechanism)
+        
+        if mechanisms_to_save:
+            print(f"Saving {len(mechanisms_to_save)} mechanisms to Supabase...")
+            response = supabase.table('mechanisms').insert(mechanisms_to_save).execute()
+            print(f"Mechanisms saved: {len(response.data) if response.data else 0}")
         
         # Save interventions with 'suggested' status
+        interventions_to_save = []
         for intervention_data in workbook_data.get('interventions', []):
-            # Filter out extra fields that don't exist in the model
             filtered_intervention = {
-                'id': intervention_data.get('id'),
+                'id': intervention_data.get('id') or str(uuid.uuid4()),  # Generate UUID if not provided
                 'user_id': user_id,
                 'mechanism_id': intervention_data.get('mechanism_id'),
                 'title': intervention_data.get('title'),
@@ -253,47 +256,57 @@ def save_workbook_to_db(user_id: int, workbook_data: Dict[str, Any]) -> bool:
                 'confidence_score': intervention_data.get('confidence_score'),
                 'source': intervention_data.get('source'),
                 'status': 'suggested',  # Set initial status as suggested
-                'created_at': datetime.utcnow(),
-                'updated_at': datetime.utcnow()
+                'created_at': datetime.utcnow().isoformat(),
+                'updated_at': datetime.utcnow().isoformat()
             }
-            
-            intervention = Intervention(**filtered_intervention)
-            db.add(intervention)
+            interventions_to_save.append(filtered_intervention)
         
-        db.commit()
-        db.close()
+        if interventions_to_save:
+            print(f"Saving {len(interventions_to_save)} interventions to Supabase...")
+            response = supabase.table('interventions').insert(interventions_to_save).execute()
+            print(f"Interventions saved: {len(response.data) if response.data else 0}")
         
         print(f"Successfully saved workbook data for user {user_id}")
         return True
         
     except Exception as e:
         print(f"Error saving workbook to database: {str(e)}")
-        if 'db' in locals():
-            db.rollback()
-            db.close()
+        import traceback
+        traceback.print_exc()
         return False
 
 def get_user_workbook(user_id: int) -> Dict[str, Any]:
-    """Retrieve user's workbook data from database."""
+    """Retrieve user's workbook data from Supabase."""
     
     try:
-        db = SessionLocal()
+        from db import supabase
         
-        mechanisms = db.query(Mechanism).filter(Mechanism.user_id == user_id).all()
-        interventions = db.query(Intervention).filter(Intervention.user_id == user_id).all()
-        reflections = db.query(DailyReflection).filter(DailyReflection.user_id == user_id).all()
+        # Get mechanisms
+        mechanisms_response = supabase.table('mechanisms').select('*').eq('user_id', user_id).execute()
+        mechanisms = mechanisms_response.data or []
         
-        db.close()
+        # Get interventions
+        interventions_response = supabase.table('interventions').select('*').eq('user_id', user_id).execute()
+        interventions = interventions_response.data or []
+        
+        # Get reflections (if table exists)
+        try:
+            reflections_response = supabase.table('daily_reflections').select('*').eq('user_id', user_id).execute()
+            reflections = reflections_response.data or []
+        except:
+            reflections = []
         
         return {
-            "mechanisms": [mechanism.to_dict() for mechanism in mechanisms],
-            "interventions": [intervention.to_dict() for intervention in interventions],
-            "reflections": [reflection.to_dict() for reflection in reflections],
+            "mechanisms": mechanisms,
+            "interventions": interventions,
+            "reflections": reflections,
             "last_updated": datetime.utcnow().isoformat()
         }
         
     except Exception as e:
         print(f"Error retrieving workbook: {e}")
+        import traceback
+        traceback.print_exc()
         return {"mechanisms": [], "interventions": [], "reflections": [], "last_updated": datetime.utcnow().isoformat()}
 
 # ===== NEW GPT-BASED MECHANISM DETECTION =====
