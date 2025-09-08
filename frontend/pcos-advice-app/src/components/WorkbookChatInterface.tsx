@@ -107,6 +107,12 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
         } else {
           const errorText = await response.text();
           console.error('Chat API error:', response.status, errorText);
+          
+          // Handle authentication errors specifically
+          if (response.status === 401) {
+            throw new Error('Authentication expired. Please log in again.');
+          }
+          
           throw new Error(`Failed to get response: ${response.status}`);
         }
       } catch (error) {
@@ -114,7 +120,7 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
         // Add error message to chat
         const errorMessage: ChatMessage = {
           sender: 'bot',
-          text: 'Sorry, I encountered an error. Please try again.',
+          text: error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.',
           timestamp: new Date().toISOString()
         };
         setChatHistory(prev => [...prev, errorMessage]);
