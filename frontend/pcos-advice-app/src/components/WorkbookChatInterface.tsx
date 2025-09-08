@@ -35,33 +35,9 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
   }, []);
 
   const loadChatHistory = async () => {
-    try {
-      const token = auth.getToken();
-      if (!token) {
-        console.log('No auth token found for chat history');
-        return;
-      }
-
-      console.log('Loading chat history...');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/v1/chat`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      console.log('Chat history response:', response.status);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Chat history loaded:', data.history?.length || 0, 'messages');
-        setChatHistory(data.history || []);
-      } else {
-        console.error('Failed to load chat history:', response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error('Error loading chat history:', error);
-    }
+    // Chat history loading is not implemented yet
+    // The chat interface will start fresh each time
+    console.log('Chat history loading not implemented - starting fresh');
   };
 
   const quickQuestions = [
