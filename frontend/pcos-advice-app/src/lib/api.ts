@@ -2,9 +2,7 @@
 import { IntakeData, Strategy, AdviceResponse, UserProfile, TrialPeriod, Log, Mechanism, Intervention, DailyReflection, ArchiveItem, WorkbookData } from '../types';
 import { auth } from "./auth";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
-  ? process.env.NEXT_PUBLIC_API_URL
-  : 'http://127.0.0.1:8000';
+export const API_BASE_URL = 'https://hfc-app.onrender.com';
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = auth.getValidToken();

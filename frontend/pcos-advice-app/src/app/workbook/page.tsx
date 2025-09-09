@@ -33,7 +33,7 @@ export default function WorkbookPage() {
       
       // Test API connectivity first
       try {
-        const testResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/docs`);
+        const testResponse = await fetch(`https://hfc-app.onrender.com/docs`);
         console.log('Backend connectivity test:', testResponse.status);
       } catch (testError) {
         console.error('Backend connectivity test failed:', testError);

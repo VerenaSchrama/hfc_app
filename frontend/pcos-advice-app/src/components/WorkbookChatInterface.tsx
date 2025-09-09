@@ -90,7 +90,7 @@ export default function WorkbookChatInterface({ workbookData }: WorkbookChatInte
         }
 
         console.log('Making chat API call...');
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/v1/chat`, {
+        const response = await fetch(`https://hfc-app.onrender.com/api/v1/chat`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
